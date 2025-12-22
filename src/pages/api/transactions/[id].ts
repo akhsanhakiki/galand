@@ -1,8 +1,9 @@
 import type { APIRoute } from "astro";
+import { getApiBaseUrl } from "../../../utils/env";
 
 export const prerender = false;
 
-const API_BASE_URL = "https://simple-cashier.onrender.com";
+const API_BASE_URL = getApiBaseUrl();
 
 export const GET: APIRoute = async ({ params }) => {
   try {
@@ -47,14 +48,11 @@ export const GET: APIRoute = async ({ params }) => {
       },
     });
   } catch (error) {
-    return new Response(
-      JSON.stringify({ error: "Internal server error" }),
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   }
 };
