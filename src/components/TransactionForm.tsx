@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Card, Label, ListBox, Modal, NumberField, Select, Spinner } from "@heroui/react";
+import { Button, Card, Input, Label, ListBox, Modal, NumberField, Select, Spinner } from "@heroui/react";
 import { useEffect, useState } from "react";
 import type { Product, TransactionItem } from "../utils/api";
 import { createTransaction, getProducts } from "../utils/api";
@@ -26,6 +26,7 @@ export default function TransactionForm({
   const [quantity, setQuantity] = useState<number | undefined>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
+  const [transactionDateTime, setTransactionDateTime] = useState<string>("");
 
   useEffect(() => {
     if (isOpen) {
@@ -95,12 +96,23 @@ export default function TransactionForm({
 
     try {
       setIsSubmitting(true);
-      const transactionData = {
+      const transactionData: {
+        items: Array<{ product_id: number; quantity: number }>;
+        created_at?: string;
+      } = {
         items: cart.map((item) => ({
           product_id: item.product_id,
           quantity: item.quantity,
         })),
       };
+      
+      // Only include created_at if a datetime is provided
+      if (transactionDateTime) {
+        // Convert datetime-local format (YYYY-MM-DDTHH:mm) to ISO string
+        const date = new Date(transactionDateTime);
+        transactionData.created_at = date.toISOString();
+      }
+      
       await createTransaction(transactionData);
       onSuccess();
       onClose();
@@ -116,6 +128,7 @@ export default function TransactionForm({
     setCart([]);
     setSelectedProductId(undefined);
     setQuantity(1);
+    setTransactionDateTime("");
   };
 
   const handleClose = () => {
@@ -245,6 +258,26 @@ export default function TransactionForm({
                     </Card.Content>
                   </Card>
                 )}
+
+                <Card className="p-4">
+                  <Card.Header>
+                    <Card.Title className="text-lg">Transaction Details</Card.Title>
+                  </Card.Header>
+                  <Card.Content className="space-y-4">
+                    <div className="flex flex-col gap-2">
+                      <Label>Transaction Time (Optional)</Label>
+                      <input
+                        type="datetime-local"
+                        value={transactionDateTime}
+                        onChange={(e) => setTransactionDateTime(e.target.value)}
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground transition-colors placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50"
+                      />
+                      <p className="text-sm text-muted">
+                        Leave empty to use the current time. The backend will automatically set it if not provided.
+                      </p>
+                    </div>
+                  </Card.Content>
+                </Card>
               </div>
             </Modal.Body>
             <Modal.Footer>

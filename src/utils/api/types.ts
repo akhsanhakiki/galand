@@ -34,4 +34,5 @@ export interface Transaction {
 
 export interface TransactionCreate {
   items: TransactionItem[];
+  created_at?: string;
 }
