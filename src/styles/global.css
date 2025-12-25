@@ -3,3 +3,8 @@
 
 /* HeroUI v3 styles - Must be after Tailwind */
 @import "@heroui/styles";
+
+/* Font Family */
+body {
+  font-family: "Plus Jakarta Sans", sans-serif;
+}

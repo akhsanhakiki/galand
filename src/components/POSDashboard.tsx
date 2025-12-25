@@ -53,7 +53,7 @@ export default function POSDashboard() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-surface p-4">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <h1 className="text-2xl font-bold">POS System</h1>
+          <h1 className="text-2xl font-bold">kadara</h1>
           <ThemeSwitcher />
         </div>
       </header>

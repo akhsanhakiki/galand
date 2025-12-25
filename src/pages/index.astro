@@ -1,10 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import POSDashboard from '../components/POSDashboard.tsx';
+import MenuDisplay from '../components/MenuDisplay.tsx';
 
 export const prerender = false;
 ---
 
-<Layout title="POS System">
-	<POSDashboard client:load />
+<Layout title="kadara">
+	<!-- <POSDashboard client:load /> -->
+  <MenuDisplay client:load />
 </Layout>
