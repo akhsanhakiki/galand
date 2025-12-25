@@ -59,6 +59,7 @@ This project is configured for deployment to Cloudflare Pages.
 
 2. **Configure build settings:**
    - **Build command:** `pnpm run build`
+   - **Deploy command:** `npx wrangler pages deploy dist`
    - **Build output directory:** `dist`
    - **Root directory:** `/` (or leave empty)
 
