@@ -159,7 +159,7 @@ export default function ProductList({
                       size="sm"
                       variant={currentPage === page ? "primary" : "tertiary"}
                       onPress={() => setCurrentPage(page)}
-                      className="min-w-[2.5rem]"
+                      className="min-w-10"
                     >
                       {page}
                     </Button>

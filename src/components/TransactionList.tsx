@@ -119,7 +119,7 @@ export default function TransactionList({ onView }: TransactionListProps) {
                       size="sm"
                       variant={currentPage === page ? "primary" : "tertiary"}
                       onPress={() => setCurrentPage(page)}
-                      className="min-w-[2.5rem]"
+                      className="min-w-10"
                     >
                       {page}
                     </Button>
