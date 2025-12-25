@@ -1,15 +1,18 @@
 /**
  * Get the API base URL from environment variables
  *
- * Requires SIMPLE_CASHIER_BASE_URL to be set in .env.local
+ * Supports both Cloudflare Pages (import.meta.env) and local development (.env.local)
  */
 export function getApiBaseUrl(): string {
-  const baseUrl = import.meta.env.SIMPLE_CASHIER_BASE_URL;
+  // Cloudflare Pages uses import.meta.env for environment variables
+  // Local development can use .env.local
+  const baseUrl = import.meta.env.SIMPLE_CASHIER_BASE_URL || 
+                  import.meta.env.PUBLIC_SIMPLE_CASHIER_BASE_URL;
 
   if (!baseUrl) {
     throw new Error(
       "SIMPLE_CASHIER_BASE_URL environment variable is required. " +
-        "Please set it in your .env.local file."
+        "Please set it in Cloudflare Pages environment variables or your .env.local file."
     );
   }
 

@@ -41,6 +41,46 @@ All commands are run from the root of the project, from a terminal:
 | `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `pnpm astro -- --help` | Get help using the Astro CLI                     |
 
+## 🚀 Deployment to Cloudflare Pages
+
+This project is configured for deployment to Cloudflare Pages.
+
+### Prerequisites
+
+1. A Cloudflare account
+2. Your project connected to a Git repository (GitHub, GitLab, or Bitbucket)
+
+### Deployment Steps
+
+1. **Connect your repository to Cloudflare Pages:**
+   - Go to [Cloudflare Dashboard](https://dash.cloudflare.com/)
+   - Navigate to **Pages** → **Create a project**
+   - Connect your Git repository
+
+2. **Configure build settings:**
+   - **Build command:** `pnpm run build`
+   - **Build output directory:** `dist`
+   - **Root directory:** `/` (or leave empty)
+
+3. **Set environment variables:**
+   - In Cloudflare Pages project settings, go to **Settings** → **Environment variables**
+   - Add the following variable:
+     - **Variable name:** `SIMPLE_CASHIER_BASE_URL`
+     - **Variable value:** Your API base URL
+     - **Encrypt:** ✅ (recommended for production)
+
+4. **Deploy:**
+   - Cloudflare Pages will automatically build and deploy on every push to your main branch
+   - Preview deployments are created for pull requests
+
+### Local Development
+
+For local development, create a `.env.local` file in the root directory:
+
+```env
+SIMPLE_CASHIER_BASE_URL=your-api-url-here
+```
+
 ## 👀 Want to learn more?
 
 Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
