@@ -73,7 +73,7 @@ const MenuControl = ({
             key={key}
             variant={currentPage === key ? "primary" : "ghost"}
             className={`justify-start w-full ${
-              currentPage === key ? "bg-accent text-accent-foreground" : ""
+              currentPage === key ? "bg-primary-100 text-primary-foreground" : ""
             }`}
             onPress={() => handleClick(key)}
           >
