@@ -6,6 +6,13 @@ import { useEffect, useState } from "react";
 export default function ThemeSwitcher() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
+  const applyTheme = (newTheme: "light" | "dark") => {
+    const root = document.documentElement;
+    root.setAttribute("data-theme", newTheme);
+    root.classList.remove("light", "dark");
+    root.classList.add(newTheme);
+  };
+
   useEffect(() => {
     const stored = localStorage.getItem("theme") as "light" | "dark" | null;
     const prefersDark = window.matchMedia(
@@ -14,18 +21,20 @@ export default function ThemeSwitcher() {
     const initialTheme = stored || (prefersDark ? "dark" : "light");
     setTheme(initialTheme);
     applyTheme(initialTheme);
+    
+    // Listen for system theme changes
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (e: MediaQueryListEvent) => {
+      const currentStored = localStorage.getItem("theme");
+      if (!currentStored) {
+        const newTheme = e.matches ? "dark" : "light";
+        setTheme(newTheme);
+        applyTheme(newTheme);
+      }
+    };
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
-
-  const applyTheme = (newTheme: "light" | "dark") => {
-    const root = document.documentElement;
-    if (newTheme === "dark") {
-      root.setAttribute("data-theme", "dark");
-      root.classList.add("dark");
-    } else {
-      root.removeAttribute("data-theme");
-      root.classList.remove("dark");
-    }
-  };
 
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
