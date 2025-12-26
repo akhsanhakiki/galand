@@ -1,21 +1,17 @@
 import React from "react";
-import {
-  FaCashRegister,
-  FaChartLine,
-  FaGear,
-  FaMoneyBill,
-  FaTags,
-  FaWarehouse,
-} from "react-icons/fa6";
 import MobileView from "./MobileView";
 import DesktopView from "./DesktopView";
+import Header from "./Header";
 
 const MainContainer = () => {
   return (
-    <>
-      <MobileView />
-      <DesktopView />
-    </>
+    <div className="flex flex-col">
+      <Header />
+      <>
+        <MobileView />
+        <DesktopView />
+      </>
+    </div>
   );
 };
 
