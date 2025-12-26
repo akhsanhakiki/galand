@@ -51,6 +51,9 @@ importers:
         specifier: ^4.1.18
         version: 4.1.18
     devDependencies:
+      '@heroui/theme':
+        specifier: ^2.4.25
+        version: 2.4.25(tailwindcss@4.1.18)
       '@types/react':
         specifier: ^19.2.7
         version: 19.2.7
@@ -959,8 +962,16 @@ packages:
       react-dom: '>=19.0.0'
       tailwindcss: '>=4.0.0'
 
+  '@heroui/shared-utils@2.1.12':
+    resolution: {integrity: sha512-0iCnxVAkIPtrHQo26Qa5g0UTqMTpugTbClNOrEPsrQuyRAq7Syux998cPwGlneTfB5E5xcU3LiEdA9GUyeK2cQ==}
+
   '@heroui/styles@3.0.0-beta.3':
     resolution: {integrity: sha512-A5fvqZxTq81Fwz85Pl0HLCA3VQ8yDyqWdVd6/c958p133HJ7scuY2PAU7+1zTefF4e3yqEXj45GNGoOzPT/joQ==}
+    peerDependencies:
+      tailwindcss: '>=4.0.0'
+
+  '@heroui/theme@2.4.25':
+    resolution: {integrity: sha512-nTptYhO1V9rMoh9SJDnMfaSmFuoXvbem1UuwgHcraRtqy/TIVBPqv26JEGzSoUCL194TDGOJpqrpMuab/PdXcw==}
     peerDependencies:
       tailwindcss: '>=4.0.0'
 
@@ -2881,6 +2892,9 @@ packages:
     resolution: {integrity: sha512-Bb6Cq8oq0IjDOe8wJmi4JeNn763Xs9cfrBcaylK1tPypWzyoy2G3l90v9k64kjphl/ZJjPIShFztenRomi8WTg==}
     engines: {node: '>=18'}
 
+  color2k@2.0.3:
+    resolution: {integrity: sha512-zW190nQTIoXcGCaU08DvVNFTmQhUpnJfVuAKfWqUQkflXKpaDdpaYoM0iluLS9lgJNHyBF58KKA2FBEwkD7wog==}
+
   color@4.2.3:
     resolution: {integrity: sha512-1rXeuUUiGGrykh+CeBdu5Ie7OJwinCgQY0bc7GCRxy5xVHy+moaqkpL/jqQq0MtQOeYcrqEz4abc5f0KtU7W4A==}
     engines: {node: '>=12.5.0'}
@@ -3353,6 +3367,10 @@ packages:
   find-up@7.0.0:
     resolution: {integrity: sha512-YyZM99iHrqLKjmt4LJDj58KI+fYyufRLBSYcqycxf//KpBk9FoewoGX0450m9nB44qrZnovzC2oeP5hUibxc/g==}
     engines: {node: '>=18'}
+
+  flat@5.0.2:
+    resolution: {integrity: sha512-b6suED+5/3rTpUBdG1gupIl8MPFCAMA0QXwmljLhvCUKcUvdE4gWky9zpuGCcXHOsz4J9wPGNWq6OKpmIzz3hQ==}
+    hasBin: true
 
   flattie@1.1.1:
     resolution: {integrity: sha512-9UbaD6XdAL97+k/n+N7JwX46K/M6Zc6KcFYskrYL8wbBV/Uyk0CTAMY0VT+qiK5PM7AIc9aTWYtq65U7T+aCNQ==}
@@ -5902,10 +5920,23 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
+  '@heroui/shared-utils@2.1.12': {}
+
   '@heroui/styles@3.0.0-beta.3(tailwindcss@4.1.18)':
     dependencies:
       tailwindcss: 4.1.18
       tw-animate-css: 1.4.0
+
+  '@heroui/theme@2.4.25(tailwindcss@4.1.18)':
+    dependencies:
+      '@heroui/shared-utils': 2.1.12
+      color: 4.2.3
+      color2k: 2.0.3
+      deepmerge: 4.3.1
+      flat: 5.0.2
+      tailwind-merge: 3.4.0
+      tailwind-variants: 3.2.2(tailwind-merge@3.4.0)(tailwindcss@4.1.18)
+      tailwindcss: 4.1.18
 
   '@humanwhocodes/momoa@2.0.4': {}
 
@@ -8485,6 +8516,8 @@ snapshots:
     dependencies:
       color-name: 2.1.0
 
+  color2k@2.0.3: {}
+
   color@4.2.3:
     dependencies:
       color-convert: 2.0.1
@@ -8997,6 +9030,8 @@ snapshots:
       locate-path: 7.2.0
       path-exists: 5.0.0
       unicorn-magic: 0.1.0
+
+  flat@5.0.2: {}
 
   flattie@1.1.1: {}
 

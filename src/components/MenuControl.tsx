@@ -37,18 +37,8 @@ const MenuControl = ({
 
   return (
     <>
-      <div className="flex flex-col gap-4 md:gap-6 items-center justify-center p-4 md:p-8 max-w-7xl mx-auto md:hidden">
-        <Card className="w-full" variant="default">
-          <Card.Header>
-            <Card.Title className="text-2xl md:text-3xl font-bold">
-              Welcome to kadara
-            </Card.Title>
-            <Card.Description className="text-sm md:text-base">
-              kadara is a point of sale system that allows you to manage your
-              sales and inventory.
-            </Card.Description>
-          </Card.Header>
-        </Card>
+      {/* ---------------------------- Mobile View ---------------------------- */}
+      <div className="flex flex-col gap-4 md:gap-6 items-center justify-center p-4 md:hidden">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 w-full">
           {menuItems.map(({ title, icon: Icon, key }) => (
             <div
@@ -73,6 +63,7 @@ const MenuControl = ({
           ))}
         </div>
       </div>
+      {/* ---------------------------- Desktop View ---------------------------- */}
       <Surface
         className="md:flex hidden flex-col gap-2 p-4 rounded-2xl min-w-[200px]"
         variant="default"
