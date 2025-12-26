@@ -6,6 +6,7 @@ import DiskonPage from "./diskon/DiskonPage";
 import GudangPage from "./gudang/GudangPage";
 import KasirPage from "./kasir/KasirPage";
 import PengaturanPage from "./pengaturan/PengaturanPage";
+import Header from "./Header";
 import { FaArrowLeft } from "react-icons/fa6";
 import { Button } from "@heroui/react";
 
@@ -33,8 +34,9 @@ const MobileView = () => {
 
   return (
     <div className="md:hidden flex flex-col gap-4 md:gap-6">
+      <Header isMobile={true} />
       {currentPage ? (
-        <div className="flex flex-col w-full">
+        <div className="flex flex-col w-full px-4">
           <Button
             variant="ghost"
             onPress={handleBack}

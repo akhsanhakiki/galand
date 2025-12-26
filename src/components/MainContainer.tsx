@@ -7,7 +7,6 @@ const MainContainer = () => {
   return (
     <Providers>
       <div className="flex flex-col">
-        <Header />
         <>
           <MobileView />
           <DesktopView />

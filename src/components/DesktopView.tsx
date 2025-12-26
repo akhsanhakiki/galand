@@ -26,7 +26,7 @@ const DesktopView = () => {
   const CurrentPageComponent = pageComponents[currentPage];
 
   return (
-    <div className="hidden md:flex flex-row gap-4 md:gap-6 p-4 md:p-6">
+    <div className="hidden md:flex flex-row gap-4 md:gap-6 p-4 md:p-4">
       <MenuControl
         onMenuClick={handleMenuClick}
         isMobile={false}

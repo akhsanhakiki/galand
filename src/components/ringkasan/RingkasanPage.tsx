@@ -10,8 +10,8 @@ import {
 
 const RingkasanPage = () => {
   return (
-    <div className="flex flex-col w-full gap-6 p-4 md:p-6">
-      <div className="flex flex-col gap-2">
+    <div className="flex flex-col w-full gap-6 p-4">
+      <div className="flex flex-col gap-2 w-full">
         <h1 className="text-3xl font-bold text-foreground">Ringkasan</h1>
         <p className="text-muted">
           Pantau ringkasan penjualan dan inventori Anda

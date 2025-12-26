@@ -21,9 +21,9 @@
   --eclipse: oklch(0.05 0 0);
 
   /* Background & Surface */
-  --background: oklch(1 0 0); /* #FFFFFF */
+  --background: oklch(0.96 0 0); /* Light gray - darker than surface */
   --foreground: oklch(0.2 0 0); /* #1A1A1A */
-  --surface: oklch(0.98 0 0); /* #FAFAFA */
+  --surface: oklch(1 0 0); /* #FFFFFF - lighter than background */
   --surface-foreground: oklch(0.2 0 0); /* #1A1A1A */
   --overlay: oklch(0.4 0 0 / 0.5);
   --overlay-foreground: oklch(1 0 0);
@@ -76,9 +76,9 @@
   --eclipse: oklch(0.05 0 0);
 
   /* Background & Surface */
-  --background: oklch(0 0 0); /* #000000 */
+  --background: oklch(0.02 0 0); /* Very dark - darker than surface */
   --foreground: oklch(1 0 0); /* #FFFFFF */
-  --surface: oklch(0.15 0 0); /* #262626 */
+  --surface: oklch(0.22 0 0); /* Lighter than background - increased contrast */
   --surface-foreground: oklch(1 0 0);
   --overlay: oklch(0.1 0 0 / 0.8);
   --overlay-foreground: oklch(1 0 0);
