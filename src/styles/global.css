@@ -4,31 +4,8 @@
 /* HeroUI v3 styles - Must be after Tailwind */
 @import "@heroui/styles";
 
-/* Font Family */
-body {
-  font-family: "Plus Jakarta Sans", sans-serif;
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", sans-serif;
 }
 
-/* Custom Theme Colors - Matching Reference Design */
-:root {
-  /* Orange accent color (matching reference) */
-  --color-accent: oklch(0.6204 0.195 253.83);
-  --color-accent-foreground: oklch(0.9702 0 0);
-
-  /* Light background */
-  --color-background: oklch(0.98 0 0);
-
-  /* Surface colors for cards */
-  --color-surface: oklch(1 0 0);
-  --color-surface-secondary: oklch(0.97 0 0);
-
-  /* Text colors */
-  --color-foreground: oklch(0.15 0 0);
-  --color-muted: oklch(0.5 0 0);
-}
-
-/* Ensure proper background */
-body {
-  background-color: var(--color-background);
-  color: var(--color-foreground);
-}

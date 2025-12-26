@@ -1,17 +1,19 @@
-import React from "react";
+import { Providers } from "./Providers";
+import Header from "./Header";
 import MobileView from "./MobileView";
 import DesktopView from "./DesktopView";
-import Header from "./Header";
 
 const MainContainer = () => {
   return (
-    <div className="flex flex-col">
-      <Header />
-      <>
-        <MobileView />
-        <DesktopView />
-      </>
-    </div>
+    <Providers>
+      <div className="flex flex-col">
+        <Header />
+        <>
+          <MobileView />
+          <DesktopView />
+        </>
+      </div>
+    </Providers>
   );
 };
 

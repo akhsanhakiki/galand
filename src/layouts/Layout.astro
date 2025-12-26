@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 
+
 export interface Props {
 	title?: string;
 }
@@ -19,7 +20,7 @@ const { title = "kadara" } = Astro.props;
 		<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet" />
 		<title>{title}</title>
 	</head>
-	<body class="bg-zinc-200">
+	<body class="bg-background text-foreground min-h-screen">
 		<slot />
 	</body>
 </html>
