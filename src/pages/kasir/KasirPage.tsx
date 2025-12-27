@@ -1,13 +1,23 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Card, Button, Surface, Separator, Spinner } from "@heroui/react";
+import React, { useState, useEffect, useMemo } from "react";
+import {
+  Button,
+  Surface,
+  Separator,
+  Spinner,
+  SearchField,
+  Select,
+  ListBox,
+} from "@heroui/react";
 import {
   LuReceipt,
   LuShoppingCart,
   LuTrash2,
   LuPlus,
   LuMinus,
+  LuChevronLeft,
+  LuChevronRight,
 } from "react-icons/lu";
 import type { Product } from "../../utils/api";
 import { getProducts, createTransaction } from "../../utils/api";
@@ -23,6 +33,9 @@ const KasirPage = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(12);
 
   useEffect(() => {
     fetchProducts();
@@ -44,6 +57,39 @@ const KasirPage = () => {
     (sum, item) => sum + item.product.price * item.quantity,
     0
   );
+
+  const filteredProducts = useMemo(() => {
+    if (!searchQuery) return products;
+    const query = searchQuery.toLowerCase();
+    return products.filter(
+      (p) =>
+        p.name.toLowerCase().includes(query) ||
+        p.id.toString().toLowerCase().includes(query)
+    );
+  }, [products, searchQuery]);
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredProducts.slice(startIndex, endIndex);
+  }, [filteredProducts, currentPage, itemsPerPage]);
+
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    } else if (currentPage < 1 && filteredProducts.length > 0) {
+      setCurrentPage(1);
+    }
+  }, [totalPages, currentPage, filteredProducts.length]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [itemsPerPage]);
 
   const addToCart = (product: Product) => {
     if (product.stock <= 0) {
@@ -116,142 +162,256 @@ const KasirPage = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <Card variant="default" className="p-6">
-            <Card.Header className="pb-4">
-              <Card.Title className="text-xl font-bold">
-                Daftar Produk
-              </Card.Title>
-            </Card.Header>
-            <Card.Content>
-              {loading ? (
-                <div className="flex items-center justify-center p-8">
-                  <Spinner size="lg" />
+      <div className="flex flex-row gap-4">
+        <div className="w-8/12">
+          {loading ? (
+            <div className="flex items-center justify-center p-8">
+              <Spinner size="lg" />
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="text-center py-8 text-muted">
+              {searchQuery
+                ? "Tidak ada produk yang ditemukan"
+                : "Belum ada produk"}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4 bg-surface rounded-2xl p-4">
+              <div className="flex flex-row justify-between items-center">
+                <div className="flex flex-col gap-1">
+                  <h2 className="text-md font-bold text-foreground">
+                    Daftar Produk
+                  </h2>
+                  <p className="text-xs text-muted">
+                    Click untuk menambahkan produk ke keranjang
+                  </p>
                 </div>
-              ) : products.length === 0 ? (
-                <div className="text-center py-8 text-muted">
-                  Belum ada produk
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {products.map((product) => (
-                    <Button
-                      key={product.id}
-                      variant="ghost"
-                      className="p-4 rounded-xl hover:shadow-md transition-all h-auto flex-col items-start justify-start"
-                      onPress={() => addToCart(product)}
-                      isDisabled={product.stock <= 0}
+                <SearchField
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  className="w-1/3"
+                >
+                  <SearchField.Group className="shadow-none border">
+                    <SearchField.SearchIcon />
+                    <SearchField.Input placeholder="Cari produk..." />
+                    <SearchField.ClearButton />
+                  </SearchField.Group>
+                </SearchField>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {paginatedProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className={`p-4 rounded-xl hover:shadow-sm transition-all h-auto flex flex-col items-start justify-start gap-1 border ${
+                      product.stock <= 0
+                        ? "opacity-50 cursor-not-allowed"
+                        : "cursor-pointer"
+                    }`}
+                    onClick={() => addToCart(product)}
+                  >
+                    <p className="font-semibold text-foreground text-sm">
+                      {product.name}
+                    </p>
+                    <div className="flex flex-row gap-2 w-full items-center justify-between">
+                      <p className="text-accent font-medium text-sm">
+                        Rp {product.price.toLocaleString("id-ID")}
+                      </p>
+                      <p className="text-xs text-muted mt-1">
+                        Stok:{" "}
+                        <span className="text-foreground font-medium text-xs">
+                          {product.stock}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {totalPages > 1 && (
+                <div className="flex flex-row gap-2 justify-between items-center pt-4 border-t border-separator">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm text-muted">Data per halaman:</p>
+                    <Select
+                      className="w-16"
+                      value={itemsPerPage.toString()}
+                      onChange={(value) => {
+                        if (value) {
+                          setItemsPerPage(Number(value));
+                        }
+                      }}
                     >
-                      <div className="flex flex-col gap-2 w-full">
-                        <div className="w-full h-24 bg-surface-tertiary rounded-lg flex items-center justify-center">
-                          <LuShoppingCart className="w-8 h-8 text-muted" />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-foreground text-sm">
-                            {product.name}
-                          </p>
-                          <p className="text-accent font-bold">
-                            Rp {product.price.toLocaleString("id-ID")}
-                          </p>
-                          <p className="text-xs text-muted mt-1">
-                            Stok: {product.stock}
-                          </p>
-                        </div>
-                      </div>
+                      <Select.Trigger className="bg-foreground/5 shadow-none">
+                        <Select.Value />
+                        <Select.Indicator />
+                      </Select.Trigger>
+                      <Select.Popover>
+                        <ListBox>
+                          <ListBox.Item id="6" textValue="6">
+                            6
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                          <ListBox.Item id="12" textValue="12">
+                            12
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                          <ListBox.Item id="18" textValue="18">
+                            18
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                          <ListBox.Item id="24" textValue="24">
+                            24
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                        </ListBox>
+                      </Select.Popover>
+                    </Select>
+                  </div>
+
+                  <div className="flex items-center justify-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onPress={() =>
+                        setCurrentPage((prev) => Math.max(1, prev - 1))
+                      }
+                      isDisabled={currentPage === 1}
+                      isIconOnly
+                    >
+                      <LuChevronLeft className="w-3 h-3" />
                     </Button>
-                  ))}
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                        (page) => (
+                          <Button
+                            key={page}
+                            size="sm"
+                            variant={
+                              currentPage === page ? "primary" : "tertiary"
+                            }
+                            onPress={() => setCurrentPage(page)}
+                            className="min-w-8 text-xs"
+                          >
+                            {page}
+                          </Button>
+                        )
+                      )}
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onPress={() =>
+                        setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                      }
+                      isDisabled={currentPage === totalPages}
+                      isIconOnly
+                    >
+                      <LuChevronRight className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  {totalPages > 0 && (
+                    <div className="text-sm text-muted">
+                      {(currentPage - 1) * itemsPerPage + 1} -{" "}
+                      {Math.min(
+                        currentPage * itemsPerPage,
+                        filteredProducts.length
+                      )}{" "}
+                      dari {filteredProducts.length} produk
+                    </div>
+                  )}
                 </div>
               )}
-            </Card.Content>
-          </Card>
+            </div>
+          )}
         </div>
 
-        <div className="lg:col-span-1">
-          <Card variant="default" className="p-6 sticky top-4">
-            <Card.Header className="pb-4 flex items-center gap-2">
-              <LuReceipt className="w-5 h-5 text-accent" />
-              <Card.Title className="text-xl font-bold">Keranjang</Card.Title>
-            </Card.Header>
-            <Card.Content className="flex flex-col gap-3 max-h-[400px] overflow-y-auto">
+        <div className="w-4/12">
+          <div className="p-4 sticky top-4 bg-surface rounded-2xl">
+            <div className="pb-3 flex flex-col gap-1">
+              <h2 className="text-md font-bold text-foreground">Keranjang</h2>
+              <p className="text-xs text-muted">
+                {cart.length > 0
+                  ? `${cart.length} item dalam keranjang`
+                  : "Keranjang kosong"}
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto">
               {cart.length === 0 ? (
-                <p className="text-center text-muted py-8">Keranjang kosong</p>
+                <p className="text-center text-muted py-8 text-xs">
+                  Keranjang kosong
+                </p>
               ) : (
                 cart.map((item) => (
-                  <Surface
-                    key={item.product_id}
-                    className="p-3 rounded-lg"
-                    variant="secondary"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex-1">
-                        <p className="font-medium text-foreground text-sm">
+                  <div key={item.product_id} className="p-2 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-foreground text-xs truncate">
                           {item.product.name}
                         </p>
-                        <p className="text-accent font-semibold text-sm">
+                        <p className="text-accent font-medium text-xs">
                           Rp{" "}
                           {(item.product.price * item.quantity).toLocaleString(
                             "id-ID"
                           )}
                         </p>
                       </div>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          isIconOnly
+                          className="min-w-6 h-6 border"
+                          onPress={() => updateQuantity(item.product_id, -1)}
+                        >
+                          <LuMinus className="w-3 h-3" />
+                        </Button>
+                        <span className="text-xs font-semibold text-foreground min-w-[20px] text-center">
+                          {item.quantity}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          isIconOnly
+                          className="min-w-6 h-6 border"
+                          onPress={() => updateQuantity(item.product_id, 1)}
+                          isDisabled={item.quantity >= item.product.stock}
+                        >
+                          <LuPlus className="w-3 h-3" />
+                        </Button>
+                      </div>
                       <Button
                         variant="ghost"
                         size="sm"
                         isIconOnly
+                        className="min-w-6 h-6"
                         onPress={() => removeFromCart(item.product_id)}
                       >
                         <LuTrash2 className="w-3 h-3" />
                       </Button>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="tertiary"
-                        size="sm"
-                        isIconOnly
-                        onPress={() => updateQuantity(item.product_id, -1)}
-                      >
-                        <LuMinus className="w-3 h-3" />
-                      </Button>
-                      <span className="flex-1 text-center font-semibold text-foreground">
-                        {item.quantity}
-                      </span>
-                      <Button
-                        variant="tertiary"
-                        size="sm"
-                        isIconOnly
-                        onPress={() => updateQuantity(item.product_id, 1)}
-                        isDisabled={item.quantity >= item.product.stock}
-                      >
-                        <LuPlus className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </Surface>
+                  </div>
                 ))
               )}
-            </Card.Content>
-            <Separator />
-            <Card.Footer className="flex flex-col gap-4 pt-4">
+            </div>
+            <Separator className="my-3" />
+            <div className="flex flex-col gap-3 pt-3">
               <div className="flex items-center justify-between w-full">
-                <span className="text-lg font-semibold text-foreground">
+                <span className="text-sm font-semibold text-foreground">
                   Total:
                 </span>
-                <span className="text-2xl font-bold text-accent">
+                <span className="text-md font-bold text-accent">
                   Rp {total.toLocaleString("id-ID")}
                 </span>
               </div>
               <Button
                 variant="primary"
                 className="w-full bg-accent text-accent-foreground"
-                size="lg"
+                size="md"
                 isDisabled={cart.length === 0 || isSubmitting}
                 onPress={handleCheckout}
                 isPending={isSubmitting}
               >
                 {isSubmitting ? "Memproses..." : "Proses Pembayaran"}
               </Button>
-            </Card.Footer>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>
