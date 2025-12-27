@@ -7,7 +7,7 @@ import GudangPage from "../pages/gudang/GudangPage";
 import KasirPage from "../pages/kasir/KasirPage";
 import PengaturanPage from "../pages/pengaturan/PengaturanPage";
 import Header from "./Header";
-import { FaArrowLeft } from "react-icons/fa6";
+import { LuArrowLeft } from "react-icons/lu";
 import { Button } from "@heroui/react";
 
 const pageComponents: Record<string, React.ComponentType> = {
@@ -43,7 +43,16 @@ const MobileView = () => {
   }, []);
 
   const handleBack = () => {
-    window.location.href = "/";
+    // Use client-side navigation to avoid page reload
+    window.history.pushState({ page: "" }, "", "/");
+
+    // Dispatch popstate event to trigger route updates
+    window.dispatchEvent(
+      new PopStateEvent("popstate", { state: { page: "" } })
+    );
+
+    // Update local state
+    setCurrentPage(null);
   };
 
   const CurrentPageComponent = currentPage ? pageComponents[currentPage] : null;
@@ -58,10 +67,10 @@ const MobileView = () => {
             onPress={handleBack}
             className="justify-start w-fit"
           >
-            <FaArrowLeft className="w-4 h-4 mr-2" />
+            <LuArrowLeft className="w-4 h-4 mr-2" />
             Kembali
           </Button>
-          {CurrentPageComponent && <CurrentPageComponent />}
+          {CurrentPageComponent && <CurrentPageComponent key={currentPage} />}
         </div>
       ) : (
         <MenuControl isMobile={true} currentPage={currentPage || undefined} />

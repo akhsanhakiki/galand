@@ -1,19 +1,19 @@
 import React from "react";
 import { Card, Surface } from "@heroui/react";
 import {
-  FaChartLine,
-  FaMoneyBill,
-  FaCartShopping,
-  FaArrowUp,
-  FaArrowDown,
-} from "react-icons/fa6";
+  LuTrendingUp,
+  LuDollarSign,
+  LuShoppingCart,
+  LuArrowUp,
+  LuArrowDown,
+} from "react-icons/lu";
 
 const RingkasanPage = () => {
   return (
     <div className="flex flex-col w-full gap-6">
-      <div className="flex flex-col gap-2 w-full">
-        <h1 className="text-3xl font-bold text-foreground">Ringkasan</h1>
-        <p className="text-muted">
+      <div className="flex flex-col gap-1 w-full">
+        <h1 className="text-xl font-bold text-foreground">Ringkasan</h1>
+        <p className="text-muted text-sm">
           Pantau ringkasan penjualan dan inventori Anda
         </p>
       </div>
@@ -31,12 +31,12 @@ const RingkasanPage = () => {
                 Rp 12.450.000
               </Card.Title>
               <div className="flex items-center gap-1 mt-2 text-success">
-                <FaArrowUp className="w-3 h-3" />
+                <LuArrowUp className="w-3 h-3" />
                 <span className="text-sm">↑ 12% dari bulan lalu</span>
               </div>
             </div>
             <div className="p-3 rounded-xl bg-accent/10">
-              <FaMoneyBill className="w-6 h-6 text-accent" />
+              <LuDollarSign className="w-6 h-6 text-accent" />
             </div>
           </Card.Content>
         </Card>
@@ -53,12 +53,12 @@ const RingkasanPage = () => {
                 Rp 8.750.000
               </Card.Title>
               <div className="flex items-center gap-1 mt-2 text-success">
-                <FaArrowUp className="w-3 h-3" />
+                <LuArrowUp className="w-3 h-3" />
                 <span className="text-sm">↑ 8% dari bulan lalu</span>
               </div>
             </div>
             <div className="p-3 rounded-xl bg-accent/10">
-              <FaCartShopping className="w-6 h-6 text-accent" />
+              <LuShoppingCart className="w-6 h-6 text-accent" />
             </div>
           </Card.Content>
         </Card>
@@ -75,12 +75,12 @@ const RingkasanPage = () => {
                 245
               </Card.Title>
               <div className="flex items-center gap-1 mt-2 text-success">
-                <FaArrowUp className="w-3 h-3" />
+                <LuArrowUp className="w-3 h-3" />
                 <span className="text-sm">↑ 5% dari bulan lalu</span>
               </div>
             </div>
             <div className="p-3 rounded-xl bg-accent/10">
-              <FaChartLine className="w-6 h-6 text-accent" />
+              <LuTrendingUp className="w-6 h-6 text-accent" />
             </div>
           </Card.Content>
         </Card>
@@ -97,12 +97,12 @@ const RingkasanPage = () => {
                 1,234
               </Card.Title>
               <div className="flex items-center gap-1 mt-2 text-danger">
-                <FaArrowDown className="w-3 h-3" />
+                <LuArrowDown className="w-3 h-3" />
                 <span className="text-sm">↓ 3% dari bulan lalu</span>
               </div>
             </div>
             <div className="p-3 rounded-xl bg-accent/10">
-              <FaCartShopping className="w-6 h-6 text-accent" />
+              <LuShoppingCart className="w-6 h-6 text-accent" />
             </div>
           </Card.Content>
         </Card>

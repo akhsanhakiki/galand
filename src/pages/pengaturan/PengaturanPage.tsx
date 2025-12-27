@@ -1,20 +1,20 @@
 import React from "react";
 import { Card, Button, Surface, Switch, Separator } from "@heroui/react";
 import {
-  FaGear,
-  FaUser,
-  FaStore,
-  FaBell,
-  FaShield,
-  FaPalette,
-} from "react-icons/fa6";
+  LuSettings,
+  LuUser,
+  LuStore,
+  LuBell,
+  LuShield,
+  LuPalette,
+} from "react-icons/lu";
 
 const PengaturanPage = () => {
   return (
     <div className="flex flex-col w-full gap-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold text-foreground">Pengaturan</h1>
-        <p className="text-muted">
+      <div className="flex flex-col gap-1">
+        <h1 className="text-xl font-bold text-foreground">Pengaturan</h1>
+        <p className="text-muted text-sm">
           Kelola pengaturan aplikasi dan preferensi Anda
         </p>
       </div>
@@ -24,7 +24,7 @@ const PengaturanPage = () => {
           <Card variant="default" className="p-6">
             <Card.Header className="flex items-center gap-3 pb-4">
               <Surface className="p-2 rounded-lg bg-accent/10">
-                <FaUser className="w-5 h-5 text-accent" />
+                <LuUser className="w-5 h-5 text-accent" />
               </Surface>
               <Card.Title className="text-xl font-bold">Profil</Card.Title>
             </Card.Header>
@@ -71,7 +71,7 @@ const PengaturanPage = () => {
           <Card variant="default" className="p-6">
             <Card.Header className="flex items-center gap-3 pb-4">
               <Surface className="p-2 rounded-lg bg-accent/10">
-                <FaStore className="w-5 h-5 text-accent" />
+                <LuStore className="w-5 h-5 text-accent" />
               </Surface>
               <Card.Title className="text-xl font-bold">Toko</Card.Title>
             </Card.Header>
@@ -108,7 +108,7 @@ const PengaturanPage = () => {
           <Card variant="default" className="p-6">
             <Card.Header className="flex items-center gap-3 pb-4">
               <Surface className="p-2 rounded-lg bg-accent/10">
-                <FaBell className="w-5 h-5 text-accent" />
+                <LuBell className="w-5 h-5 text-accent" />
               </Surface>
               <Card.Title className="text-xl font-bold">Notifikasi</Card.Title>
             </Card.Header>
@@ -159,15 +159,15 @@ const PengaturanPage = () => {
             </Card.Header>
             <Card.Content className="flex flex-col gap-2">
               <Button variant="ghost" className="justify-start">
-                <FaPalette className="w-4 h-4 mr-2" />
+                <LuPalette className="w-4 h-4 mr-2" />
                 Tema
               </Button>
               <Button variant="ghost" className="justify-start">
-                <FaShield className="w-4 h-4 mr-2" />
+                <LuShield className="w-4 h-4 mr-2" />
                 Keamanan
               </Button>
               <Button variant="ghost" className="justify-start">
-                <FaGear className="w-4 h-4 mr-2" />
+                <LuSettings className="w-4 h-4 mr-2" />
                 Umum
               </Button>
             </Card.Content>

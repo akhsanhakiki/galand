@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, Button, Chip, Surface } from "@heroui/react";
-import { FaTag, FaPlus, FaPenToSquare, FaTrash } from "react-icons/fa6";
+import { LuTag, LuPlus, LuPencil, LuTrash2 } from "react-icons/lu";
 
 const DiskonPage = () => {
   const discounts = [
@@ -41,12 +41,14 @@ const DiskonPage = () => {
   return (
     <div className="flex flex-col w-full gap-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold text-foreground">Diskon</h1>
-          <p className="text-muted">Kelola kode diskon dan promo penjualan</p>
+        <div className="flex flex-col gap-1">
+          <h1 className="text-xl font-bold text-foreground">Diskon</h1>
+          <p className="text-muted text-sm">
+            Kelola kode diskon dan promo penjualan
+          </p>
         </div>
         <Button variant="primary" className="bg-accent text-accent-foreground">
-          <FaPlus className="w-4 h-4 mr-2" />
+          <LuPlus className="w-4 h-4 mr-2" />
           Tambah Diskon
         </Button>
       </div>
@@ -57,7 +59,7 @@ const DiskonPage = () => {
             <Card.Header className="flex items-start justify-between pb-4">
               <div className="flex items-center gap-3">
                 <Surface className="p-3 rounded-xl bg-accent/10">
-                  <FaTag className="w-5 h-5 text-accent" />
+                  <LuTag className="w-5 h-5 text-accent" />
                 </Surface>
                 <div>
                   <Card.Title className="text-lg font-bold">
@@ -90,11 +92,11 @@ const DiskonPage = () => {
             </Card.Content>
             <Card.Footer className="flex gap-2 pt-4 border-t border-separator">
               <Button variant="tertiary" size="sm" className="flex-1">
-                <FaPenToSquare className="w-3 h-3 mr-1" />
+                <LuPencil className="w-3 h-3 mr-1" />
                 Edit
               </Button>
               <Button variant="ghost" size="sm" className="flex-1">
-                <FaTrash className="w-3 h-3 mr-1" />
+                <LuTrash2 className="w-3 h-3 mr-1" />
                 Hapus
               </Button>
             </Card.Footer>

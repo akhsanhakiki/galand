@@ -10,7 +10,7 @@ import {
   ListBox,
   SearchField,
 } from "@heroui/react";
-import { FaFilter, FaChevronLeft, FaChevronRight } from "react-icons/fa6";
+import { LuFilter, LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import type { Transaction } from "../../utils/api";
 import { getTransactions } from "../../utils/api";
 import TransactionForm from "../../components/TransactionForm";
@@ -26,7 +26,7 @@ const TransaksiPage = () => {
   >(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(30);
 
   useEffect(() => {
     fetchTransactions();
@@ -98,22 +98,17 @@ const TransaksiPage = () => {
   };
 
   return (
-    <div className="flex flex-col w-full gap-5">
+    <div className="flex flex-col w-full gap-5 h-full">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-foreground">Transaksi</h1>
-          <p className="text-muted">Kelola semua transaksi penjualan Anda</p>
+          <h1 className="text-xl font-bold text-foreground">Transaksi</h1>
+          <p className="text-muted text-sm">
+            Kelola semua transaksi penjualan Anda
+          </p>
         </div>
-        <Button
-          variant="primary"
-          className="bg-accent text-accent-foreground"
-          onPress={() => setTransactionFormOpen(true)}
-        >
-          Transaksi Baru
-        </Button>
       </div>
 
-      <div className="p-6 bg-surface rounded-3xl flex flex-col h-[calc(100vh-12rem)] min-h-[500px]">
+      <div className="p-6 bg-surface rounded-3xl flex flex-col h-full min-h-[500px]">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4">
           <SearchField
             value={searchQuery}
@@ -127,7 +122,7 @@ const TransaksiPage = () => {
             </SearchField.Group>
           </SearchField>
           <Button variant="ghost" isIconOnly>
-            <FaFilter className="w-4 h-4" />
+            <LuFilter className="w-4 h-4" />
           </Button>
         </div>
         <div className="flex flex-col h-full">
@@ -174,14 +169,14 @@ const TransaksiPage = () => {
                           <td className="py-2 px-4 text-xs font-medium text-foreground">
                             {transaction.id}
                           </td>
-                          <td className="py-2 px-4 text-sm text-foreground">
+                          <td className="py-2 px-4 text-xs text-foreground">
                             {transaction.items?.length || 0}
                           </td>
-                          <td className="py-2 px-4 text-sm font-medium text-foreground">
+                          <td className="py-2 px-4 text-xs font-medium text-foreground">
                             Rp{" "}
                             {transaction.total_amount.toLocaleString("id-ID")}
                           </td>
-                          <td className="py-2 px-4 text-sm text-muted">
+                          <td className="py-2 px-4 text-xs text-muted">
                             {formatDate(transaction.created_at)}
                           </td>
                           <td className="py-2 px-4">
@@ -249,7 +244,7 @@ const TransaksiPage = () => {
                       isDisabled={currentPage === 1}
                       isIconOnly
                     >
-                      <FaChevronLeft className="w-3 h-3" />
+                      <LuChevronLeft className="w-3 h-3" />
                     </Button>
                     <div className="flex items-center gap-1">
                       {Array.from({ length: totalPages }, (_, i) => i + 1).map(
@@ -277,7 +272,7 @@ const TransaksiPage = () => {
                       isDisabled={currentPage === totalPages}
                       isIconOnly
                     >
-                      <FaChevronRight className="w-3 h-3" />
+                      <LuChevronRight className="w-3 h-3" />
                     </Button>
                   </div>
                 )}

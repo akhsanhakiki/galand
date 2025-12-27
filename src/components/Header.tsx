@@ -1,7 +1,7 @@
 "use client";
 
 import { Avatar, Button, Surface } from "@heroui/react";
-import { FaUser, FaSun, FaMoon } from "react-icons/fa6";
+import { LuUser, LuSun, LuMoon } from "react-icons/lu";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
@@ -35,9 +35,9 @@ export default function Header({
               onPress={() => setTheme(theme === "dark" ? "light" : "dark")}
             >
               {mounted && theme === "dark" ? (
-                <FaSun className="w-4 h-4 text-default-500" />
+                <LuSun className="w-4 h-4 text-default-500" />
               ) : (
-                <FaMoon className="w-4 h-4 text-default-500" />
+                <LuMoon className="w-4 h-4 text-default-500" />
               )}
             </Button>
             <div className="flex items-center gap-2 pl-2">
@@ -51,7 +51,7 @@ export default function Header({
               </div>
               <Avatar size="md" className="bg-primary text-primary-foreground">
                 <Avatar.Fallback>
-                  <FaUser className="w-4 h-4" />
+                  <LuUser className="w-4 h-4" />
                 </Avatar.Fallback>
               </Avatar>
             </div>
@@ -75,40 +75,38 @@ export default function Header({
             onPress={() => setTheme(theme === "dark" ? "light" : "dark")}
           >
             {mounted && theme === "dark" ? (
-              <FaSun className="w-4 h-4 text-default-500" />
+              <LuSun className="w-4 h-4 text-default-500" />
             ) : (
-              <FaMoon className="w-4 h-4 text-default-500" />
+              <LuMoon className="w-4 h-4 text-default-500" />
             )}
           </Button>
           <Avatar size="sm" className="bg-primary text-primary-foreground">
             <Avatar.Fallback>
-              <FaUser className="w-3 h-3" />
+              <LuUser className="w-3 h-3" />
             </Avatar.Fallback>
           </Avatar>
         </div>
       ) : (
         // Expanded state - horizontal layout with full info
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3">
           <Button
-            className="flex items-center gap-4 w-full justify-start p-4"
+            className="w-full transition-all duration-200 rounded-2xl justify-start h-10 hover:bg-default-100 text-foreground"
             variant="ghost"
-            isIconOnly
-            size="md"
             onPress={() => setTheme(theme === "dark" ? "light" : "dark")}
           >
             {mounted && theme === "dark" ? (
-              <FaMoon className="w-4 h-4 text-default-500" />
+              <LuMoon className="w-5 h-5 mr-2 shrink-0" />
             ) : (
-              <FaSun className="w-4 h-4 text-default-500" />
+              <LuSun className="w-5 h-5 mr-2 shrink-0" />
             )}
-            <p className="text-xs font-medium text-foreground">
+            <span className="text-sm font-medium truncate">
               {theme === "dark" ? "Dark Mode" : "Light Mode"}
-            </p>
+            </span>
           </Button>
           <div className="flex items-center gap-2 px-2 pb-1">
             <Avatar size="sm" className="bg-primary text-primary-foreground">
               <Avatar.Fallback>
-                <FaUser className="w-3 h-3" />
+                <LuUser className="w-3 h-3" />
               </Avatar.Fallback>
             </Avatar>
             <div className="flex flex-col min-w-0">

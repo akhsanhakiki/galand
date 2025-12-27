@@ -6,7 +6,7 @@ import DesktopView from "./DesktopView";
 const MainContainer = () => {
   return (
     <Providers>
-      <div className="flex flex-col">
+      <div className="flex flex-col h-full">
         <>
           <MobileView />
           <DesktopView />

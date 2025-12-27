@@ -3,12 +3,12 @@
 import React, { useState, useEffect } from "react";
 import { Card, Button, Surface, Separator, Spinner } from "@heroui/react";
 import {
-  FaCashRegister,
-  FaCartShopping,
-  FaTrash,
-  FaPlus,
-  FaMinus,
-} from "react-icons/fa6";
+  LuReceipt,
+  LuShoppingCart,
+  LuTrash2,
+  LuPlus,
+  LuMinus,
+} from "react-icons/lu";
 import type { Product } from "../../utils/api";
 import { getProducts, createTransaction } from "../../utils/api";
 
@@ -109,9 +109,9 @@ const KasirPage = () => {
 
   return (
     <div className="flex flex-col w-full gap-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold text-foreground">Kasir</h1>
-        <p className="text-muted">
+      <div className="flex flex-col gap-1">
+        <h1 className="text-xl font-bold text-foreground">Kasir</h1>
+        <p className="text-muted text-sm">
           Sistem point of sale untuk transaksi penjualan
         </p>
       </div>
@@ -145,7 +145,7 @@ const KasirPage = () => {
                     >
                       <div className="flex flex-col gap-2 w-full">
                         <div className="w-full h-24 bg-surface-tertiary rounded-lg flex items-center justify-center">
-                          <FaCartShopping className="w-8 h-8 text-muted" />
+                          <LuShoppingCart className="w-8 h-8 text-muted" />
                         </div>
                         <div>
                           <p className="font-semibold text-foreground text-sm">
@@ -170,7 +170,7 @@ const KasirPage = () => {
         <div className="lg:col-span-1">
           <Card variant="default" className="p-6 sticky top-4">
             <Card.Header className="pb-4 flex items-center gap-2">
-              <FaCashRegister className="w-5 h-5 text-accent" />
+              <LuReceipt className="w-5 h-5 text-accent" />
               <Card.Title className="text-xl font-bold">Keranjang</Card.Title>
             </Card.Header>
             <Card.Content className="flex flex-col gap-3 max-h-[400px] overflow-y-auto">
@@ -201,7 +201,7 @@ const KasirPage = () => {
                         isIconOnly
                         onPress={() => removeFromCart(item.product_id)}
                       >
-                        <FaTrash className="w-3 h-3" />
+                        <LuTrash2 className="w-3 h-3" />
                       </Button>
                     </div>
                     <div className="flex items-center gap-2">
@@ -211,7 +211,7 @@ const KasirPage = () => {
                         isIconOnly
                         onPress={() => updateQuantity(item.product_id, -1)}
                       >
-                        <FaMinus className="w-3 h-3" />
+                        <LuMinus className="w-3 h-3" />
                       </Button>
                       <span className="flex-1 text-center font-semibold text-foreground">
                         {item.quantity}
@@ -223,7 +223,7 @@ const KasirPage = () => {
                         onPress={() => updateQuantity(item.product_id, 1)}
                         isDisabled={item.quantity >= item.product.stock}
                       >
-                        <FaPlus className="w-3 h-3" />
+                        <LuPlus className="w-3 h-3" />
                       </Button>
                     </div>
                   </Surface>

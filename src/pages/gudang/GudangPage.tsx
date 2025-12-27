@@ -1,12 +1,12 @@
 import React from "react";
 import { Card, Button, Chip, Surface } from "@heroui/react";
 import {
-  FaWarehouse,
-  FaPlus,
-  FaMagnifyingGlass,
-  FaBox,
-  FaCircleExclamation,
-} from "react-icons/fa6";
+  LuWarehouse,
+  LuPlus,
+  LuSearch,
+  LuBox,
+  LuTriangleAlert,
+} from "react-icons/lu";
 
 const GudangPage = () => {
   const products = [
@@ -63,7 +63,7 @@ const GudangPage = () => {
       case "low-stock":
         return (
           <Chip color="warning" variant="soft">
-            <FaCircleExclamation className="w-3 h-3 mr-1" />
+            <LuTriangleAlert className="w-3 h-3 mr-1" />
             Stok Menipis
           </Chip>
         );
@@ -85,12 +85,12 @@ const GudangPage = () => {
   return (
     <div className="flex flex-col w-full gap-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold text-foreground">Gudang</h1>
-          <p className="text-muted">Kelola inventori dan stok produk</p>
+        <div className="flex flex-col gap-1">
+          <h1 className="text-xl font-bold text-foreground">Gudang</h1>
+          <p className="text-muted text-sm">Kelola inventori dan stok produk</p>
         </div>
         <Button variant="primary" className="bg-accent text-accent-foreground">
-          <FaPlus className="w-4 h-4 mr-2" />
+          <LuPlus className="w-4 h-4 mr-2" />
           Tambah Produk
         </Button>
       </div>
@@ -107,7 +107,7 @@ const GudangPage = () => {
               125
             </Card.Title>
             <Surface className="p-3 rounded-xl bg-accent/10">
-              <FaBox className="w-5 h-5 text-accent" />
+              <LuBox className="w-5 h-5 text-accent" />
             </Surface>
           </Card.Content>
         </Card>
@@ -123,7 +123,7 @@ const GudangPage = () => {
               98
             </Card.Title>
             <Surface className="p-3 rounded-xl bg-success/10">
-              <FaBox className="w-5 h-5 text-success" />
+              <LuBox className="w-5 h-5 text-success" />
             </Surface>
           </Card.Content>
         </Card>
@@ -139,7 +139,7 @@ const GudangPage = () => {
               12
             </Card.Title>
             <Surface className="p-3 rounded-xl bg-warning/10">
-              <FaCircleExclamation className="w-5 h-5 text-warning" />
+              <LuTriangleAlert className="w-5 h-5 text-warning" />
             </Surface>
           </Card.Content>
         </Card>
@@ -155,7 +155,7 @@ const GudangPage = () => {
               15
             </Card.Title>
             <Surface className="p-3 rounded-xl bg-danger/10">
-              <FaCircleExclamation className="w-5 h-5 text-danger" />
+              <LuTriangleAlert className="w-5 h-5 text-danger" />
             </Surface>
           </Card.Content>
         </Card>
@@ -168,7 +168,7 @@ const GudangPage = () => {
               className="flex-1 flex items-center gap-2 px-4 py-2 rounded-lg"
               variant="secondary"
             >
-              <FaMagnifyingGlass className="w-4 h-4 text-muted" />
+              <LuSearch className="w-4 h-4 text-muted" />
               <input
                 type="text"
                 placeholder="Cari produk..."
