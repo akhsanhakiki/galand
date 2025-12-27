@@ -18,6 +18,7 @@ import {
   LuMinus,
   LuChevronLeft,
   LuChevronRight,
+  LuShoppingBasket,
 } from "react-icons/lu";
 import type { Product } from "../../utils/api";
 import { getProducts, createTransaction } from "../../utils/api";
@@ -163,7 +164,7 @@ const KasirPage = () => {
   };
 
   return (
-    <div className="flex flex-col w-full gap-6">
+    <div className="flex flex-col w-full gap-6 h-full">
       <div className="flex flex-col gap-1">
         <h1 className="text-xl font-bold text-foreground">Kasir</h1>
         <p className="text-muted text-sm">
@@ -171,7 +172,7 @@ const KasirPage = () => {
         </p>
       </div>
 
-      <div className="flex flex-row gap-4">
+      <div className="flex flex-row gap-4 h-full">
         <div className="w-8/12">
           {loading ? (
             <div className="flex items-center justify-center p-8">
@@ -184,7 +185,7 @@ const KasirPage = () => {
                 : "Belum ada produk"}
             </div>
           ) : (
-            <div className="flex flex-col gap-4 bg-surface rounded-2xl p-4">
+            <div className="flex flex-col gap-4 bg-surface rounded-2xl p-4 h-full">
               <div className="flex flex-row justify-between items-center">
                 <div className="flex flex-col gap-1">
                   <h2 className="text-md font-bold text-foreground">
@@ -331,95 +332,142 @@ const KasirPage = () => {
           )}
         </div>
 
-        <div className="w-4/12">
-          <div className="p-4 sticky top-4 bg-surface rounded-2xl">
+        <div className="w-4/12 h-full">
+          <div className="p-4 sticky top-4 bg-surface rounded-2xl h-full">
             <div className="pb-3 flex flex-col gap-1">
               <h2 className="text-md font-bold text-foreground">Keranjang</h2>
               <p className="text-xs text-muted">
                 {cart.length > 0
                   ? `${cart.length} item dalam keranjang`
-                  : "Keranjang kosong"}
+                  : "Tammbahkan produk ke keranjang"}
               </p>
             </div>
-            <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto">
+            <div className="flex flex-col min-h-36 overflow-y-auto h-full">
               {cart.length === 0 ? (
-                <p className="text-center text-muted py-8 text-xs">
-                  Keranjang kosong
-                </p>
+                <div className="flex flex-col items-center justify-center gap-6 h-full">
+                  <LuShoppingBasket className="w-24 h-24 text-accent rotate-45 opacity-50" />
+                  <p className="text-center text-muted text-sm">
+                    Keranjang kosong
+                  </p>
+                </div>
               ) : (
-                cart.map((item) => (
-                  <div key={item.product_id} className="p-2 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-foreground text-xs truncate">
-                          {item.product.name}
-                        </p>
-                        <p className="text-accent font-medium text-xs">
-                          Rp{" "}
-                          {(item.product.price * item.quantity).toLocaleString(
-                            "id-ID"
-                          )}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          isIconOnly
-                          className="min-w-6 h-6 border"
-                          onPress={() => updateQuantity(item.product_id, -1)}
-                        >
-                          <LuMinus className="w-3 h-3" />
-                        </Button>
-                        <span className="text-xs font-semibold text-foreground min-w-[20px] text-center">
-                          {item.quantity}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          isIconOnly
-                          className="min-w-6 h-6 border"
-                          onPress={() => updateQuantity(item.product_id, 1)}
-                          isDisabled={item.quantity >= item.product.stock}
-                        >
-                          <LuPlus className="w-3 h-3" />
-                        </Button>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        isIconOnly
-                        className="min-w-6 h-6"
-                        onPress={() => removeFromCart(item.product_id)}
-                      >
-                        <LuTrash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </div>
-                ))
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="sticky top-0 bg-surface z-10">
+                      <tr className="border-b border-separator">
+                        <th className="text-left py-2 px-2 text-xs font-semibold text-muted">
+                          Nama Barang
+                        </th>
+                        <th className="text-left py-2 px-2 text-xs font-semibold text-muted">
+                          Pembelian
+                        </th>
+                        <th className="text-right py-2 px-2 text-xs font-semibold text-muted">
+                          Total Harga
+                        </th>
+                        <th className="text-center py-2 px-2 text-xs font-semibold text-muted w-12">
+                          Aksi
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {cart.map((item) => {
+                        const itemTotal = item.product.price * item.quantity;
+                        return (
+                          <tr
+                            key={item.product_id}
+                            className="hover:bg-surface-secondary/20 transition-colors"
+                          >
+                            <td className="py-2 px-2">
+                              <p className="text-xs font-medium text-foreground">
+                                {item.product.name}
+                              </p>
+                            </td>
+                            <td className="py-2 px-2">
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  isIconOnly
+                                  className="w-5 h-5 border"
+                                  onPress={() =>
+                                    updateQuantity(item.product_id, -1)
+                                  }
+                                >
+                                  <LuMinus className="w-2.5 h-2.5" />
+                                </Button>
+                                <span className="text-xs font-medium text-foreground min-w-[20px] text-center">
+                                  {item.quantity}
+                                </span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  isIconOnly
+                                  className="w-5 h-5 border"
+                                  onPress={() =>
+                                    updateQuantity(item.product_id, 1)
+                                  }
+                                  isDisabled={
+                                    item.quantity >= item.product.stock
+                                  }
+                                >
+                                  <LuPlus className="w-2.5 h-2.5" />
+                                </Button>
+                              </div>
+                            </td>
+                            <td className="py-2 px-2 text-right">
+                              <p className="text-xs font-medium text-foreground">
+                                Rp {itemTotal.toLocaleString("id-ID")}
+                              </p>
+                            </td>
+                            <td className="py-2 px-2 text-center w-12">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                isIconOnly
+                                className="w-5 h-5"
+                                onPress={() => removeFromCart(item.product_id)}
+                              >
+                                <LuTrash2 className="w-3 h-3" />
+                              </Button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
-            <Separator className="my-3" />
-            <div className="flex flex-col gap-3 pt-3">
-              <div className="flex items-center justify-between w-full">
-                <span className="text-sm font-semibold text-foreground">
-                  Total:
-                </span>
-                <span className="text-md font-bold text-accent">
-                  Rp {total.toLocaleString("id-ID")}
-                </span>
-              </div>
-              <Button
-                variant="primary"
-                className="w-full bg-accent text-accent-foreground"
-                size="md"
-                isDisabled={cart.length === 0 || isSubmitting}
-                onPress={handleCheckout}
-                isPending={isSubmitting}
-              >
-                {isSubmitting ? "Memproses..." : "Proses Pembayaran"}
-              </Button>
-            </div>
+            {cart.length > 0 && (
+              <>
+                <Separator className="my-3" />
+                <div className="flex flex-col pt-3 items-end gap-6">
+                  <div className="flex items-center justify-between w-full">
+                    <span className="text-sm font-semibold text-foreground">
+                      Total:
+                    </span>
+                    <span className="text-md font-bold text-accent">
+                      Rp {total.toLocaleString("id-ID")}
+                    </span>
+                  </div>
+                  <div className="flex flex-row gap-2">
+                    <Button variant="ghost" size="sm">
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="primary"
+                      className="bg-accent text-accent-foreground"
+                      size="sm"
+                      isDisabled={cart.length === 0 || isSubmitting}
+                      onPress={handleCheckout}
+                      isPending={isSubmitting}
+                    >
+                      {isSubmitting ? "Memproses..." : "Proses Pembayaran"}
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
