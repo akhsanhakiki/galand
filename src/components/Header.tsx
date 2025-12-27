@@ -100,7 +100,7 @@ export default function Header({
               <LuSun className="w-5 h-5 mr-2 shrink-0" />
             )}
             <span className="text-sm font-medium truncate">
-              {theme === "dark" ? "Dark Mode" : "Light Mode"}
+              {theme === "dark" ? "Dark" : "Light"}
             </span>
           </Button>
           <div className="flex items-center gap-2 px-2 pb-1">

@@ -10,11 +10,17 @@ import {
   ListBox,
   SearchField,
 } from "@heroui/react";
-import { LuFilter, LuChevronLeft, LuChevronRight } from "react-icons/lu";
+import {
+  LuFilter,
+  LuChevronLeft,
+  LuChevronRight,
+  LuPrinter,
+} from "react-icons/lu";
 import type { Transaction } from "../../utils/api";
-import { getTransactions } from "../../utils/api";
+import { getTransactions, getTransaction } from "../../utils/api";
 import TransactionForm from "../../components/TransactionForm";
 import TransactionView from "../../components/TransactionView";
+import { printTransaction } from "../../utils/print";
 
 const TransaksiPage = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -84,6 +90,15 @@ const TransaksiPage = () => {
     setViewingTransactionId(transaction.id);
   };
 
+  const handlePrintTransaction = async (transactionId: number) => {
+    try {
+      const transaction = await getTransaction(transactionId);
+      printTransaction(transaction);
+    } catch (error) {
+      // Error handling - could show toast notification
+    }
+  };
+
   const formatDate = (dateString?: string) => {
     if (!dateString) return "-";
     const date = new Date(dateString);
@@ -125,7 +140,7 @@ const TransaksiPage = () => {
             <LuFilter className="w-4 h-4" />
           </Button>
         </div>
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full overflow-hidden gap-1">
           {loading ? (
             <div className="flex items-center justify-center p-8">
               <Spinner size="lg" />
@@ -180,12 +195,24 @@ const TransaksiPage = () => {
                             {formatDate(transaction.created_at)}
                           </td>
                           <td className="py-2 px-4">
-                            <div
-                              onClick={() => handleViewTransaction(transaction)}
-                            >
-                              <p className="text-xs text-primary font-medium cursor-pointer">
+                            <div className="flex items-center gap-3">
+                              <p
+                                onClick={() =>
+                                  handleViewTransaction(transaction)
+                                }
+                                className="text-xs text-primary font-medium cursor-pointer hover:text-primary-700 transition-colors"
+                              >
                                 Detail
                               </p>
+                              <button
+                                onClick={() =>
+                                  handlePrintTransaction(transaction.id)
+                                }
+                                className="text-xs text-primary hover:text-primary-700 transition-colors cursor-pointer"
+                                title="Print"
+                              >
+                                <LuPrinter className="w-3.5 h-3.5" />
+                              </button>
                             </div>
                           </td>
                         </tr>

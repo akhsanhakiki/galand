@@ -167,14 +167,14 @@ const MenuControl = ({
                   : "justify-start h-10"
               } ${
                 currentPage === key
-                  ? "bg-primary-100 text-primary-600 font-medium"
+                  ? "bg-primary-100 text-primary-700 font-medium"
                   : "hover:bg-primary-100 text-foreground"
               }`}
               onPress={() => handleClick(key)}
             >
               <Icon
                 className={`shrink-0 ${
-                  isCollapsed ? "w-5 h-5" : "w-5 h-5 mr-2"
+                  isCollapsed ? "w-4 h-4" : "w-4 h-4 mr-2"
                 }`}
               />
               {!isCollapsed && (
