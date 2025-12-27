@@ -96,21 +96,30 @@ const KasirPage = () => {
       return;
     }
 
-    const existingItem = cart.find((item) => item.product_id === product.id);
-    if (existingItem) {
-      if (existingItem.quantity >= product.stock) {
-        return;
-      }
-      setCart(
-        cart.map((item) =>
+    setCart((currentCart) => {
+      const existingItem = currentCart.find(
+        (item) => item.product_id === product.id
+      );
+
+      if (existingItem) {
+        // Check if we can increment (not exceeding stock)
+        if (existingItem.quantity >= product.stock) {
+          return currentCart;
+        }
+        // Increment quantity
+        return currentCart.map((item) =>
           item.product_id === product.id
             ? { ...item, quantity: item.quantity + 1 }
             : item
-        )
-      );
-    } else {
-      setCart([...cart, { product_id: product.id, product, quantity: 1 }]);
-    }
+        );
+      } else {
+        // Add new item to cart
+        return [
+          ...currentCart,
+          { product_id: product.id, product, quantity: 1 },
+        ];
+      }
+    });
   };
 
   const updateQuantity = (productId: number, delta: number) => {
