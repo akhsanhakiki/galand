@@ -28,9 +28,9 @@ interface MenuControlProps {
 
 // Helper function to get current page from URL
 const getCurrentPageFromUrl = (): string => {
-  if (typeof window === 'undefined') return 'ringkasan';
+  if (typeof window === "undefined") return "ringkasan";
   const path = window.location.pathname;
-  const page = path.split('/').filter(Boolean)[0] || 'ringkasan';
+  const page = path.split("/").filter(Boolean)[0] || "ringkasan";
   return page;
 };
 
@@ -49,9 +49,9 @@ const MenuControl = ({
     const updateCurrentPage = () => {
       setCurrentPage(getCurrentPageFromUrl());
     };
-    window.addEventListener('popstate', updateCurrentPage);
+    window.addEventListener("popstate", updateCurrentPage);
     updateCurrentPage();
-    return () => window.removeEventListener('popstate', updateCurrentPage);
+    return () => window.removeEventListener("popstate", updateCurrentPage);
   }, []);
 
   const handleClick = (menuKey: string) => {
