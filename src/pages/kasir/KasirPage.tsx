@@ -40,7 +40,10 @@ const KasirPage = () => {
     }
   };
 
-  const total = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const total = cart.reduce(
+    (sum, item) => sum + item.product.price * item.quantity,
+    0
+  );
 
   const addToCart = (product: Product) => {
     if (product.stock <= 0) {
@@ -187,7 +190,9 @@ const KasirPage = () => {
                         </p>
                         <p className="text-accent font-semibold text-sm">
                           Rp{" "}
-                          {(item.product.price * item.quantity).toLocaleString("id-ID")}
+                          {(item.product.price * item.quantity).toLocaleString(
+                            "id-ID"
+                          )}
                         </p>
                       </div>
                       <Button

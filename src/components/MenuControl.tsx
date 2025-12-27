@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ChartBarIcon,
   BanknotesIcon,
@@ -26,17 +26,37 @@ interface MenuControlProps {
   currentPage?: string;
 }
 
+// Helper function to get current page from URL
+const getCurrentPageFromUrl = (): string => {
+  if (typeof window === 'undefined') return 'ringkasan';
+  const path = window.location.pathname;
+  const page = path.split('/').filter(Boolean)[0] || 'ringkasan';
+  return page;
+};
+
 const MenuControl = ({
   onMenuClick,
   isMobile = false,
-  currentPage,
+  currentPage: propCurrentPage,
 }: MenuControlProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [currentPage, setCurrentPage] = useState<string>(
+    propCurrentPage || getCurrentPageFromUrl()
+  );
+
+  // Update current page when URL changes
+  useEffect(() => {
+    const updateCurrentPage = () => {
+      setCurrentPage(getCurrentPageFromUrl());
+    };
+    window.addEventListener('popstate', updateCurrentPage);
+    updateCurrentPage();
+    return () => window.removeEventListener('popstate', updateCurrentPage);
+  }, []);
 
   const handleClick = (menuKey: string) => {
-    if (onMenuClick) {
-      onMenuClick(menuKey);
-    }
+    // Navigate to the route
+    window.location.href = `/${menuKey}`;
   };
 
   const toggleCollapse = () => {

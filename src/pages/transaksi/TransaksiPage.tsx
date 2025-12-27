@@ -1,23 +1,21 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { Card, Button, Chip, Surface, Spinner } from "@heroui/react";
-import {
-  FaMagnifyingGlass,
-  FaFilter,
-  FaCircleCheck,
-} from "react-icons/fa6";
+import { Card, Button, Surface, Spinner } from "@heroui/react";
+import { FaMagnifyingGlass, FaFilter } from "react-icons/fa6";
 import type { Transaction } from "../../utils/api";
 import { getTransactions } from "../../utils/api";
-import TransactionForm from "../TransactionForm";
-import TransactionView from "../TransactionView";
+import TransactionForm from "../../components/TransactionForm";
+import TransactionView from "../../components/TransactionView";
 
 const TransaksiPage = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [transactionFormOpen, setTransactionFormOpen] = useState(false);
-  const [viewingTransactionId, setViewingTransactionId] = useState<number | null>(null);
+  const [viewingTransactionId, setViewingTransactionId] = useState<
+    number | null
+  >(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -39,7 +37,7 @@ const TransaksiPage = () => {
   const filteredTransactions = useMemo(() => {
     if (!searchQuery) return transactions;
     const query = searchQuery.toLowerCase();
-    return transactions.filter((t) => 
+    return transactions.filter((t) =>
       t.id.toString().toLowerCase().includes(query)
     );
   }, [transactions, searchQuery]);
@@ -53,23 +51,16 @@ const TransaksiPage = () => {
     setViewingTransactionId(transaction.id);
   };
 
-  const getStatusChip = (transaction: Transaction) => {
-    // Since API doesn't have status, we'll show "Selesai" for all completed transactions
-    return (
-      <Chip color="success" variant="soft">
-        <FaCircleCheck className="w-3 h-3 mr-1" />
-        Selesai
-      </Chip>
-    );
-  };
-
   const formatDate = (dateString?: string) => {
     if (!dateString) return "-";
     const date = new Date(dateString);
-    return date.toLocaleDateString("id-ID", {
+    return date.toLocaleString("id-ID", {
       day: "numeric",
       month: "short",
       year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
     });
   };
 
@@ -80,8 +71,8 @@ const TransaksiPage = () => {
           <h1 className="text-3xl font-bold text-foreground">Transaksi</h1>
           <p className="text-muted">Kelola semua transaksi penjualan Anda</p>
         </div>
-        <Button 
-          variant="primary" 
+        <Button
+          variant="primary"
           className="bg-accent text-accent-foreground"
           onPress={() => setTransactionFormOpen(true)}
         >
@@ -117,7 +108,9 @@ const TransaksiPage = () => {
             </div>
           ) : filteredTransactions.length === 0 ? (
             <div className="text-center py-8 text-muted">
-              {searchQuery ? "Tidak ada transaksi yang ditemukan" : "Belum ada transaksi"}
+              {searchQuery
+                ? "Tidak ada transaksi yang ditemukan"
+                : "Belum ada transaksi"}
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -132,9 +125,6 @@ const TransaksiPage = () => {
                     </th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
                       Jumlah
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
-                      Status
                     </th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
                       Tanggal
@@ -159,15 +149,12 @@ const TransaksiPage = () => {
                       <td className="py-3 px-4 text-sm font-semibold text-foreground">
                         Rp {transaction.total_amount.toLocaleString("id-ID")}
                       </td>
-                      <td className="py-3 px-4">
-                        {getStatusChip(transaction)}
-                      </td>
                       <td className="py-3 px-4 text-sm text-muted">
                         {formatDate(transaction.created_at)}
                       </td>
                       <td className="py-3 px-4">
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="sm"
                           onPress={() => handleViewTransaction(transaction)}
                         >

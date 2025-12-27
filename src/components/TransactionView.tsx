@@ -95,7 +95,15 @@ export default function TransactionView({
 
                 {transaction.created_at && (
                   <p className="text-sm text-muted">
-                    Created: {new Date(transaction.created_at).toLocaleString()}
+                    Created:{" "}
+                    {new Date(transaction.created_at).toLocaleString("id-ID", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                    })}
                   </p>
                 )}
               </div>

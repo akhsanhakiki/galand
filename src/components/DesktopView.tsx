@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import MenuControl from "./MenuControl";
-import RingkasanPage from "./ringkasan/RingkasanPage";
-import TransaksiPage from "./transaksi/TransaksiPage";
-import DiskonPage from "./diskon/DiskonPage";
-import GudangPage from "./gudang/GudangPage";
-import KasirPage from "./kasir/KasirPage";
-import PengaturanPage from "./pengaturan/PengaturanPage";
+import RingkasanPage from "../pages/ringkasan/RingkasanPage";
+import TransaksiPage from "../pages/transaksi/TransaksiPage";
+import DiskonPage from "../pages/diskon/DiskonPage";
+import GudangPage from "../pages/gudang/GudangPage";
+import KasirPage from "../pages/kasir/KasirPage";
+import PengaturanPage from "../pages/pengaturan/PengaturanPage";
 
 const pageComponents: Record<string, React.ComponentType> = {
   ringkasan: RingkasanPage,
@@ -16,19 +16,37 @@ const pageComponents: Record<string, React.ComponentType> = {
   pengaturan: PengaturanPage,
 };
 
-const DesktopView = () => {
-  const [currentPage, setCurrentPage] = useState<string>("ringkasan");
+// Helper function to get current page from URL
+const getCurrentPageFromUrl = (): string => {
+  if (typeof window === 'undefined') return 'ringkasan';
+  const path = window.location.pathname;
+  const page = path.split('/').filter(Boolean)[0];
+  // If on root, redirect to ringkasan
+  if (!page || page === '') {
+    window.location.href = '/ringkasan';
+    return 'ringkasan';
+  }
+  return page;
+};
 
-  const handleMenuClick = (menuKey: string) => {
-    setCurrentPage(menuKey);
-  };
+const DesktopView = () => {
+  const [currentPage, setCurrentPage] = useState<string>(getCurrentPageFromUrl());
+
+  // Update current page when URL changes
+  useEffect(() => {
+    const updateCurrentPage = () => {
+      setCurrentPage(getCurrentPageFromUrl());
+    };
+    window.addEventListener('popstate', updateCurrentPage);
+    updateCurrentPage();
+    return () => window.removeEventListener('popstate', updateCurrentPage);
+  }, []);
 
   const CurrentPageComponent = pageComponents[currentPage];
 
   return (
     <div className="hidden md:flex flex-row gap-4 md:gap-6 p-4 md:p-4">
       <MenuControl
-        onMenuClick={handleMenuClick}
         isMobile={false}
         currentPage={currentPage}
       />

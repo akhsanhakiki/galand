@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import MenuControl from "./MenuControl";
-import RingkasanPage from "./ringkasan/RingkasanPage";
-import TransaksiPage from "./transaksi/TransaksiPage";
-import DiskonPage from "./diskon/DiskonPage";
-import GudangPage from "./gudang/GudangPage";
-import KasirPage from "./kasir/KasirPage";
-import PengaturanPage from "./pengaturan/PengaturanPage";
+import RingkasanPage from "../pages/ringkasan/RingkasanPage";
+import TransaksiPage from "../pages/transaksi/TransaksiPage";
+import DiskonPage from "../pages/diskon/DiskonPage";
+import GudangPage from "../pages/gudang/GudangPage";
+import KasirPage from "../pages/kasir/KasirPage";
+import PengaturanPage from "../pages/pengaturan/PengaturanPage";
 import Header from "./Header";
 import { FaArrowLeft } from "react-icons/fa6";
 import { Button } from "@heroui/react";
@@ -19,15 +19,34 @@ const pageComponents: Record<string, React.ComponentType> = {
   pengaturan: PengaturanPage,
 };
 
-const MobileView = () => {
-  const [currentPage, setCurrentPage] = useState<string | null>(null);
+// Helper function to get current page from URL
+const getCurrentPageFromUrl = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  const path = window.location.pathname;
+  const page = path.split('/').filter(Boolean)[0];
+  // If on root, redirect to ringkasan
+  if (!page || page === '') {
+    window.location.href = '/ringkasan';
+    return 'ringkasan';
+  }
+  return page;
+};
 
-  const handleMenuClick = (menuKey: string) => {
-    setCurrentPage(menuKey);
-  };
+const MobileView = () => {
+  const [currentPage, setCurrentPage] = useState<string | null>(getCurrentPageFromUrl());
+
+  // Update current page when URL changes
+  useEffect(() => {
+    const updateCurrentPage = () => {
+      setCurrentPage(getCurrentPageFromUrl());
+    };
+    window.addEventListener('popstate', updateCurrentPage);
+    updateCurrentPage();
+    return () => window.removeEventListener('popstate', updateCurrentPage);
+  }, []);
 
   const handleBack = () => {
-    setCurrentPage(null);
+    window.location.href = '/';
   };
 
   const CurrentPageComponent = currentPage ? pageComponents[currentPage] : null;
@@ -49,7 +68,6 @@ const MobileView = () => {
         </div>
       ) : (
         <MenuControl
-          onMenuClick={handleMenuClick}
           isMobile={true}
           currentPage={currentPage || undefined}
         />

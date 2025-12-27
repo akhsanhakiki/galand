@@ -15,53 +15,53 @@
   color-scheme: light;
 
   /* Base Colors */
-  --white: oklch(1 0 0);
-  --black: oklch(0 0 0);
-  --snow: oklch(0.99 0 0);
-  --eclipse: oklch(0.05 0 0);
+  --white: #ffffff;
+  --black: #000000;
+  --snow: #fcfcfc;
+  --eclipse: #0d0d0d;
 
   /* Background & Surface */
-  --background: oklch(0.96 0 0); /* Light gray - darker than surface */
-  --foreground: oklch(0.2 0 0); /* #1A1A1A */
-  --surface: oklch(1 0 0); /* #FFFFFF - lighter than background */
-  --surface-foreground: oklch(0.2 0 0); /* #1A1A1A */
-  --overlay: oklch(0.4 0 0 / 0.5);
-  --overlay-foreground: oklch(1 0 0);
+  --background: #f5f5f5; /* Light gray - darker than surface */
+  --foreground: #333333; /* #1A1A1A */
+  --surface: #ffffff; /* #FFFFFF - lighter than background */
+  --surface-foreground: #333333; /* #1A1A1A */
+  --overlay: #ffffff;
+  --overlay-foreground: #ffffff;
 
   /* Primary Colors (Accent) */
-  --accent: oklch(0.7 0.15 160); /* #10B981 - emerald-500 */
-  --accent-foreground: oklch(1 0 0); /* #FFFFFF */
-  --accent-soft: oklch(0.85 0.1 160); /* Lighter emerald */
-  --accent-soft-foreground: oklch(0.2 0 0);
+  --accent: #10b981; /* #10B981 - emerald-500 */
+  --accent-foreground: #ffffff; /* #FFFFFF */
+  --accent-soft: #a7f3d0; /* Lighter emerald */
+  --accent-soft-foreground: #333333;
 
   /* Primary color variants for compatibility */
-  --primary-50: oklch(0.95 0.05 160);
-  --primary-100: oklch(0.9 0.08 160); /* Light background variant */
-  --primary-500: oklch(0.7 0.15 160); /* Same as accent */
-  --primary-600: oklch(0.65 0.15 160);
+  --primary-50: #ecfdf5;
+  --primary-100: #d1fae5; /* Light background variant */
+  --primary-500: #10b981; /* Same as accent */
+  --primary-600: #059669;
 
   /* Status Colors */
-  --success: oklch(0.65 0.15 155);
-  --success-foreground: oklch(1 0 0);
-  --warning: oklch(0.75 0.15 80);
-  --warning-foreground: oklch(0.2 0 0);
-  --danger: oklch(0.6 0.2 25);
-  --danger-foreground: oklch(1 0 0);
+  --success: #059669;
+  --success-foreground: #ffffff;
+  --warning: #f59e0b;
+  --warning-foreground: #333333;
+  --danger: #dc2626;
+  --danger-foreground: #ffffff;
 
   /* Form Field Colors */
-  --field-background: oklch(1 0 0);
-  --field-foreground: oklch(0.2 0 0);
-  --field-placeholder: oklch(0.5 0 0); /* #808080 */
-  --field-border: oklch(0.9 0 0); /* #E5E5E5 */
+  --field-background: #ffffff;
+  --field-foreground: #333333;
+  --field-placeholder: #808080; /* #808080 */
+  --field-border: #e5e5e5; /* #E5E5E5 */
 
   /* Other Colors */
-  --default: oklch(0.96 0 0);
-  --default-foreground: oklch(0.2 0 0);
-  --muted: oklch(0.5 0 0);
-  --border: oklch(0.9 0 0); /* #E5E5E5 */
-  --focus: oklch(0.7 0.15 160);
-  --link: oklch(0.7 0.15 160);
-  --scrollbar: oklch(0.8 0 0);
+  --default: #f5f5f5;
+  --default-foreground: #333333;
+  --muted: #808080;
+  --border: #e5e5e5; /* #E5E5E5 */
+  --focus: #10b981;
+  --link: #10b981;
+  --scrollbar: #cccccc;
 }
 
 /* Dark Theme */
@@ -70,55 +70,53 @@
   color-scheme: dark;
 
   /* Base Colors */
-  --white: oklch(1 0 0);
-  --black: oklch(0 0 0);
-  --snow: oklch(0.99 0 0);
-  --eclipse: oklch(0.05 0 0);
+  --white: #ffffff;
+  --black: #000000;
+  --snow: #fcfcfc;
+  --eclipse: #0d0d0d;
 
   /* Background & Surface */
-  --background: oklch(0.02 0 0); /* Very dark - darker than surface */
-  --foreground: oklch(1 0 0); /* #FFFFFF */
-  --surface: oklch(0.22 0 0); /* Lighter than background - increased contrast */
-  --surface-foreground: oklch(1 0 0);
-  --overlay: oklch(0.1 0 0 / 0.8);
-  --overlay-foreground: oklch(1 0 0);
+  --background: #050505; /* Very dark - darker than surface */
+  --foreground: #ffffff; /* #FFFFFF */
+  --surface: #383838; /* Lighter than background - increased contrast */
+  --surface-foreground: #ffffff;
+  --overlay: #1a1a1a;
+  --overlay-foreground: #ffffff;
 
   /* Primary Colors (Accent) */
-  --accent: oklch(0.75 0.15 160); /* #34D399 - emerald-400 */
-  --accent-foreground: oklch(0 0 0); /* #000000 */
-  --accent-soft: oklch(0.6 0.12 160); /* Darker emerald */
-  --accent-soft-foreground: oklch(1 0 0);
+  --accent: #34d399; /* #34D399 - emerald-400 */
+  --accent-foreground: #000000; /* #000000 */
+  --accent-soft: #047857; /* Darker emerald */
+  --accent-soft-foreground: #ffffff;
 
   /* Primary color variants for compatibility */
-  --primary-50: oklch(0.2 0.05 160);
-  --primary-100: oklch(
-    0.25 0.08 160
-  ); /* Light background variant for dark mode */
-  --primary-500: oklch(0.75 0.15 160); /* Same as accent */
-  --primary-600: oklch(0.8 0.15 160);
+  --primary-50: #064e3b;
+  --primary-100: #065f46; /* Light background variant for dark mode */
+  --primary-500: #34d399; /* Same as accent */
+  --primary-600: #6ee7b7;
 
   /* Status Colors */
-  --success: oklch(0.7 0.12 155);
-  --success-foreground: oklch(0 0 0);
-  --warning: oklch(0.8 0.12 80);
-  --warning-foreground: oklch(0 0 0);
-  --danger: oklch(0.65 0.18 25);
-  --danger-foreground: oklch(1 0 0);
+  --success: #10b981;
+  --success-foreground: #000000;
+  --warning: #fbbf24;
+  --warning-foreground: #000000;
+  --danger: #ef4444;
+  --danger-foreground: #ffffff;
 
   /* Form Field Colors */
-  --field-background: oklch(0.15 0 0); /* #262626 */
-  --field-foreground: oklch(1 0 0);
-  --field-placeholder: oklch(0.5 0 0); /* #808080 */
-  --field-border: oklch(0.3 0 0); /* #404040 */
+  --field-background: #262626; /* #262626 */
+  --field-foreground: #ffffff;
+  --field-placeholder: #808080; /* #808080 */
+  --field-border: #4d4d4d; /* #404040 */
 
   /* Other Colors */
-  --default: oklch(0.15 0 0);
-  --default-foreground: oklch(1 0 0);
-  --muted: oklch(0.6 0 0);
-  --border: oklch(0.3 0 0); /* #404040 */
-  --focus: oklch(0.75 0.15 160);
-  --link: oklch(0.75 0.15 160);
-  --scrollbar: oklch(0.3 0 0);
+  --default: #262626;
+  --default-foreground: #ffffff;
+  --muted: #999999;
+  --border: #4d4d4d; /* #404040 */
+  --focus: #34d399;
+  --link: #34d399;
+  --scrollbar: #4d4d4d;
 }
 
 /* Make colors available to Tailwind */
