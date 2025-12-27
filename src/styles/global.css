@@ -78,7 +78,7 @@
   /* Background & Surface */
   --background: #050505; /* Very dark - darker than surface */
   --foreground: #ffffff; /* #FFFFFF */
-  --surface: #383838; /* Lighter than background - increased contrast */
+  --surface: #1a1a1a; /* Lighter than background - increased contrast */
   --surface-foreground: #ffffff;
   --overlay: #1a1a1a;
   --overlay-foreground: #ffffff;

@@ -146,7 +146,7 @@ const MenuControl = ({
             >
               <Icon
                 className={`shrink-0 ${
-                  isCollapsed ? "w-5 h-5" : "w-5 h-5 mr-3"
+                  isCollapsed ? "w-5 h-5" : "w-5 h-5 mr-2"
                 }`}
               />
               {!isCollapsed && (
@@ -158,8 +158,10 @@ const MenuControl = ({
 
         {/* Header Surface */}
         <Surface
-          className={`rounded-3xl transition-all duration-300 ${
-            isCollapsed ? "w-[64px] min-w-[64px]" : "w-[240px] min-w-[240px]"
+          className={`rounded-3xl transition-all duration-300${
+            isCollapsed
+              ? "w-[64px] min-w-[64px] p-2"
+              : "w-[240px] min-w-[240px] p-4"
           }`}
           variant="default"
         >

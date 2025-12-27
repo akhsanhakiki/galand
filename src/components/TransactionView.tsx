@@ -65,29 +65,33 @@ export default function TransactionView({
                 {transaction.items?.map((item) => {
                   const itemTotal = item.price * item.quantity;
                   return (
-                    <Card key={item.id} className="p-4">
-                      <Card.Content>
+                    <div key={item.id} className="p-2">
+                      <div className="space-y-2">
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
-                            <p className="font-medium">{item.product_name}</p>
-                            <p className="text-sm text-muted">
+                            <p className="font-medium text-foreground">
+                              {item.product_name}
+                            </p>
+                            <p className="text-sm">
                               {item.quantity} x Rp{" "}
                               {item.price.toLocaleString("id-ID")}
                             </p>
                           </div>
-                          <p className="text-lg font-semibold">
+                          <p className="text-lg font-regular text-foreground">
                             Rp {itemTotal.toLocaleString("id-ID")}
                           </p>
                         </div>
-                      </Card.Content>
-                    </Card>
+                      </div>
+                    </div>
                   );
                 })}
 
                 <div className="border-t border-border pt-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-lg font-semibold">Total:</span>
-                    <span className="text-xl font-bold">
+                    <span className="text-lg font-semibold text-foreground">
+                      Total:
+                    </span>
+                    <span className="text-xl font-bold text-foreground">
                       Rp {transaction.total_amount.toLocaleString("id-ID")}
                     </span>
                   </div>

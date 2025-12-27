@@ -63,10 +63,10 @@ export default function Header({
 
   // Desktop view - collapsible in sidebar
   return (
-    <div className="w-full flex flex-col gap-2 p-2">
+    <div className="w-full flex flex-col gap-2">
       {collapsed ? (
         // Collapsed state - vertical layout with icons only
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center gap-2 w-full">
           <Button
             variant="ghost"
             isIconOnly
@@ -97,9 +97,9 @@ export default function Header({
             onPress={() => setTheme(theme === "dark" ? "light" : "dark")}
           >
             {mounted && theme === "dark" ? (
-              <FaSun className="w-4 h-4 text-default-500" />
-            ) : (
               <FaMoon className="w-4 h-4 text-default-500" />
+            ) : (
+              <FaSun className="w-4 h-4 text-default-500" />
             )}
             <p className="text-xs font-medium text-foreground">
               {theme === "dark" ? "Dark Mode" : "Light Mode"}

@@ -1,8 +1,16 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { Card, Button, Surface, Spinner } from "@heroui/react";
-import { FaMagnifyingGlass, FaFilter } from "react-icons/fa6";
+import {
+  Card,
+  Button,
+  Surface,
+  Spinner,
+  Select,
+  ListBox,
+  SearchField,
+} from "@heroui/react";
+import { FaFilter, FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import type { Transaction } from "../../utils/api";
 import { getTransactions } from "../../utils/api";
 import TransactionForm from "../../components/TransactionForm";
@@ -17,6 +25,8 @@ const TransaksiPage = () => {
     number | null
   >(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
   useEffect(() => {
     fetchTransactions();
@@ -42,6 +52,29 @@ const TransaksiPage = () => {
     );
   }, [transactions, searchQuery]);
 
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+  const paginatedTransactions = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredTransactions.slice(startIndex, endIndex);
+  }, [filteredTransactions, currentPage, itemsPerPage]);
+
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    } else if (currentPage < 1 && filteredTransactions.length > 0) {
+      setCurrentPage(1);
+    }
+  }, [totalPages, currentPage, filteredTransactions.length]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [itemsPerPage]);
+
   const handleTransactionSuccess = () => {
     setRefreshKey((prev) => prev + 1);
     setTransactionFormOpen(false);
@@ -65,10 +98,10 @@ const TransaksiPage = () => {
   };
 
   return (
-    <div className="flex flex-col w-full gap-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex flex-col gap-2 ">
-          <h1 className="text-3xl font-bold text-foreground">Transaksi</h1>
+    <div className="flex flex-col w-full gap-5">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-bold text-foreground">Transaksi</h1>
           <p className="text-muted">Kelola semua transaksi penjualan Anda</p>
         </div>
         <Button
@@ -80,28 +113,24 @@ const TransaksiPage = () => {
         </Button>
       </div>
 
-      <Card variant="default" className="p-6">
-        <Card.Header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4">
-          <div className="flex flex-1 gap-2">
-            <Surface
-              className="flex-1 flex items-center gap-2 px-4 py-2 rounded-lg"
-              variant="secondary"
-            >
-              <FaMagnifyingGlass className="w-4 h-4 text-muted" />
-              <input
-                type="text"
-                placeholder="Cari transaksi..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted"
-              />
-            </Surface>
-            <Button variant="tertiary" isIconOnly>
-              <FaFilter className="w-4 h-4" />
-            </Button>
-          </div>
-        </Card.Header>
-        <Card.Content>
+      <div className="p-6 bg-surface rounded-3xl flex flex-col h-[calc(100vh-12rem)] min-h-[500px]">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4">
+          <SearchField
+            value={searchQuery}
+            onChange={setSearchQuery}
+            className="w-1/4"
+          >
+            <SearchField.Group className="shadow-none border ">
+              <SearchField.SearchIcon />
+              <SearchField.Input placeholder="Cari transaksi..." />
+              <SearchField.ClearButton />
+            </SearchField.Group>
+          </SearchField>
+          <Button variant="ghost" isIconOnly>
+            <FaFilter className="w-4 h-4" />
+          </Button>
+        </div>
+        <div className="flex flex-col h-full">
           {loading ? (
             <div className="flex items-center justify-center p-8">
               <Spinner size="lg" />
@@ -113,62 +142,160 @@ const TransaksiPage = () => {
                 : "Belum ada transaksi"}
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-separator">
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
-                      ID Transaksi
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
-                      Item
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
-                      Jumlah
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
-                      Tanggal
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
-                      Aksi
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredTransactions.map((transaction) => (
-                    <tr
-                      key={transaction.id}
-                      className="border-b border-separator hover:bg-surface-secondary transition-colors"
-                    >
-                      <td className="py-3 px-4 text-sm font-medium text-foreground">
-                        #{transaction.id}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-foreground">
-                        {transaction.items?.length || 0} item(s)
-                      </td>
-                      <td className="py-3 px-4 text-sm font-semibold text-foreground">
-                        Rp {transaction.total_amount.toLocaleString("id-ID")}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-muted">
-                        {formatDate(transaction.created_at)}
-                      </td>
-                      <td className="py-3 px-4">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onPress={() => handleViewTransaction(transaction)}
+            <>
+              <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+                <div className="overflow-y-auto overflow-x-auto flex-1">
+                  <table className="w-full">
+                    <thead className="sticky top-0 bg-surface z-10">
+                      <tr className="border-b border-separator">
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
+                          ID Transaksi
+                        </th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
+                          Total Barang
+                        </th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
+                          Jumlah
+                        </th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
+                          Tanggal
+                        </th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
+                          Aksi
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedTransactions.map((transaction) => (
+                        <tr
+                          key={transaction.id}
+                          className="border-b border-separator hover:bg-surface-secondary/20 transition-colors"
                         >
-                          Detail
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                          <td className="py-2 px-4 text-xs font-medium text-foreground">
+                            {transaction.id}
+                          </td>
+                          <td className="py-2 px-4 text-sm text-foreground">
+                            {transaction.items?.length || 0}
+                          </td>
+                          <td className="py-2 px-4 text-sm font-medium text-foreground">
+                            Rp{" "}
+                            {transaction.total_amount.toLocaleString("id-ID")}
+                          </td>
+                          <td className="py-2 px-4 text-sm text-muted">
+                            {formatDate(transaction.created_at)}
+                          </td>
+                          <td className="py-2 px-4">
+                            <div
+                              onClick={() => handleViewTransaction(transaction)}
+                            >
+                              <p className="text-xs text-primary font-medium cursor-pointer">
+                                Detail
+                              </p>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div className="flex flex-row gap-2 justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-muted">Data per halaman:</p>
+                  <Select
+                    className="w-16"
+                    value={itemsPerPage.toString()}
+                    onChange={(value) => {
+                      if (value) {
+                        setItemsPerPage(Number(value));
+                      }
+                    }}
+                  >
+                    <Select.Trigger className="bg-foreground/5 shadow-none">
+                      <Select.Value />
+                      <Select.Indicator />
+                    </Select.Trigger>
+                    <Select.Popover>
+                      <ListBox>
+                        <ListBox.Item id="10" textValue="10">
+                          10
+                          <ListBox.ItemIndicator />
+                        </ListBox.Item>
+                        <ListBox.Item id="20" textValue="20">
+                          20
+                          <ListBox.ItemIndicator />
+                        </ListBox.Item>
+                        <ListBox.Item id="30" textValue="30">
+                          30
+                          <ListBox.ItemIndicator />
+                        </ListBox.Item>
+                        <ListBox.Item id="40" textValue="40">
+                          40
+                          <ListBox.ItemIndicator />
+                        </ListBox.Item>
+                      </ListBox>
+                    </Select.Popover>
+                  </Select>
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 ">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onPress={() =>
+                        setCurrentPage((prev) => Math.max(1, prev - 1))
+                      }
+                      isDisabled={currentPage === 1}
+                      isIconOnly
+                    >
+                      <FaChevronLeft className="w-3 h-3" />
+                    </Button>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                        (page) => (
+                          <Button
+                            key={page}
+                            size="sm"
+                            variant={
+                              currentPage === page ? "primary" : "tertiary"
+                            }
+                            onPress={() => setCurrentPage(page)}
+                            className="min-w-8 text-xs"
+                          >
+                            {page}
+                          </Button>
+                        )
+                      )}
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onPress={() =>
+                        setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                      }
+                      isDisabled={currentPage === totalPages}
+                      isIconOnly
+                    >
+                      <FaChevronRight className="w-3 h-3" />
+                    </Button>
+                  </div>
+                )}
+                {totalPages > 0 && (
+                  <div className="text-center text-sm text-muted pt-2">
+                    {(currentPage - 1) * itemsPerPage + 1} -{" "}
+                    {Math.min(
+                      currentPage * itemsPerPage,
+                      filteredTransactions.length
+                    )}{" "}
+                    data dari {filteredTransactions.length} transaksi
+                  </div>
+                )}
+              </div>
+            </>
           )}
-        </Card.Content>
-      </Card>
+        </div>
+      </div>
 
       <TransactionForm
         isOpen={transactionFormOpen}
