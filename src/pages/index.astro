@@ -1,6 +1,11 @@
 ---
-export const prerender = false;
+import Layout from '../layouts/Layout.astro';
+import MainContainer from '../components/MainContainer.tsx';
 
-// Redirect to /ringkasan as the default page
-return Astro.redirect('/ringkasan', 302);
+export const prerender = false;
 ---
+<Layout title="kadara">
+	<!-- <POSDashboard client:load /> -->
+  <MainContainer client:load />
+</Layout>
+

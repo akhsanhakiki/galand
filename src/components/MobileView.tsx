@@ -21,32 +21,29 @@ const pageComponents: Record<string, React.ComponentType> = {
 
 // Helper function to get current page from URL
 const getCurrentPageFromUrl = (): string | null => {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === "undefined") return null;
   const path = window.location.pathname;
-  const page = path.split('/').filter(Boolean)[0];
-  // If on root, redirect to ringkasan
-  if (!page || page === '') {
-    window.location.href = '/ringkasan';
-    return 'ringkasan';
-  }
+  const page = path.split("/").filter(Boolean)[0];
   return page;
 };
 
 const MobileView = () => {
-  const [currentPage, setCurrentPage] = useState<string | null>(getCurrentPageFromUrl());
+  const [currentPage, setCurrentPage] = useState<string | null>(
+    getCurrentPageFromUrl()
+  );
 
   // Update current page when URL changes
   useEffect(() => {
     const updateCurrentPage = () => {
       setCurrentPage(getCurrentPageFromUrl());
     };
-    window.addEventListener('popstate', updateCurrentPage);
+    window.addEventListener("popstate", updateCurrentPage);
     updateCurrentPage();
-    return () => window.removeEventListener('popstate', updateCurrentPage);
+    return () => window.removeEventListener("popstate", updateCurrentPage);
   }, []);
 
   const handleBack = () => {
-    window.location.href = '/';
+    window.location.href = "/";
   };
 
   const CurrentPageComponent = currentPage ? pageComponents[currentPage] : null;
@@ -67,10 +64,7 @@ const MobileView = () => {
           {CurrentPageComponent && <CurrentPageComponent />}
         </div>
       ) : (
-        <MenuControl
-          isMobile={true}
-          currentPage={currentPage || undefined}
-        />
+        <MenuControl isMobile={true} currentPage={currentPage || undefined} />
       )}
     </div>
   );

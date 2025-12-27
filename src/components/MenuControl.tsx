@@ -28,9 +28,9 @@ interface MenuControlProps {
 
 // Helper function to get current page from URL
 const getCurrentPageFromUrl = (): string => {
-  if (typeof window === "undefined") return "ringkasan";
+  if (typeof window === "undefined") return "";
   const path = window.location.pathname;
-  const page = path.split("/").filter(Boolean)[0] || "ringkasan";
+  const page = path.split("/").filter(Boolean)[0] || "";
   return page;
 };
 

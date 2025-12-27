@@ -18,38 +18,39 @@ const pageComponents: Record<string, React.ComponentType> = {
 
 // Helper function to get current page from URL
 const getCurrentPageFromUrl = (): string => {
-  if (typeof window === 'undefined') return 'ringkasan';
+  if (typeof window === "undefined") return "";
   const path = window.location.pathname;
-  const page = path.split('/').filter(Boolean)[0];
-  // If on root, redirect to ringkasan
-  if (!page || page === '') {
-    window.location.href = '/ringkasan';
-    return 'ringkasan';
+  const page = path.split("/").filter(Boolean)[0] || "";
+
+  // Validate that the page exists in pageComponents
+  if (page && page in pageComponents) {
+    return page;
   }
-  return page;
+
+  // Return empty string for invalid or root paths
+  return "";
 };
 
 const DesktopView = () => {
-  const [currentPage, setCurrentPage] = useState<string>(getCurrentPageFromUrl());
+  const [currentPage, setCurrentPage] = useState<string>(
+    getCurrentPageFromUrl()
+  );
 
   // Update current page when URL changes
   useEffect(() => {
     const updateCurrentPage = () => {
       setCurrentPage(getCurrentPageFromUrl());
     };
-    window.addEventListener('popstate', updateCurrentPage);
+    window.addEventListener("popstate", updateCurrentPage);
     updateCurrentPage();
-    return () => window.removeEventListener('popstate', updateCurrentPage);
+    return () => window.removeEventListener("popstate", updateCurrentPage);
   }, []);
 
   const CurrentPageComponent = pageComponents[currentPage];
 
   return (
     <div className="hidden md:flex flex-row gap-4 md:gap-6 p-4 md:p-4">
-      <MenuControl
-        isMobile={false}
-        currentPage={currentPage}
-      />
+      <MenuControl isMobile={false} currentPage={currentPage} />
       <div className="flex-1">
         {CurrentPageComponent && <CurrentPageComponent />}
       </div>
