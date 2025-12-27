@@ -88,21 +88,23 @@ export default function Header({
         </div>
       ) : (
         // Expanded state - horizontal layout with full info
-        <>
-          <div className="flex items-center justify-between px-2">
-            <Button
-              variant="ghost"
-              isIconOnly
-              size="sm"
-              onPress={() => setTheme(theme === "dark" ? "light" : "dark")}
-            >
-              {mounted && theme === "dark" ? (
-                <FaSun className="w-4 h-4 text-default-500" />
-              ) : (
-                <FaMoon className="w-4 h-4 text-default-500" />
-              )}
-            </Button>
-          </div>
+        <div className="flex flex-col gap-2">
+          <Button
+            className="flex items-center gap-4 w-full justify-start p-4"
+            variant="ghost"
+            isIconOnly
+            size="md"
+            onPress={() => setTheme(theme === "dark" ? "light" : "dark")}
+          >
+            {mounted && theme === "dark" ? (
+              <FaSun className="w-4 h-4 text-default-500" />
+            ) : (
+              <FaMoon className="w-4 h-4 text-default-500" />
+            )}
+            <p className="text-xs font-medium text-foreground">
+              {theme === "dark" ? "Dark Mode" : "Light Mode"}
+            </p>
+          </Button>
           <div className="flex items-center gap-2 px-2 pb-1">
             <Avatar size="sm" className="bg-primary text-primary-foreground">
               <Avatar.Fallback>
@@ -118,7 +120,7 @@ export default function Header({
               </span>
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

@@ -1,5 +1,7 @@
-import React, { useState } from "react";
-import { Card, Button, Surface, Separator } from "@heroui/react";
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { Card, Button, Surface, Separator, Spinner } from "@heroui/react";
 import {
   FaCashRegister,
   FaCartShopping,
@@ -7,58 +9,103 @@ import {
   FaPlus,
   FaMinus,
 } from "react-icons/fa6";
+import type { Product } from "../../utils/api";
+import { getProducts, createTransaction } from "../../utils/api";
+
+interface CartItem {
+  product_id: number;
+  product: Product;
+  quantity: number;
+}
 
 const KasirPage = () => {
-  const [cart, setCart] = useState([
-    { id: 1, name: "Produk A", price: 50000, quantity: 2 },
-    { id: 2, name: "Produk B", price: 75000, quantity: 1 },
-  ]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const products = [
-    { id: 1, name: "Produk A", price: 50000 },
-    { id: 2, name: "Produk B", price: 75000 },
-    { id: 3, name: "Produk C", price: 120000 },
-    { id: 4, name: "Produk D", price: 30000 },
-    { id: 5, name: "Produk E", price: 25000 },
-  ];
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const data = await getProducts();
+      setProducts(data);
+    } catch (error) {
+      // Error handling
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const addToCart = (product: (typeof products)[0]) => {
-    const existingItem = cart.find((item) => item.id === product.id);
+  const total = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+
+  const addToCart = (product: Product) => {
+    if (product.stock <= 0) {
+      return;
+    }
+
+    const existingItem = cart.find((item) => item.product_id === product.id);
     if (existingItem) {
+      if (existingItem.quantity >= product.stock) {
+        return;
+      }
       setCart(
         cart.map((item) =>
-          item.id === product.id
+          item.product_id === product.id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         )
       );
     } else {
-      setCart([...cart, { ...product, quantity: 1 }]);
+      setCart([...cart, { product_id: product.id, product, quantity: 1 }]);
     }
   };
 
-  const updateQuantity = (id: number, delta: number) => {
+  const updateQuantity = (productId: number, delta: number) => {
     setCart(
       cart
         .map((item) => {
-          if (item.id === id) {
+          if (item.product_id === productId) {
             const newQuantity = item.quantity + delta;
-            return newQuantity > 0 ? { ...item, quantity: newQuantity } : item;
+            const product = item.product;
+            if (newQuantity <= 0) return null;
+            if (newQuantity > product.stock) return item;
+            return { ...item, quantity: newQuantity };
           }
           return item;
         })
-        .filter((item) => item.quantity > 0)
+        .filter((item): item is CartItem => item !== null)
     );
   };
 
-  const removeFromCart = (id: number) => {
-    setCart(cart.filter((item) => item.id !== id));
+  const removeFromCart = (productId: number) => {
+    setCart(cart.filter((item) => item.product_id !== productId));
+  };
+
+  const handleCheckout = async () => {
+    if (cart.length === 0) return;
+
+    try {
+      setIsSubmitting(true);
+      await createTransaction({
+        items: cart.map((item) => ({
+          product_id: item.product_id,
+          quantity: item.quantity,
+        })),
+      });
+      setCart([]);
+    } catch (error) {
+      // Error handling
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="flex flex-col w-full gap-6 p-4 md:p-6">
+    <div className="flex flex-col w-full gap-6">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold text-foreground">Kasir</h1>
         <p className="text-muted">
@@ -75,30 +122,44 @@ const KasirPage = () => {
               </Card.Title>
             </Card.Header>
             <Card.Content>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {products.map((product) => (
-                  <Button
-                    key={product.id}
-                    variant="ghost"
-                    className="p-4 rounded-xl hover:shadow-md transition-all h-auto flex-col items-start justify-start"
-                    onPress={() => addToCart(product)}
-                  >
-                    <div className="flex flex-col gap-2 w-full">
-                      <div className="w-full h-24 bg-surface-tertiary rounded-lg flex items-center justify-center">
-                        <FaCartShopping className="w-8 h-8 text-muted" />
+              {loading ? (
+                <div className="flex items-center justify-center p-8">
+                  <Spinner size="lg" />
+                </div>
+              ) : products.length === 0 ? (
+                <div className="text-center py-8 text-muted">
+                  Belum ada produk
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {products.map((product) => (
+                    <Button
+                      key={product.id}
+                      variant="ghost"
+                      className="p-4 rounded-xl hover:shadow-md transition-all h-auto flex-col items-start justify-start"
+                      onPress={() => addToCart(product)}
+                      isDisabled={product.stock <= 0}
+                    >
+                      <div className="flex flex-col gap-2 w-full">
+                        <div className="w-full h-24 bg-surface-tertiary rounded-lg flex items-center justify-center">
+                          <FaCartShopping className="w-8 h-8 text-muted" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-foreground text-sm">
+                            {product.name}
+                          </p>
+                          <p className="text-accent font-bold">
+                            Rp {product.price.toLocaleString("id-ID")}
+                          </p>
+                          <p className="text-xs text-muted mt-1">
+                            Stok: {product.stock}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-semibold text-foreground text-sm">
-                          {product.name}
-                        </p>
-                        <p className="text-accent font-bold">
-                          Rp {product.price.toLocaleString("id-ID")}
-                        </p>
-                      </div>
-                    </div>
-                  </Button>
-                ))}
-              </div>
+                    </Button>
+                  ))}
+                </div>
+              )}
             </Card.Content>
           </Card>
         </div>
@@ -115,25 +176,25 @@ const KasirPage = () => {
               ) : (
                 cart.map((item) => (
                   <Surface
-                    key={item.id}
+                    key={item.product_id}
                     className="p-3 rounded-lg"
                     variant="secondary"
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex-1">
                         <p className="font-medium text-foreground text-sm">
-                          {item.name}
+                          {item.product.name}
                         </p>
                         <p className="text-accent font-semibold text-sm">
                           Rp{" "}
-                          {(item.price * item.quantity).toLocaleString("id-ID")}
+                          {(item.product.price * item.quantity).toLocaleString("id-ID")}
                         </p>
                       </div>
                       <Button
                         variant="ghost"
                         size="sm"
                         isIconOnly
-                        onPress={() => removeFromCart(item.id)}
+                        onPress={() => removeFromCart(item.product_id)}
                       >
                         <FaTrash className="w-3 h-3" />
                       </Button>
@@ -143,7 +204,7 @@ const KasirPage = () => {
                         variant="tertiary"
                         size="sm"
                         isIconOnly
-                        onPress={() => updateQuantity(item.id, -1)}
+                        onPress={() => updateQuantity(item.product_id, -1)}
                       >
                         <FaMinus className="w-3 h-3" />
                       </Button>
@@ -154,7 +215,8 @@ const KasirPage = () => {
                         variant="tertiary"
                         size="sm"
                         isIconOnly
-                        onPress={() => updateQuantity(item.id, 1)}
+                        onPress={() => updateQuantity(item.product_id, 1)}
+                        isDisabled={item.quantity >= item.product.stock}
                       >
                         <FaPlus className="w-3 h-3" />
                       </Button>
@@ -177,9 +239,11 @@ const KasirPage = () => {
                 variant="primary"
                 className="w-full bg-accent text-accent-foreground"
                 size="lg"
-                isDisabled={cart.length === 0}
+                isDisabled={cart.length === 0 || isSubmitting}
+                onPress={handleCheckout}
+                isPending={isSubmitting}
               >
-                Proses Pembayaran
+                {isSubmitting ? "Memproses..." : "Proses Pembayaran"}
               </Button>
             </Card.Footer>
           </Card>

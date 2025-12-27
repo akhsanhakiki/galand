@@ -1,6 +1,16 @@
 "use client";
 
-import { Button, Card, Input, Label, Modal, NumberField, Spinner, TextArea, TextField } from "@heroui/react";
+import {
+  Button,
+  Card,
+  Input,
+  Label,
+  Modal,
+  NumberField,
+  Spinner,
+  TextArea,
+  TextField,
+} from "@heroui/react";
 import { useEffect, useState } from "react";
 import type { Product, ProductCreate, ProductUpdate } from "../utils/api";
 import { createProduct, updateProduct } from "../utils/api";
@@ -52,7 +62,8 @@ export default function ProductForm({
         const updateData: ProductUpdate = {};
         if (name !== product.name) updateData.name = name;
         if (price !== product.price) updateData.price = price;
-        if (description !== product.description) updateData.description = description;
+        if (description !== product.description)
+          updateData.description = description;
         if (stock !== product.stock) updateData.stock = stock;
         await updateProduct(product.id, updateData);
       } else {
@@ -133,7 +144,11 @@ export default function ProductForm({
                   </NumberField.Group>
                 </NumberField>
 
-                <TextField name="description" onChange={setDescription} value={description}>
+                <TextField
+                  name="description"
+                  onChange={setDescription}
+                  value={description}
+                >
                   <Label>Description</Label>
                   <TextArea placeholder="Enter product description" rows={3} />
                 </TextField>

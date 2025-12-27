@@ -11,7 +11,7 @@ import {
 
 const PengaturanPage = () => {
   return (
-    <div className="flex flex-col w-full gap-6 p-4 md:p-6">
+    <div className="flex flex-col w-full gap-6">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold text-foreground">Pengaturan</h1>
         <p className="text-muted">

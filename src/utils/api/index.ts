@@ -6,6 +6,7 @@ export type {
   Transaction,
   TransactionCreate,
   TransactionItem,
+  TransactionItemCreate,
 } from "./types";
 
 // Re-export product functions

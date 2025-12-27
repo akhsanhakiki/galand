@@ -21,6 +21,15 @@ export interface ProductUpdate {
 }
 
 export interface TransactionItem {
+  id: number;
+  product_id: number;
+  quantity: number;
+  price: number;
+  transaction_id: number;
+  product_name: string;
+}
+
+export interface TransactionItemCreate {
   product_id: number;
   quantity: number;
 }
@@ -28,11 +37,11 @@ export interface TransactionItem {
 export interface Transaction {
   id: number;
   items: TransactionItem[];
-  total?: number;
-  created_at?: string;
+  total_amount: number;
+  created_at: string;
 }
 
 export interface TransactionCreate {
-  items: TransactionItem[];
+  items: TransactionItemCreate[];
   created_at?: string;
 }

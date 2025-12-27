@@ -2,8 +2,8 @@
 
 import { Button, Card, Modal } from "@heroui/react";
 import { useEffect, useState } from "react";
-import type { Product, Transaction } from "../utils/api";
-import { getProduct, getTransaction } from "../utils/api";
+import type { Transaction } from "../utils/api";
+import { getTransaction } from "../utils/api";
 
 interface TransactionViewProps {
   transactionId: number | null;
@@ -17,7 +17,6 @@ export default function TransactionView({
   onClose,
 }: TransactionViewProps) {
   const [transaction, setTransaction] = useState<Transaction | null>(null);
-  const [products, setProducts] = useState<Record<number, Product>>({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -33,15 +32,6 @@ export default function TransactionView({
       setLoading(true);
       const data = await getTransaction(transactionId);
       setTransaction(data);
-
-      const productIds = data.items?.map((item) => item.product_id) || [];
-      const productPromises = productIds.map((id) => getProduct(id));
-      const productData = await Promise.all(productPromises);
-      const productMap: Record<number, Product> = {};
-      productData.forEach((product) => {
-        productMap[product.id] = product;
-      });
-      setProducts(productMap);
     } catch (error) {
       alert("Failed to load transaction details");
     } finally {
@@ -53,14 +43,12 @@ export default function TransactionView({
     return null;
   }
 
-  const total = transaction.items?.reduce((sum, item) => {
-    const product = products[item.product_id];
-    if (!product) return sum;
-    return sum + product.price * item.quantity;
-  }, 0) || 0;
-
   return (
-    <Modal.Backdrop isOpen={isOpen} onOpenChange={onClose}>
+    <Modal.Backdrop
+      isOpen={isOpen}
+      onOpenChange={onClose}
+      variant="transparent"
+    >
       <Modal.Container>
         <Modal.Dialog className="sm:max-w-2xl">
           <Modal.CloseTrigger />
@@ -75,20 +63,20 @@ export default function TransactionView({
             ) : (
               <div className="space-y-4">
                 {transaction.items?.map((item) => {
-                  const product = products[item.product_id];
-                  if (!product) return null;
+                  const itemTotal = item.price * item.quantity;
                   return (
-                    <Card key={item.product_id} className="p-4">
+                    <Card key={item.id} className="p-4">
                       <Card.Content>
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
-                            <p className="font-medium">{product.name}</p>
+                            <p className="font-medium">{item.product_name}</p>
                             <p className="text-sm text-muted">
-                              {item.quantity} x Rp {product.price.toLocaleString("id-ID")}
+                              {item.quantity} x Rp{" "}
+                              {item.price.toLocaleString("id-ID")}
                             </p>
                           </div>
                           <p className="text-lg font-semibold">
-                            Rp {(product.price * item.quantity).toLocaleString("id-ID")}
+                            Rp {itemTotal.toLocaleString("id-ID")}
                           </p>
                         </div>
                       </Card.Content>
@@ -100,7 +88,7 @@ export default function TransactionView({
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-semibold">Total:</span>
                     <span className="text-xl font-bold">
-                      Rp {total.toLocaleString("id-ID")}
+                      Rp {transaction.total_amount.toLocaleString("id-ID")}
                     </span>
                   </div>
                 </div>
