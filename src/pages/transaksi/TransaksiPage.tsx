@@ -9,18 +9,22 @@ import {
   Select,
   ListBox,
   SearchField,
+  Dropdown,
+  Label,
 } from "@heroui/react";
 import {
   LuFilter,
   LuChevronLeft,
   LuChevronRight,
   LuPrinter,
+  LuDownload,
 } from "react-icons/lu";
 import type { Transaction } from "../../utils/api";
 import { getTransactions, getTransaction } from "../../utils/api";
 import TransactionForm from "../../components/TransactionForm";
 import TransactionView from "../../components/TransactionView";
 import { printTransaction } from "../../utils/print";
+import { exportToCSV, exportToXLSX, exportToPDF } from "../../utils/export";
 
 const TransaksiPage = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -112,6 +116,22 @@ const TransaksiPage = () => {
     });
   };
 
+  const handleExport = (format: "csv" | "xlsx" | "pdf") => {
+    if (filteredTransactions.length === 0) return;
+
+    switch (format) {
+      case "csv":
+        exportToCSV(filteredTransactions);
+        break;
+      case "xlsx":
+        exportToXLSX(filteredTransactions);
+        break;
+      case "pdf":
+        exportToPDF(filteredTransactions);
+        break;
+    }
+  };
+
   return (
     <div className="flex flex-col w-full gap-5 h-full">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
@@ -136,9 +156,37 @@ const TransaksiPage = () => {
               <SearchField.ClearButton />
             </SearchField.Group>
           </SearchField>
-          <Button variant="ghost" isIconOnly>
-            <LuFilter className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Dropdown>
+              <Button
+                variant="ghost"
+                isDisabled={filteredTransactions.length === 0}
+              >
+                <LuDownload className="w-4 h-4" />
+                Export
+              </Button>
+              <Dropdown.Popover>
+                <Dropdown.Menu
+                  onAction={(key) =>
+                    handleExport(key as "csv" | "xlsx" | "pdf")
+                  }
+                >
+                  <Dropdown.Item id="csv" textValue="Export to CSV">
+                    <Label className="text-xs">Export to CSV</Label>
+                  </Dropdown.Item>
+                  <Dropdown.Item id="xlsx" textValue="Export to XLSX">
+                    <Label className="text-xs">Export to XLSX</Label>
+                  </Dropdown.Item>
+                  <Dropdown.Item id="pdf" textValue="Export to PDF">
+                    <Label className="text-xs">Export to PDF</Label>
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown.Popover>
+            </Dropdown>
+            <Button variant="ghost" isIconOnly>
+              <LuFilter className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
         <div className="flex flex-col h-full overflow-hidden gap-1">
           {loading ? (
