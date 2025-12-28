@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   Card,
   Button,
@@ -25,6 +25,7 @@ import TransactionForm from "../../components/TransactionForm";
 import TransactionView from "../../components/TransactionView";
 import { printTransaction } from "../../utils/print";
 import { exportToCSV, exportToXLSX, exportToPDF } from "../../utils/export";
+import { ResizableCell } from "../../components/ResizableCell";
 
 const TransaksiPage = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -37,6 +38,77 @@ const TransaksiPage = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(30);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  interface ColumnConfig {
+    id: string;
+    minWidth: number;
+    maxWidth: number;
+    defaultWidth: number;
+  }
+
+  const columnConfigs: ColumnConfig[] = [
+    { id: "id-transaksi", minWidth: 120, maxWidth: 300, defaultWidth: 150 },
+    { id: "total-barang", minWidth: 100, maxWidth: 250, defaultWidth: 130 },
+    { id: "jumlah", minWidth: 120, maxWidth: 300, defaultWidth: 150 },
+    { id: "tanggal", minWidth: 150, maxWidth: 350, defaultWidth: 200 },
+    { id: "aksi", minWidth: 100, maxWidth: 250, defaultWidth: 120 },
+  ];
+
+  // Initialize with default widths (SSR-safe)
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>(
+    () => {
+      const initial: Record<string, number> = {};
+      columnConfigs.forEach((col) => {
+        initial[col.id] = col.defaultWidth;
+      });
+      return initial;
+    }
+  );
+
+  // Load from localStorage on client side only
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const loaded: Record<string, number> = {};
+      columnConfigs.forEach((col) => {
+        const saved = localStorage.getItem(`transaksi-column-width-${col.id}`);
+        if (saved) {
+          const width = parseInt(saved, 10);
+          if (width >= col.minWidth && width <= col.maxWidth) {
+            loaded[col.id] = width;
+          } else {
+            loaded[col.id] = col.defaultWidth;
+          }
+        } else {
+          loaded[col.id] = col.defaultWidth;
+        }
+      });
+      setColumnWidths(loaded);
+    }
+  }, []);
+
+  const handleResize = useCallback(
+    (columnId: string, width: number) => {
+      const column = columnConfigs.find((col) => col.id === columnId);
+      if (column) {
+        const clampedWidth = Math.max(
+          column.minWidth,
+          Math.min(column.maxWidth, width)
+        );
+        setColumnWidths((prev) => {
+          const updated = { ...prev, [columnId]: clampedWidth };
+          if (typeof window !== "undefined") {
+            localStorage.setItem(
+              `transaksi-column-width-${columnId}`,
+              clampedWidth.toString()
+            );
+          }
+          return updated;
+        });
+      }
+    },
+    [columnConfigs]
+  );
 
   useEffect(() => {
     fetchTransactions();
@@ -133,7 +205,13 @@ const TransaksiPage = () => {
   };
 
   return (
-    <div className="flex flex-col w-full gap-5 h-full">
+    <>
+      <style>{`
+        .table-header-separator {
+          box-shadow: 0 1px 0 0 var(--separator) !important;
+        }
+      `}</style>
+      <div className="flex flex-col w-full gap-5 h-full">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
         <div className="flex flex-col gap-1">
           <h1 className="text-xl font-bold text-foreground">Transaksi</h1>
@@ -202,25 +280,71 @@ const TransaksiPage = () => {
           ) : (
             <>
               <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-                <div className="overflow-y-auto overflow-x-auto flex-1">
-                  <table className="w-full">
-                    <thead className="sticky top-0 bg-surface z-10">
-                      <tr className="border-b border-separator">
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
+                <div
+                  ref={scrollContainerRef}
+                  className="overflow-y-auto overflow-x-auto flex-1"
+                >
+                  <table
+                    className="w-full"
+                    style={{ tableLayout: "fixed" }}
+                  >
+                    <thead className="sticky top-0 bg-surface z-10 table-header-separator">
+                      <tr>
+                        <ResizableCell
+                          columnId="id-transaksi"
+                          width={columnWidths["id-transaksi"] || 150}
+                          minWidth={120}
+                          maxWidth={300}
+                          onResize={handleResize}
+                          isHeader
+                          className="text-left py-3 px-4 text-sm font-semibold text-muted border-r border-separator"
+                        >
                           ID Transaksi
-                        </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
+                        </ResizableCell>
+                        <ResizableCell
+                          columnId="total-barang"
+                          width={columnWidths["total-barang"] || 130}
+                          minWidth={100}
+                          maxWidth={250}
+                          onResize={handleResize}
+                          isHeader
+                          className="text-left py-3 px-4 text-sm font-semibold text-muted border-r border-separator"
+                        >
                           Total Barang
-                        </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
+                        </ResizableCell>
+                        <ResizableCell
+                          columnId="jumlah"
+                          width={columnWidths["jumlah"] || 150}
+                          minWidth={120}
+                          maxWidth={300}
+                          onResize={handleResize}
+                          isHeader
+                          className="text-left py-3 px-4 text-sm font-semibold text-muted border-r border-separator"
+                        >
                           Jumlah
-                        </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
+                        </ResizableCell>
+                        <ResizableCell
+                          columnId="tanggal"
+                          width={columnWidths["tanggal"] || 200}
+                          minWidth={150}
+                          maxWidth={350}
+                          onResize={handleResize}
+                          isHeader
+                          className="text-left py-3 px-4 text-sm font-semibold text-muted border-r border-separator"
+                        >
                           Tanggal
-                        </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
+                        </ResizableCell>
+                        <ResizableCell
+                          columnId="aksi"
+                          width={columnWidths["aksi"] || 120}
+                          minWidth={100}
+                          maxWidth={250}
+                          onResize={handleResize}
+                          isHeader
+                          className="text-left py-3 px-4 text-sm font-semibold text-muted"
+                        >
                           Aksi
-                        </th>
+                        </ResizableCell>
                       </tr>
                     </thead>
                     <tbody>
@@ -229,20 +353,55 @@ const TransaksiPage = () => {
                           key={transaction.id}
                           className="border-b border-separator hover:bg-surface-secondary/20 transition-colors"
                         >
-                          <td className="py-2 px-4 text-xs font-medium text-foreground">
+                          <td
+                            className="py-2 px-4 text-xs font-medium text-foreground border-r border-separator"
+                            style={{
+                              width: `${columnWidths["id-transaksi"] || 150}px`,
+                              minWidth: `${columnWidths["id-transaksi"] || 150}px`,
+                              maxWidth: `${columnWidths["id-transaksi"] || 150}px`,
+                            }}
+                          >
                             {transaction.id}
                           </td>
-                          <td className="py-2 px-4 text-xs text-foreground">
+                          <td
+                            className="py-2 px-4 text-xs text-foreground border-r border-separator"
+                            style={{
+                              width: `${columnWidths["total-barang"] || 130}px`,
+                              minWidth: `${columnWidths["total-barang"] || 130}px`,
+                              maxWidth: `${columnWidths["total-barang"] || 130}px`,
+                            }}
+                          >
                             {transaction.items?.length || 0}
                           </td>
-                          <td className="py-2 px-4 text-xs font-medium text-foreground">
+                          <td
+                            className="py-2 px-4 text-xs font-medium text-foreground border-r border-separator"
+                            style={{
+                              width: `${columnWidths["jumlah"] || 150}px`,
+                              minWidth: `${columnWidths["jumlah"] || 150}px`,
+                              maxWidth: `${columnWidths["jumlah"] || 150}px`,
+                            }}
+                          >
                             Rp{" "}
                             {transaction.total_amount.toLocaleString("id-ID")}
                           </td>
-                          <td className="py-2 px-4 text-xs text-muted">
+                          <td
+                            className="py-2 px-4 text-xs text-muted border-r border-separator"
+                            style={{
+                              width: `${columnWidths["tanggal"] || 200}px`,
+                              minWidth: `${columnWidths["tanggal"] || 200}px`,
+                              maxWidth: `${columnWidths["tanggal"] || 200}px`,
+                            }}
+                          >
                             {formatDate(transaction.created_at)}
                           </td>
-                          <td className="py-2 px-4">
+                          <td
+                            className="py-2 px-4"
+                            style={{
+                              width: `${columnWidths["aksi"] || 120}px`,
+                              minWidth: `${columnWidths["aksi"] || 120}px`,
+                              maxWidth: `${columnWidths["aksi"] || 120}px`,
+                            }}
+                          >
                             <div className="flex items-center gap-3">
                               <p
                                 onClick={() =>
@@ -379,6 +538,7 @@ const TransaksiPage = () => {
         onClose={() => setViewingTransactionId(null)}
       />
     </div>
+    </>
   );
 };
 

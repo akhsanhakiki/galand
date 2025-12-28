@@ -131,12 +131,23 @@ export const exportToPDF = (transactions: Transaction[]) => {
 
 // Product export functions
 export const exportProductsToCSV = (products: Product[]) => {
-  const headers = ["Nama Produk", "Deskripsi", "Stok", "Harga"];
+  const headers = [
+    "Nama Produk",
+    "Deskripsi",
+    "Stok",
+    "Harga",
+    "COGS",
+    "Jumlah Bundle",
+    "Harga Bundle",
+  ];
   const rows = products.map((p) => [
     p.name,
     p.description || "-",
     p.stock.toString(),
     `Rp ${p.price.toLocaleString("id-ID")}`,
+    `Rp ${p.cogs.toLocaleString("id-ID")}`,
+    p.bundle_quantity.toString(),
+    `Rp ${p.bundle_price.toLocaleString("id-ID")}`,
   ]);
 
   const csvContent = [
@@ -166,6 +177,9 @@ export const exportProductsToXLSX = (products: Product[]) => {
     Deskripsi: p.description || "-",
     Stok: p.stock,
     Harga: p.price,
+    COGS: p.cogs,
+    "Jumlah Bundle": p.bundle_quantity,
+    "Harga Bundle": p.bundle_price,
   }));
 
   const worksheet = XLSX.utils.json_to_sheet(data);
@@ -198,8 +212,16 @@ export const exportProductsToPDF = (products: Product[]) => {
   );
   currentY += 8;
 
-  const tableHeaders = ["Nama", "Deskripsi", "Stok", "Harga"];
-  const colWidths = [50, 50, 20, 40];
+  const tableHeaders = [
+    "Nama",
+    "Deskripsi",
+    "Stok",
+    "Harga",
+    "COGS",
+    "Bundle Qty",
+    "Bundle Price",
+  ];
+  const colWidths = [40, 40, 15, 30, 30, 20, 30];
   const rowHeight = 7;
 
   doc.setFontSize(9);
@@ -229,6 +251,9 @@ export const exportProductsToPDF = (products: Product[]) => {
       product.description || "-",
       product.stock.toString(),
       `Rp ${product.price.toLocaleString("id-ID")}`,
+      `Rp ${product.cogs.toLocaleString("id-ID")}`,
+      product.bundle_quantity.toString(),
+      `Rp ${product.bundle_price.toLocaleString("id-ID")}`,
     ];
 
     xPos = margin;

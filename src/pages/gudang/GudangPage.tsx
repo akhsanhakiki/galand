@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
 import {
   Card,
   Button,
@@ -33,6 +39,7 @@ import {
   exportProductsToXLSX,
   exportProductsToPDF,
 } from "../../utils/export";
+import { ResizableCell } from "../../components/ResizableCell";
 
 const GudangPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -43,6 +50,82 @@ const GudangPage = () => {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const stickyColumnRef = useRef<HTMLDivElement>(null);
+
+  interface ColumnConfig {
+    id: string;
+    minWidth: number;
+    maxWidth: number;
+    defaultWidth: number;
+  }
+
+  const columnConfigs: ColumnConfig[] = [
+    { id: "nama-produk", minWidth: 150, maxWidth: 400, defaultWidth: 180 },
+    { id: "deskripsi", minWidth: 150, maxWidth: 500, defaultWidth: 250 },
+    { id: "stok", minWidth: 80, maxWidth: 200, defaultWidth: 100 },
+    { id: "harga", minWidth: 100, maxWidth: 250, defaultWidth: 120 },
+    { id: "hpp", minWidth: 100, maxWidth: 250, defaultWidth: 120 },
+    { id: "jumlah-bundle", minWidth: 100, maxWidth: 250, defaultWidth: 120 },
+    { id: "harga-bundle", minWidth: 100, maxWidth: 250, defaultWidth: 120 },
+    { id: "status", minWidth: 100, maxWidth: 250, defaultWidth: 120 },
+    { id: "aksi", minWidth: 100, maxWidth: 250, defaultWidth: 120 },
+  ];
+
+  // Initialize with default widths (SSR-safe)
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>(
+    () => {
+      const initial: Record<string, number> = {};
+      columnConfigs.forEach((col) => {
+        initial[col.id] = col.defaultWidth;
+      });
+      return initial;
+    }
+  );
+
+  // Load from localStorage on client side only
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const loaded: Record<string, number> = {};
+      columnConfigs.forEach((col) => {
+        const saved = localStorage.getItem(`gudang-column-width-${col.id}`);
+        if (saved) {
+          const width = parseInt(saved, 10);
+          if (width >= col.minWidth && width <= col.maxWidth) {
+            loaded[col.id] = width;
+          } else {
+            loaded[col.id] = col.defaultWidth;
+          }
+        } else {
+          loaded[col.id] = col.defaultWidth;
+        }
+      });
+      setColumnWidths(loaded);
+    }
+  }, []);
+
+  const handleResize = useCallback(
+    (columnId: string, width: number) => {
+      const column = columnConfigs.find((col) => col.id === columnId);
+      if (column) {
+        const clampedWidth = Math.max(
+          column.minWidth,
+          Math.min(column.maxWidth, width)
+        );
+        setColumnWidths((prev) => {
+          const updated = { ...prev, [columnId]: clampedWidth };
+          if (typeof window !== "undefined") {
+            localStorage.setItem(
+              `gudang-column-width-${columnId}`,
+              clampedWidth.toString()
+            );
+          }
+          return updated;
+        });
+      }
+    },
+    [columnConfigs]
+  );
 
   useEffect(() => {
     loadProducts();
@@ -158,6 +241,32 @@ const GudangPage = () => {
     setCurrentPage(1);
   }, [itemsPerPage]);
 
+  // Handle shadow on horizontal scroll for sticky column
+  useEffect(() => {
+    const stickyColumn = stickyColumnRef.current;
+    const scrollContainer = scrollContainerRef.current;
+
+    if (stickyColumn && scrollContainer) {
+      const updateShadow = () => {
+        const scrollLeft = scrollContainer.scrollLeft;
+        if (scrollLeft > 1) {
+          stickyColumn.classList.add("shadow-visible");
+        } else {
+          stickyColumn.classList.remove("shadow-visible");
+        }
+      };
+
+      scrollContainer.addEventListener("scroll", updateShadow, {
+        passive: true,
+      });
+      updateShadow(); // Check initial state
+
+      return () => {
+        scrollContainer.removeEventListener("scroll", updateShadow);
+      };
+    }
+  }, [paginatedProducts]);
+
   const stats = {
     total: products.length,
     inStock: products.filter((p) => p.stock >= 10).length,
@@ -166,262 +275,597 @@ const GudangPage = () => {
   };
 
   return (
-    <div className="flex flex-col w-full gap-5 h-full">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-xl font-bold text-foreground">Gudang</h1>
-          <p className="text-muted text-sm">Kelola inventori dan stok produk</p>
-        </div>
-        <Button
-          variant="primary"
-          className="bg-accent text-accent-foreground"
-          onPress={handleCreate}
-        >
-          <LuPlus className="w-4 h-4 mr-2" />
-          Tambah Produk
-        </Button>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="p-4 bg-surface rounded-3xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-muted mb-1">Total Produk</p>
-              <p className="text-xl font-bold text-foreground">{stats.total}</p>
-            </div>
-            <Surface className="p-2 rounded-lg bg-accent/10">
-              <LuPackage className="w-4 h-4 text-accent" />
-            </Surface>
+    <>
+      <style>{`
+        #sticky-column.shadow-visible {
+          box-shadow: 4px 0 6px -2px rgba(0, 0, 0, 0.15);
+        }
+        .sticky-column-header::after,
+        .sticky-column-cell::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          width: 1px;
+          background-color: var(--separator);
+          pointer-events: none;
+          z-index: 1;
+        }
+        #sticky-column table {
+          table-layout: fixed !important;
+        }
+      `}</style>
+      <div className="flex flex-col w-full gap-5 h-full">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-xl font-bold text-foreground">Gudang</h1>
+            <p className="text-muted text-sm">
+              Kelola inventori dan stok produk
+            </p>
           </div>
-        </div>
-
-        <div className="p-4 bg-surface rounded-3xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-muted mb-1">Stok Tersedia</p>
-              <p className="text-xl font-bold text-foreground">
-                {stats.inStock}
-              </p>
-            </div>
-            <Surface className="p-2 rounded-lg bg-success/10">
-              <LuCheck className="w-4 h-4 text-success" />
-            </Surface>
-          </div>
-        </div>
-
-        <div className="p-4 bg-surface rounded-3xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-muted mb-1">Stok Menipis</p>
-              <p className="text-xl font-bold text-foreground">
-                {stats.lowStock}
-              </p>
-            </div>
-            <Surface className="p-2 rounded-lg bg-warning/10">
-              <LuTriangleAlert className="w-4 h-4 text-warning" />
-            </Surface>
-          </div>
-        </div>
-
-        <div className="p-4 bg-surface rounded-3xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-muted mb-1">Habis</p>
-              <p className="text-xl font-bold text-foreground">
-                {stats.outOfStock}
-              </p>
-            </div>
-            <Surface className="p-2 rounded-lg bg-danger/10">
-              <LuCircleX className="w-4 h-4 text-danger" />
-            </Surface>
-          </div>
-        </div>
-      </div>
-
-      <div className="p-6 bg-surface rounded-3xl flex flex-col h-full min-h-[500px]">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4">
-          <SearchField
-            value={searchQuery}
-            onChange={setSearchQuery}
-            className="w-1/4"
+          <Button
+            variant="primary"
+            className="bg-accent text-accent-foreground"
+            onPress={handleCreate}
           >
-            <SearchField.Group className="shadow-none border">
-              <SearchField.SearchIcon />
-              <SearchField.Input placeholder="Cari produk..." />
-              <SearchField.ClearButton />
-            </SearchField.Group>
-          </SearchField>
-          <div className="flex items-center gap-2">
-            <Dropdown>
-              <Button
-                variant="ghost"
-                isDisabled={filteredProducts.length === 0}
-              >
-                <LuDownload className="w-4 h-4" />
-                Export
-              </Button>
-              <Dropdown.Popover>
-                <Dropdown.Menu
-                  onAction={(key) =>
-                    handleExport(key as "csv" | "xlsx" | "pdf")
-                  }
-                >
-                  <Dropdown.Item id="csv" textValue="Export to CSV">
-                    <Label className="text-xs">Export to CSV</Label>
-                  </Dropdown.Item>
-                  <Dropdown.Item id="xlsx" textValue="Export to XLSX">
-                    <Label className="text-xs">Export to XLSX</Label>
-                  </Dropdown.Item>
-                  <Dropdown.Item id="pdf" textValue="Export to PDF">
-                    <Label className="text-xs">Export to PDF</Label>
-                  </Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown.Popover>
-            </Dropdown>
+            <LuPlus className="w-4 h-4 mr-2" />
+            Tambah Produk
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="p-4 bg-surface rounded-3xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted mb-1">Total Produk</p>
+                <p className="text-xl font-bold text-foreground">
+                  {stats.total}
+                </p>
+              </div>
+              <Surface className="p-2 rounded-lg bg-accent/10">
+                <LuPackage className="w-4 h-4 text-accent" />
+              </Surface>
+            </div>
+          </div>
+
+          <div className="p-4 bg-surface rounded-3xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted mb-1">Stok Tersedia</p>
+                <p className="text-xl font-bold text-foreground">
+                  {stats.inStock}
+                </p>
+              </div>
+              <Surface className="p-2 rounded-lg bg-success/10">
+                <LuCheck className="w-4 h-4 text-success" />
+              </Surface>
+            </div>
+          </div>
+
+          <div className="p-4 bg-surface rounded-3xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted mb-1">Stok Menipis</p>
+                <p className="text-xl font-bold text-foreground">
+                  {stats.lowStock}
+                </p>
+              </div>
+              <Surface className="p-2 rounded-lg bg-warning/10">
+                <LuTriangleAlert className="w-4 h-4 text-warning" />
+              </Surface>
+            </div>
+          </div>
+
+          <div className="p-4 bg-surface rounded-3xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted mb-1">Habis</p>
+                <p className="text-xl font-bold text-foreground">
+                  {stats.outOfStock}
+                </p>
+              </div>
+              <Surface className="p-2 rounded-lg bg-danger/10">
+                <LuCircleX className="w-4 h-4 text-danger" />
+              </Surface>
+            </div>
           </div>
         </div>
-        <div className="flex flex-col h-full overflow-hidden gap-1">
-          {loading ? (
-            <div className="flex items-center justify-center p-8">
-              <Spinner size="lg" />
-            </div>
-          ) : filteredProducts.length === 0 ? (
-            <div className="text-center py-8 text-muted">
-              {searchQuery
-                ? "Tidak ada produk yang ditemukan"
-                : "Belum ada produk"}
-            </div>
-          ) : (
-            <>
-              <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-                <div className="overflow-y-auto overflow-x-auto flex-1">
-                  <table className="w-full table-fixed">
-                    <thead className="sticky top-0 bg-surface z-10">
-                      <tr className="border-b border-separator">
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted min-w-[180px] w-[20%]">
-                          Nama Produk
-                        </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted min-w-[250px] w-[30%]">
-                          Deskripsi
-                        </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted min-w-[80px] w-[10%]">
-                          Stok
-                        </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted min-w-[120px] w-[15%]">
-                          Harga
-                        </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted min-w-[120px] w-[15%]">
-                          Status
-                        </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted min-w-[100px] w-[10%]">
-                          Aksi
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {paginatedProducts.map((product) => (
-                        <tr
-                          key={product.id}
-                          className="border-b border-separator hover:bg-surface-secondary/20 transition-colors"
-                        >
-                          <td className="py-2 px-4 text-xs font-medium text-foreground min-w-[180px] w-[20%] wrap-break-word">
-                            {product.name}
-                          </td>
-                          <td className="py-2 px-4 text-xs text-foreground min-w-[250px] w-[30%] wrap-break-word">
-                            {product.description || "-"}
-                          </td>
-                          <td className="py-2 px-4 text-xs font-semibold text-foreground min-w-[80px] w-[10%]">
-                            {product.stock}
-                          </td>
-                          <td className="py-2 px-4 text-xs font-semibold text-foreground min-w-[120px] w-[15%]">
-                            Rp {product.price.toLocaleString("id-ID")}
-                          </td>
-                          <td className="py-2 px-4 min-w-[120px] w-[15%]">
-                            {getStockStatus(product.stock)}
-                          </td>
-                          <td className="py-2 px-4 min-w-[100px] w-[10%]">
-                            <div className="flex items-center gap-3">
-                              <p
-                                onClick={() => handleEdit(product)}
-                                className="text-xs text-primary font-medium cursor-pointer hover:text-primary-700 transition-colors"
-                              >
-                                Edit
-                              </p>
-                              <button
-                                onClick={() => handleDelete(product.id)}
-                                disabled={deletingId === product.id}
-                                className="text-xs text-primary hover:text-primary-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                title="Hapus"
-                              >
-                                {deletingId === product.id ? (
-                                  <Spinner size="sm" />
-                                ) : (
-                                  <LuTrash2 className="w-3.5 h-3.5" />
-                                )}
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              <div className="flex flex-row gap-2 justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm text-muted">Data per halaman:</p>
-                  <Select
-                    className="w-16"
-                    value={itemsPerPage.toString()}
-                    onChange={(value) => {
-                      if (value) {
-                        setItemsPerPage(Number(value));
-                      }
-                    }}
-                  >
-                    <Select.Trigger className="bg-foreground/5 shadow-none">
-                      <Select.Value />
-                      <Select.Indicator />
-                    </Select.Trigger>
-                    <Select.Popover>
-                      <ListBox>
-                        <ListBox.Item id="10" textValue="10">
-                          10
-                          <ListBox.ItemIndicator />
-                        </ListBox.Item>
-                        <ListBox.Item id="20" textValue="20">
-                          20
-                          <ListBox.ItemIndicator />
-                        </ListBox.Item>
-                        <ListBox.Item id="30" textValue="30">
-                          30
-                          <ListBox.ItemIndicator />
-                        </ListBox.Item>
-                        <ListBox.Item id="40" textValue="40">
-                          40
-                          <ListBox.ItemIndicator />
-                        </ListBox.Item>
-                      </ListBox>
-                    </Select.Popover>
-                  </Select>
-                </div>
 
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onPress={() =>
-                        setCurrentPage((prev) => Math.max(1, prev - 1))
-                      }
-                      isDisabled={currentPage === 1}
-                      isIconOnly
+        <div className="p-6 bg-surface rounded-3xl flex flex-col h-full min-h-[500px]">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4">
+            <SearchField
+              value={searchQuery}
+              onChange={setSearchQuery}
+              className="w-1/4"
+            >
+              <SearchField.Group className="shadow-none border">
+                <SearchField.SearchIcon />
+                <SearchField.Input placeholder="Cari produk..." />
+                <SearchField.ClearButton />
+              </SearchField.Group>
+            </SearchField>
+            <div className="flex items-center gap-2">
+              <Dropdown>
+                <Button
+                  variant="ghost"
+                  isDisabled={filteredProducts.length === 0}
+                >
+                  <LuDownload className="w-4 h-4" />
+                  Export
+                </Button>
+                <Dropdown.Popover>
+                  <Dropdown.Menu
+                    onAction={(key) =>
+                      handleExport(key as "csv" | "xlsx" | "pdf")
+                    }
+                  >
+                    <Dropdown.Item id="csv" textValue="Export to CSV">
+                      <Label className="text-xs">Export to CSV</Label>
+                    </Dropdown.Item>
+                    <Dropdown.Item id="xlsx" textValue="Export to XLSX">
+                      <Label className="text-xs">Export to XLSX</Label>
+                    </Dropdown.Item>
+                    <Dropdown.Item id="pdf" textValue="Export to PDF">
+                      <Label className="text-xs">Export to PDF</Label>
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown.Popover>
+              </Dropdown>
+            </div>
+          </div>
+          <div className="flex flex-col h-full overflow-hidden gap-1">
+            {loading ? (
+              <div className="flex items-center justify-center p-8">
+                <Spinner size="lg" />
+              </div>
+            ) : filteredProducts.length === 0 ? (
+              <div className="text-center py-8 text-muted">
+                {searchQuery
+                  ? "Tidak ada produk yang ditemukan"
+                  : "Belum ada produk"}
+              </div>
+            ) : (
+              <>
+                <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+                  {/* Scrollable Container - wraps both tables */}
+                  <div
+                    ref={scrollContainerRef}
+                    className="flex-1 overflow-x-auto overflow-y-auto min-w-0 h-full relative w-full"
+                    data-scroll-container
+                  >
+                    {/* Combined Table Container */}
+                    <div className="flex relative">
+                      {/* Sticky Column */}
+                      <div
+                        id="sticky-column"
+                        ref={stickyColumnRef}
+                        className="shrink-0 border-r border-separator bg-surface shadow-none transition-shadow duration-300 ease-in-out"
+                        style={{
+                          width: `${columnWidths["nama-produk"] || 180}px`,
+                          position: "sticky",
+                          left: 0,
+                          zIndex: 50,
+                        }}
+                      >
+                        <table
+                          className="border-separate border-spacing-0"
+                          style={{
+                            tableLayout: "fixed",
+                            width: `${columnWidths["nama-produk"] || 180}px`,
+                          }}
+                        >
+                          <colgroup>
+                            <col
+                              style={{
+                                width: `${
+                                  columnWidths["nama-produk"] || 180
+                                }px`,
+                              }}
+                            />
+                          </colgroup>
+                          <thead className="sticky top-0 bg-surface z-60">
+                            <tr className="h-12 max-h-12">
+                              <ResizableCell
+                                columnId="nama-produk"
+                                width={columnWidths["nama-produk"] || 180}
+                                minWidth={150}
+                                maxWidth={400}
+                                onResize={handleResize}
+                                isHeader
+                                className="sticky-column-header text-left py-3 px-4 text-sm font-semibold text-muted bg-surface truncate whitespace-nowrap overflow-hidden text-ellipsis h-12 max-h-12 box-border align-middle z-70 border-b border-separator"
+                              >
+                                <div className="truncate flex items-center h-full whitespace-nowrap overflow-hidden text-ellipsis">
+                                  Nama Produk
+                                </div>
+                              </ResizableCell>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {paginatedProducts.map((product, index) => (
+                              <tr
+                                key={product.id}
+                                className="hover:bg-foreground/5 transition-colors group h-12 max-h-12"
+                              >
+                                <td
+                                  className={`sticky-column-cell py-2 px-4 text-xs font-medium text-foreground transition-colors bg-surface group-hover:bg-foreground/5 z-10 border-b border-separator h-12 max-h-12 box-border align-middle overflow-hidden ${
+                                    index === paginatedProducts.length - 1
+                                      ? "border-b-0"
+                                      : ""
+                                  }`}
+                                  style={{
+                                    width: `${
+                                      columnWidths["nama-produk"] || 180
+                                    }px`,
+                                    minWidth: `${
+                                      columnWidths["nama-produk"] || 180
+                                    }px`,
+                                    maxWidth: `${
+                                      columnWidths["nama-produk"] || 180
+                                    }px`,
+                                  }}
+                                >
+                                  <div className="flex items-center h-full overflow-hidden">
+                                    <span className="truncate">
+                                      {product.name}
+                                    </span>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Scrollable Table */}
+                      <div
+                        className="flex-1 min-w-0 w-full"
+                        data-scroll-container
+                      >
+                        <table
+                          className="w-full border-separate border-spacing-0 min-w-max"
+                          style={{
+                            tableLayout: "fixed",
+                          }}
+                        >
+                          <thead className="sticky top-0 bg-surface z-40">
+                            <tr className="h-12 max-h-12">
+                              <ResizableCell
+                                columnId="deskripsi"
+                                width={columnWidths["deskripsi"] || 250}
+                                minWidth={150}
+                                maxWidth={500}
+                                onResize={handleResize}
+                                isHeader
+                                className="text-left py-3 px-4 text-sm font-semibold text-muted border-r border-b border-separator truncate whitespace-nowrap overflow-hidden text-ellipsis h-12 max-h-12 box-border align-middle"
+                              >
+                                <div className="truncate flex items-center h-full whitespace-nowrap overflow-hidden text-ellipsis">
+                                  Deskripsi
+                                </div>
+                              </ResizableCell>
+                              <ResizableCell
+                                columnId="stok"
+                                width={columnWidths["stok"] || 100}
+                                minWidth={80}
+                                maxWidth={200}
+                                onResize={handleResize}
+                                isHeader
+                                className="text-left py-3 px-4 text-sm font-semibold text-muted border-r border-b border-separator truncate whitespace-nowrap overflow-hidden text-ellipsis h-12 max-h-12 box-border align-middle"
+                              >
+                                <div className="truncate flex items-center h-full whitespace-nowrap overflow-hidden text-ellipsis">
+                                  Stok
+                                </div>
+                              </ResizableCell>
+                              <ResizableCell
+                                columnId="harga"
+                                width={columnWidths["harga"] || 120}
+                                minWidth={100}
+                                maxWidth={250}
+                                onResize={handleResize}
+                                isHeader
+                                className="text-left py-3 px-4 text-sm font-semibold text-muted border-r border-b border-separator truncate whitespace-nowrap overflow-hidden text-ellipsis h-12 max-h-12 box-border align-middle"
+                              >
+                                <div className="truncate flex items-center h-full whitespace-nowrap overflow-hidden text-ellipsis">
+                                  Harga
+                                </div>
+                              </ResizableCell>
+                              <ResizableCell
+                                columnId="hpp"
+                                width={columnWidths["hpp"] || 120}
+                                minWidth={100}
+                                maxWidth={250}
+                                onResize={handleResize}
+                                isHeader
+                                className="text-left py-3 px-4 text-sm font-semibold text-muted border-r border-b border-separator truncate whitespace-nowrap overflow-hidden text-ellipsis h-12 max-h-12 box-border align-middle"
+                              >
+                                <div className="truncate flex items-center h-full whitespace-nowrap overflow-hidden text-ellipsis">
+                                  HPP
+                                </div>
+                              </ResizableCell>
+                              <ResizableCell
+                                columnId="jumlah-bundle"
+                                width={columnWidths["jumlah-bundle"] || 120}
+                                minWidth={100}
+                                maxWidth={250}
+                                onResize={handleResize}
+                                isHeader
+                                className="text-left py-3 px-4 text-sm font-semibold text-muted border-r border-b border-separator truncate whitespace-nowrap overflow-hidden text-ellipsis h-12 max-h-12 box-border align-middle"
+                              >
+                                <div className="truncate flex items-center h-full whitespace-nowrap overflow-hidden text-ellipsis">
+                                  Jumlah Bundle
+                                </div>
+                              </ResizableCell>
+                              <ResizableCell
+                                columnId="harga-bundle"
+                                width={columnWidths["harga-bundle"] || 120}
+                                minWidth={100}
+                                maxWidth={250}
+                                onResize={handleResize}
+                                isHeader
+                                className="text-left py-3 px-4 text-sm font-semibold text-muted border-r border-b border-separator truncate whitespace-nowrap overflow-hidden text-ellipsis h-12 max-h-12 box-border align-middle"
+                              >
+                                <div className="truncate flex items-center h-full whitespace-nowrap overflow-hidden text-ellipsis">
+                                  Harga Bundle
+                                </div>
+                              </ResizableCell>
+                              <ResizableCell
+                                columnId="status"
+                                width={columnWidths["status"] || 120}
+                                minWidth={100}
+                                maxWidth={250}
+                                onResize={handleResize}
+                                isHeader
+                                className="text-left py-3 px-4 text-sm font-semibold text-muted border-r border-b border-separator truncate whitespace-nowrap overflow-hidden text-ellipsis h-12 max-h-12 box-border align-middle"
+                              >
+                                <div className="truncate flex items-center h-full whitespace-nowrap overflow-hidden text-ellipsis">
+                                  Status
+                                </div>
+                              </ResizableCell>
+                              <ResizableCell
+                                columnId="aksi"
+                                width={columnWidths["aksi"] || 120}
+                                minWidth={100}
+                                maxWidth={250}
+                                onResize={handleResize}
+                                isHeader
+                                className="text-left py-3 px-4 text-sm font-semibold text-muted border-b border-separator truncate whitespace-nowrap overflow-hidden text-ellipsis h-12 max-h-12 box-border align-middle"
+                              >
+                                <div className="truncate flex items-center h-full whitespace-nowrap overflow-hidden text-ellipsis">
+                                  Aksi
+                                </div>
+                              </ResizableCell>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {paginatedProducts.map((product, index) => (
+                              <tr
+                                key={product.id}
+                                className={`hover:bg-foreground/5 transition-colors group h-12 max-h-12 ${
+                                  index === paginatedProducts.length - 1
+                                    ? "[&>td]:border-b-0"
+                                    : ""
+                                }`}
+                              >
+                                <td
+                                  className="py-2 px-4 text-xs text-foreground border-r border-b border-separator h-12 max-h-12 box-border align-middle overflow-hidden"
+                                  style={{
+                                    width: `${
+                                      columnWidths["deskripsi"] || 250
+                                    }px`,
+                                    minWidth: `${
+                                      columnWidths["deskripsi"] || 250
+                                    }px`,
+                                    maxWidth: `${
+                                      columnWidths["deskripsi"] || 250
+                                    }px`,
+                                  }}
+                                >
+                                  <div className="flex items-center h-full overflow-hidden">
+                                    <span className="truncate">
+                                      {product.description || "-"}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td
+                                  className="py-2 px-4 text-xs font-semibold text-foreground border-r border-b border-separator h-12 max-h-12 box-border align-middle overflow-hidden"
+                                  style={{
+                                    width: `${columnWidths["stok"] || 100}px`,
+                                    minWidth: `${
+                                      columnWidths["stok"] || 100
+                                    }px`,
+                                    maxWidth: `${
+                                      columnWidths["stok"] || 100
+                                    }px`,
+                                  }}
+                                >
+                                  <div className="flex items-center h-full overflow-hidden">
+                                    {product.stock}
+                                  </div>
+                                </td>
+                                <td
+                                  className="py-2 px-4 text-xs font-semibold text-foreground border-r border-b border-separator h-12 max-h-12 box-border align-middle overflow-hidden"
+                                  style={{
+                                    width: `${columnWidths["harga"] || 120}px`,
+                                    minWidth: `${
+                                      columnWidths["harga"] || 120
+                                    }px`,
+                                    maxWidth: `${
+                                      columnWidths["harga"] || 120
+                                    }px`,
+                                  }}
+                                >
+                                  <div className="flex items-center h-full overflow-hidden">
+                                    Rp {product.price.toLocaleString("id-ID")}
+                                  </div>
+                                </td>
+                                <td
+                                  className="py-2 px-4 text-xs font-semibold text-foreground border-r border-b border-separator h-12 max-h-12 box-border align-middle overflow-hidden"
+                                  style={{
+                                    width: `${columnWidths["hpp"] || 120}px`,
+                                    minWidth: `${columnWidths["hpp"] || 120}px`,
+                                    maxWidth: `${columnWidths["hpp"] || 120}px`,
+                                  }}
+                                >
+                                  <div className="flex items-center h-full overflow-hidden">
+                                    Rp{" "}
+                                    {(product.cogs ?? 0).toLocaleString(
+                                      "id-ID"
+                                    )}
+                                  </div>
+                                </td>
+                                <td
+                                  className="py-2 px-4 text-xs font-semibold text-foreground border-r border-b border-separator h-12 max-h-12 box-border align-middle overflow-hidden"
+                                  style={{
+                                    width: `${
+                                      columnWidths["jumlah-bundle"] || 120
+                                    }px`,
+                                    minWidth: `${
+                                      columnWidths["jumlah-bundle"] || 120
+                                    }px`,
+                                    maxWidth: `${
+                                      columnWidths["jumlah-bundle"] || 120
+                                    }px`,
+                                  }}
+                                >
+                                  <div className="flex items-center h-full overflow-hidden">
+                                    {product.bundle_quantity ?? 0}
+                                  </div>
+                                </td>
+                                <td
+                                  className="py-2 px-4 text-xs font-semibold text-foreground border-r border-b border-separator h-12 max-h-12 box-border align-middle overflow-hidden"
+                                  style={{
+                                    width: `${
+                                      columnWidths["harga-bundle"] || 120
+                                    }px`,
+                                    minWidth: `${
+                                      columnWidths["harga-bundle"] || 120
+                                    }px`,
+                                    maxWidth: `${
+                                      columnWidths["harga-bundle"] || 120
+                                    }px`,
+                                  }}
+                                >
+                                  <div className="flex items-center h-full overflow-hidden">
+                                    Rp{" "}
+                                    {(product.bundle_price ?? 0).toLocaleString(
+                                      "id-ID"
+                                    )}
+                                  </div>
+                                </td>
+                                <td
+                                  className="py-2 px-4 border-r border-b border-separator h-12 max-h-12 box-border align-middle overflow-hidden"
+                                  style={{
+                                    width: `${columnWidths["status"] || 120}px`,
+                                    minWidth: `${
+                                      columnWidths["status"] || 120
+                                    }px`,
+                                    maxWidth: `${
+                                      columnWidths["status"] || 120
+                                    }px`,
+                                  }}
+                                >
+                                  <div className="flex items-center h-full overflow-hidden">
+                                    {getStockStatus(product.stock)}
+                                  </div>
+                                </td>
+                                <td
+                                  className="py-2 px-4 border-b border-separator h-12 max-h-12 box-border align-middle overflow-hidden"
+                                  style={{
+                                    width: `${columnWidths["aksi"] || 120}px`,
+                                    minWidth: `${
+                                      columnWidths["aksi"] || 120
+                                    }px`,
+                                    maxWidth: `${
+                                      columnWidths["aksi"] || 120
+                                    }px`,
+                                  }}
+                                >
+                                  <div className="flex items-center gap-3 h-full overflow-hidden">
+                                    <p
+                                      onClick={() => handleEdit(product)}
+                                      className="text-xs text-primary font-medium cursor-pointer hover:text-primary-700 transition-colors"
+                                    >
+                                      Edit
+                                    </p>
+                                    <button
+                                      onClick={() => handleDelete(product.id)}
+                                      disabled={deletingId === product.id}
+                                      className="text-xs text-primary hover:text-primary-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                      title="Hapus"
+                                    >
+                                      {deletingId === product.id ? (
+                                        <Spinner size="sm" />
+                                      ) : (
+                                        <LuTrash2 className="w-3.5 h-3.5" />
+                                      )}
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-row gap-2 justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm text-muted">Data per halaman:</p>
+                    <Select
+                      className="w-16"
+                      value={itemsPerPage.toString()}
+                      onChange={(value) => {
+                        if (value) {
+                          setItemsPerPage(Number(value));
+                        }
+                      }}
                     >
-                      <LuChevronLeft className="w-3 h-3" />
-                    </Button>
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                        (page) => (
+                      <Select.Trigger className="bg-foreground/5 shadow-none">
+                        <Select.Value />
+                        <Select.Indicator />
+                      </Select.Trigger>
+                      <Select.Popover>
+                        <ListBox>
+                          <ListBox.Item id="10" textValue="10">
+                            10
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                          <ListBox.Item id="20" textValue="20">
+                            20
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                          <ListBox.Item id="30" textValue="30">
+                            30
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                          <ListBox.Item id="40" textValue="40">
+                            40
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                        </ListBox>
+                      </Select.Popover>
+                    </Select>
+                  </div>
+
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onPress={() =>
+                          setCurrentPage((prev) => Math.max(1, prev - 1))
+                        }
+                        isDisabled={currentPage === 1}
+                        isIconOnly
+                      >
+                        <LuChevronLeft className="w-3 h-3" />
+                      </Button>
+                      <div className="flex items-center gap-1">
+                        {Array.from(
+                          { length: totalPages },
+                          (_, i) => i + 1
+                        ).map((page) => (
                           <Button
                             key={page}
                             size="sm"
@@ -433,48 +877,50 @@ const GudangPage = () => {
                           >
                             {page}
                           </Button>
-                        )
-                      )}
+                        ))}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onPress={() =>
+                          setCurrentPage((prev) =>
+                            Math.min(totalPages, prev + 1)
+                          )
+                        }
+                        isDisabled={currentPage === totalPages}
+                        isIconOnly
+                      >
+                        <LuChevronRight className="w-3 h-3" />
+                      </Button>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onPress={() =>
-                        setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-                      }
-                      isDisabled={currentPage === totalPages}
-                      isIconOnly
-                    >
-                      <LuChevronRight className="w-3 h-3" />
-                    </Button>
-                  </div>
-                )}
-                {totalPages > 0 && (
-                  <div className="text-center text-sm text-muted">
-                    {(currentPage - 1) * itemsPerPage + 1} -{" "}
-                    {Math.min(
-                      currentPage * itemsPerPage,
-                      filteredProducts.length
-                    )}{" "}
-                    data dari {filteredProducts.length} produk
-                  </div>
-                )}
-              </div>
-            </>
-          )}
+                  )}
+                  {totalPages > 0 && (
+                    <div className="text-center text-sm text-muted">
+                      {(currentPage - 1) * itemsPerPage + 1} -{" "}
+                      {Math.min(
+                        currentPage * itemsPerPage,
+                        filteredProducts.length
+                      )}{" "}
+                      data dari {filteredProducts.length} produk
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
         </div>
-      </div>
 
-      <ProductForm
-        product={editingProduct}
-        isOpen={isFormOpen}
-        onClose={() => {
-          setIsFormOpen(false);
-          setEditingProduct(null);
-        }}
-        onSuccess={handleFormSuccess}
-      />
-    </div>
+        <ProductForm
+          product={editingProduct}
+          isOpen={isFormOpen}
+          onClose={() => {
+            setIsFormOpen(false);
+            setEditingProduct(null);
+          }}
+          onSuccess={handleFormSuccess}
+        />
+      </div>
+    </>
   );
 };
 

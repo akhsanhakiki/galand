@@ -9,9 +9,18 @@ export const GET: APIRoute = async ({ url }) => {
   try {
     const offset = url.searchParams.get("offset") || "0";
     const limit = url.searchParams.get("limit") || "100";
+    const search = url.searchParams.get("search");
+
+    // Build query parameters
+    const queryParams = new URLSearchParams();
+    queryParams.set("offset", offset);
+    queryParams.set("limit", limit);
+    if (search) {
+      queryParams.set("search", search);
+    }
 
     const response = await fetch(
-      `${API_BASE_URL}/products/?offset=${offset}&limit=${limit}`,
+      `${API_BASE_URL}/products/?${queryParams.toString()}`,
       {
         headers: {
           Accept: "application/json",

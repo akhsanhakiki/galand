@@ -4,16 +4,21 @@ const API_BASE = "/api/products";
 
 export async function getProducts(
   offset = 0,
-  limit = 100
+  limit = 100,
+  search?: string
 ): Promise<Product[]> {
-  const response = await fetch(
-    `${API_BASE}?offset=${offset}&limit=${limit}`,
-    {
-      headers: {
-        Accept: "application/json",
-      },
-    }
-  );
+  const queryParams = new URLSearchParams();
+  queryParams.set("offset", offset.toString());
+  queryParams.set("limit", limit.toString());
+  if (search) {
+    queryParams.set("search", search);
+  }
+
+  const response = await fetch(`${API_BASE}?${queryParams.toString()}`, {
+    headers: {
+      Accept: "application/json",
+    },
+  });
 
   if (!response.ok) {
     throw new Error("Failed to fetch products");
