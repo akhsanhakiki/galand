@@ -190,3 +190,8 @@
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar) transparent;
 }
+
+/* Modal Body Padding Override */
+.modal__body--scroll-inside {
+  padding: 4px;
+}

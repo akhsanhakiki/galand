@@ -15,8 +15,10 @@ import {
 } from "@heroui/react";
 import {
   LuPlus,
-  LuBox,
+  LuPackage,
+  LuCheck,
   LuTriangleAlert,
+  LuCircleX,
   LuPencil,
   LuTrash2,
   LuChevronLeft,
@@ -107,20 +109,20 @@ const GudangPage = () => {
   const getStockStatus = (stock: number) => {
     if (stock === 0) {
       return (
-        <Chip color="danger" variant="soft">
+        <Chip color="danger" variant="soft" className="text-xs">
           Habis
         </Chip>
       );
     } else if (stock < 10) {
       return (
-        <Chip color="warning" variant="soft">
+        <Chip color="warning" variant="soft" className="text-xs">
           <LuTriangleAlert className="w-3 h-3 mr-1" />
           Stok Menipis
         </Chip>
       );
     } else {
       return (
-        <Chip color="success" variant="soft">
+        <Chip color="success" variant="soft" className="text-xs">
           Tersedia
         </Chip>
       );
@@ -164,7 +166,7 @@ const GudangPage = () => {
   };
 
   return (
-    <div className="flex flex-col w-full gap-6">
+    <div className="flex flex-col w-full gap-5 h-full">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-xl font-bold text-foreground">Gudang</h1>
@@ -181,19 +183,19 @@ const GudangPage = () => {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card variant="default" className="p-4">
+        <div className="p-4 bg-surface rounded-3xl">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-muted mb-1">Total Produk</p>
               <p className="text-xl font-bold text-foreground">{stats.total}</p>
             </div>
             <Surface className="p-2 rounded-lg bg-accent/10">
-              <LuBox className="w-4 h-4 text-accent" />
+              <LuPackage className="w-4 h-4 text-accent" />
             </Surface>
           </div>
-        </Card>
+        </div>
 
-        <Card variant="default" className="p-4">
+        <div className="p-4 bg-surface rounded-3xl">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-muted mb-1">Stok Tersedia</p>
@@ -202,12 +204,12 @@ const GudangPage = () => {
               </p>
             </div>
             <Surface className="p-2 rounded-lg bg-success/10">
-              <LuBox className="w-4 h-4 text-success" />
+              <LuCheck className="w-4 h-4 text-success" />
             </Surface>
           </div>
-        </Card>
+        </div>
 
-        <Card variant="default" className="p-4">
+        <div className="p-4 bg-surface rounded-3xl">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-muted mb-1">Stok Menipis</p>
@@ -219,9 +221,9 @@ const GudangPage = () => {
               <LuTriangleAlert className="w-4 h-4 text-warning" />
             </Surface>
           </div>
-        </Card>
+        </div>
 
-        <Card variant="default" className="p-4">
+        <div className="p-4 bg-surface rounded-3xl">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-muted mb-1">Habis</p>
@@ -230,10 +232,10 @@ const GudangPage = () => {
               </p>
             </div>
             <Surface className="p-2 rounded-lg bg-danger/10">
-              <LuTriangleAlert className="w-4 h-4 text-danger" />
+              <LuCircleX className="w-4 h-4 text-danger" />
             </Surface>
           </div>
-        </Card>
+        </div>
       </div>
 
       <div className="p-6 bg-surface rounded-3xl flex flex-col h-full min-h-[500px]">
@@ -293,25 +295,25 @@ const GudangPage = () => {
             <>
               <div className="flex-1 overflow-hidden flex flex-col min-h-0">
                 <div className="overflow-y-auto overflow-x-auto flex-1">
-                  <table className="w-full">
+                  <table className="w-full table-fixed">
                     <thead className="sticky top-0 bg-surface z-10">
                       <tr className="border-b border-separator">
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted min-w-[180px] w-[20%]">
                           Nama Produk
                         </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted min-w-[250px] w-[30%]">
                           Deskripsi
                         </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted min-w-[80px] w-[10%]">
                           Stok
                         </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted min-w-[120px] w-[15%]">
                           Harga
                         </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted min-w-[120px] w-[15%]">
                           Status
                         </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted">
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-muted min-w-[100px] w-[10%]">
                           Aksi
                         </th>
                       </tr>
@@ -322,22 +324,22 @@ const GudangPage = () => {
                           key={product.id}
                           className="border-b border-separator hover:bg-surface-secondary/20 transition-colors"
                         >
-                          <td className="py-2 px-4 text-xs font-medium text-foreground">
+                          <td className="py-2 px-4 text-xs font-medium text-foreground min-w-[180px] w-[20%] wrap-break-word">
                             {product.name}
                           </td>
-                          <td className="py-2 px-4 text-xs text-foreground">
+                          <td className="py-2 px-4 text-xs text-foreground min-w-[250px] w-[30%] wrap-break-word">
                             {product.description || "-"}
                           </td>
-                          <td className="py-2 px-4 text-xs font-semibold text-foreground">
+                          <td className="py-2 px-4 text-xs font-semibold text-foreground min-w-[80px] w-[10%]">
                             {product.stock}
                           </td>
-                          <td className="py-2 px-4 text-xs font-semibold text-foreground">
+                          <td className="py-2 px-4 text-xs font-semibold text-foreground min-w-[120px] w-[15%]">
                             Rp {product.price.toLocaleString("id-ID")}
                           </td>
-                          <td className="py-2 px-4">
+                          <td className="py-2 px-4 min-w-[120px] w-[15%]">
                             {getStockStatus(product.stock)}
                           </td>
-                          <td className="py-2 px-4">
+                          <td className="py-2 px-4 min-w-[100px] w-[10%]">
                             <div className="flex items-center gap-3">
                               <p
                                 onClick={() => handleEdit(product)}

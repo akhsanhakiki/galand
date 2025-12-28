@@ -52,7 +52,7 @@ export default function ProductForm({
     e.preventDefault();
 
     if (!name || price === undefined || stock === undefined) {
-      alert("Please fill in all required fields");
+      alert("Harap isi semua field yang wajib");
       return;
     }
 
@@ -79,7 +79,7 @@ export default function ProductForm({
       onClose();
       resetForm();
     } catch (error) {
-      alert("Failed to save product");
+      alert("Gagal menyimpan produk");
     } finally {
       setIsSubmitting(false);
     }
@@ -109,7 +109,7 @@ export default function ProductForm({
           <form onSubmit={handleSubmit}>
             <Modal.Header>
               <Modal.Heading>
-                {product ? "Edit Product" : "Create Product"}
+                {product ? "Edit Produk" : "Buat Produk"}
               </Modal.Heading>
             </Modal.Header>
             <Modal.Body>
@@ -120,8 +120,8 @@ export default function ProductForm({
                   onChange={setName}
                   value={name}
                 >
-                  <Label>Product Name</Label>
-                  <Input placeholder="Enter product name" />
+                  <Label>Nama Produk</Label>
+                  <Input placeholder="Masukkan nama produk" />
                 </TextField>
 
                 <NumberField
@@ -136,7 +136,7 @@ export default function ProductForm({
                   value={price}
                   onChange={setPrice}
                 >
-                  <Label>Price</Label>
+                  <Label>Harga</Label>
                   <NumberField.Group>
                     <NumberField.DecrementButton />
                     <NumberField.Input className="w-full" />
@@ -149,8 +149,8 @@ export default function ProductForm({
                   onChange={setDescription}
                   value={description}
                 >
-                  <Label>Description</Label>
-                  <TextArea placeholder="Enter product description" rows={3} />
+                  <Label>Deskripsi</Label>
+                  <TextArea placeholder="Masukkan deskripsi produk" rows={3} />
                 </TextField>
 
                 <NumberField
@@ -160,7 +160,7 @@ export default function ProductForm({
                   value={stock}
                   onChange={setStock}
                 >
-                  <Label>Stock</Label>
+                  <Label>Stok</Label>
                   <NumberField.Group>
                     <NumberField.DecrementButton />
                     <NumberField.Input className="w-full" />
@@ -175,16 +175,16 @@ export default function ProductForm({
                 slot="close"
                 variant="secondary"
               >
-                Cancel
+                Batal
               </Button>
               <Button isPending={isSubmitting} type="submit" variant="primary">
                 {isSubmitting ? (
                   <>
                     <Spinner color="current" size="sm" />
-                    Saving...
+                    Menyimpan...
                   </>
                 ) : (
-                  "Save"
+                  "Simpan"
                 )}
               </Button>
             </Modal.Footer>

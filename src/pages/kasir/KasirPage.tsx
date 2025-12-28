@@ -164,7 +164,7 @@ const KasirPage = () => {
   };
 
   return (
-    <div className="flex flex-col w-full gap-6 h-full">
+    <div className="flex flex-col w-full gap-5 h-full">
       <div className="flex flex-col gap-1">
         <h1 className="text-xl font-bold text-foreground">Kasir</h1>
         <p className="text-muted text-sm">
@@ -172,8 +172,8 @@ const KasirPage = () => {
         </p>
       </div>
 
-      <div className="flex flex-row gap-4 h-full">
-        <div className="w-8/12">
+      <div className="flex flex-row gap-4 flex-1 min-h-0 items-stretch">
+        <div className="w-8/12 h-full">
           {loading ? (
             <div className="flex items-center justify-center p-8">
               <Spinner size="lg" />
@@ -207,89 +207,96 @@ const KasirPage = () => {
                   </SearchField.Group>
                 </SearchField>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {paginatedProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    className={`p-4 rounded-xl hover:shadow-sm transition-all h-auto flex flex-col items-start justify-start gap-1 border ${
-                      product.stock <= 0
-                        ? "opacity-50 cursor-not-allowed"
-                        : "cursor-pointer"
-                    }`}
-                    onClick={() => addToCart(product)}
-                  >
-                    <p className="font-semibold text-foreground text-sm">
-                      {product.name}
-                    </p>
-                    <div className="flex flex-row gap-2 w-full items-center justify-between">
-                      <p className="text-accent font-medium text-sm">
-                        Rp {product.price.toLocaleString("id-ID")}
-                      </p>
-                      <p className="text-xs text-muted mt-1">
-                        Stok:{" "}
-                        <span className="text-foreground font-medium text-xs">
-                          {product.stock}
-                        </span>
-                      </p>
+              <div className="flex flex-col h-full overflow-hidden gap-1">
+                <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+                  <div className="overflow-y-auto overflow-x-auto flex-1">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      {paginatedProducts.map((product) => (
+                        <div
+                          key={product.id}
+                          className={`p-4 rounded-xl hover:shadow-sm transition-all h-auto flex flex-col items-start justify-start gap-1 border ${
+                            product.stock <= 0
+                              ? "opacity-50 cursor-not-allowed"
+                              : "cursor-pointer"
+                          }`}
+                          onClick={() => addToCart(product)}
+                        >
+                          <p className="font-semibold text-foreground text-sm">
+                            {product.name}
+                          </p>
+                          <div className="flex flex-row gap-2 w-full items-center justify-between">
+                            <p className="text-accent font-medium text-sm">
+                              Rp {product.price.toLocaleString("id-ID")}
+                            </p>
+                            <p className="text-xs text-muted mt-1">
+                              Stok:{" "}
+                              <span className="text-foreground font-medium text-xs">
+                                {product.stock}
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
-              {totalPages > 1 && (
-                <div className="flex flex-row gap-2 justify-between items-center pt-4 border-t border-separator">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm text-muted">Data per halaman:</p>
-                    <Select
-                      className="w-16"
-                      value={itemsPerPage.toString()}
-                      onChange={(value) => {
-                        if (value) {
-                          setItemsPerPage(Number(value));
-                        }
-                      }}
-                    >
-                      <Select.Trigger className="bg-foreground/5 shadow-none">
-                        <Select.Value />
-                        <Select.Indicator />
-                      </Select.Trigger>
-                      <Select.Popover>
-                        <ListBox>
-                          <ListBox.Item id="6" textValue="6">
-                            6
-                            <ListBox.ItemIndicator />
-                          </ListBox.Item>
-                          <ListBox.Item id="12" textValue="12">
-                            12
-                            <ListBox.ItemIndicator />
-                          </ListBox.Item>
-                          <ListBox.Item id="18" textValue="18">
-                            18
-                            <ListBox.ItemIndicator />
-                          </ListBox.Item>
-                          <ListBox.Item id="24" textValue="24">
-                            24
-                            <ListBox.ItemIndicator />
-                          </ListBox.Item>
-                        </ListBox>
-                      </Select.Popover>
-                    </Select>
-                  </div>
+                </div>
+                {totalPages > 1 && (
+                  <div className="flex flex-row gap-2 justify-between items-center pt-4 border-t border-separator">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm text-muted">Data per halaman:</p>
+                      <Select
+                        className="w-16"
+                        value={itemsPerPage.toString()}
+                        onChange={(value) => {
+                          if (value) {
+                            setItemsPerPage(Number(value));
+                          }
+                        }}
+                      >
+                        <Select.Trigger className="bg-foreground/5 shadow-none">
+                          <Select.Value />
+                          <Select.Indicator />
+                        </Select.Trigger>
+                        <Select.Popover>
+                          <ListBox>
+                            <ListBox.Item id="6" textValue="6">
+                              6
+                              <ListBox.ItemIndicator />
+                            </ListBox.Item>
+                            <ListBox.Item id="12" textValue="12">
+                              12
+                              <ListBox.ItemIndicator />
+                            </ListBox.Item>
+                            <ListBox.Item id="18" textValue="18">
+                              18
+                              <ListBox.ItemIndicator />
+                            </ListBox.Item>
+                            <ListBox.Item id="24" textValue="24">
+                              24
+                              <ListBox.ItemIndicator />
+                            </ListBox.Item>
+                          </ListBox>
+                        </Select.Popover>
+                      </Select>
+                    </div>
 
-                  <div className="flex items-center justify-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onPress={() =>
-                        setCurrentPage((prev) => Math.max(1, prev - 1))
-                      }
-                      isDisabled={currentPage === 1}
-                      isIconOnly
-                    >
-                      <LuChevronLeft className="w-3 h-3" />
-                    </Button>
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                        (page) => (
+                    <div className="flex items-center justify-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onPress={() =>
+                          setCurrentPage((prev) => Math.max(1, prev - 1))
+                        }
+                        isDisabled={currentPage === 1}
+                        isIconOnly
+                      >
+                        <LuChevronLeft className="w-3 h-3" />
+                      </Button>
+                      <div className="flex items-center gap-1">
+                        {Array.from(
+                          { length: totalPages },
+                          (_, i) => i + 1
+                        ).map((page) => (
                           <Button
                             key={page}
                             size="sm"
@@ -301,39 +308,41 @@ const KasirPage = () => {
                           >
                             {page}
                           </Button>
-                        )
-                      )}
+                        ))}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onPress={() =>
+                          setCurrentPage((prev) =>
+                            Math.min(totalPages, prev + 1)
+                          )
+                        }
+                        isDisabled={currentPage === totalPages}
+                        isIconOnly
+                      >
+                        <LuChevronRight className="w-3 h-3" />
+                      </Button>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onPress={() =>
-                        setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-                      }
-                      isDisabled={currentPage === totalPages}
-                      isIconOnly
-                    >
-                      <LuChevronRight className="w-3 h-3" />
-                    </Button>
+                    {totalPages > 0 && (
+                      <div className="text-sm text-muted">
+                        {(currentPage - 1) * itemsPerPage + 1} -{" "}
+                        {Math.min(
+                          currentPage * itemsPerPage,
+                          filteredProducts.length
+                        )}{" "}
+                        dari {filteredProducts.length} produk
+                      </div>
+                    )}
                   </div>
-                  {totalPages > 0 && (
-                    <div className="text-sm text-muted">
-                      {(currentPage - 1) * itemsPerPage + 1} -{" "}
-                      {Math.min(
-                        currentPage * itemsPerPage,
-                        filteredProducts.length
-                      )}{" "}
-                      dari {filteredProducts.length} produk
-                    </div>
-                  )}
-                </div>
-              )}
+                )}
+              </div>
             </div>
           )}
         </div>
 
         <div className="w-4/12 h-full">
-          <div className="p-4 sticky top-4 bg-surface rounded-2xl h-full">
+          <div className="p-4 sticky top-4 bg-surface rounded-2xl h-full flex flex-col">
             <div className="pb-3 flex flex-col gap-1">
               <h2 className="text-md font-bold text-foreground">Keranjang</h2>
               <p className="text-xs text-muted">
@@ -342,101 +351,108 @@ const KasirPage = () => {
                   : "Tammbahkan produk ke keranjang"}
               </p>
             </div>
-            <div className="flex flex-col min-h-36 overflow-y-auto">
-              {cart.length === 0 ? (
-                <div className="flex flex-col items-center justify-center gap-6 h-full">
-                  <LuShoppingBasket className="w-24 h-24 text-accent rotate-45 opacity-50" />
-                  <p className="text-center text-muted text-sm">
-                    Keranjang kosong
-                  </p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="sticky top-0 bg-surface z-10">
-                      <tr className="border-b border-separator">
-                        <th className="text-left py-2 px-2 text-xs font-semibold text-muted">
-                          Nama Barang
-                        </th>
-                        <th className="text-left py-2 px-2 text-xs font-semibold text-muted">
-                          Pembelian
-                        </th>
-                        <th className="text-right py-2 px-2 text-xs font-semibold text-muted">
-                          Total Harga
-                        </th>
-                        <th className="text-center py-2 px-2 text-xs font-semibold text-muted w-12">
-                          Aksi
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {cart.map((item) => {
-                        const itemTotal = item.product.price * item.quantity;
-                        return (
-                          <tr
-                            key={item.product_id}
-                            className="hover:bg-surface-secondary/20 transition-colors"
-                          >
-                            <td className="py-2 px-2">
-                              <p className="text-xs font-medium text-foreground">
-                                {item.product.name}
-                              </p>
-                            </td>
-                            <td className="py-2 px-2">
-                              <div className="flex items-center gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  isIconOnly
-                                  className="w-5 h-5 border"
-                                  onPress={() =>
-                                    updateQuantity(item.product_id, -1)
-                                  }
-                                >
-                                  <LuMinus className="w-2.5 h-2.5" />
-                                </Button>
-                                <span className="text-xs font-medium text-foreground min-w-[20px] text-center">
-                                  {item.quantity}
-                                </span>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  isIconOnly
-                                  className="w-5 h-5 border"
-                                  onPress={() =>
-                                    updateQuantity(item.product_id, 1)
-                                  }
-                                  isDisabled={
-                                    item.quantity >= item.product.stock
-                                  }
-                                >
-                                  <LuPlus className="w-2.5 h-2.5" />
-                                </Button>
-                              </div>
-                            </td>
-                            <td className="py-2 px-2 text-right">
-                              <p className="text-xs font-medium text-foreground">
-                                Rp {itemTotal.toLocaleString("id-ID")}
-                              </p>
-                            </td>
-                            <td className="py-2 px-2 text-center w-12">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                isIconOnly
-                                className="w-5 h-5"
-                                onPress={() => removeFromCart(item.product_id)}
-                              >
-                                <LuTrash2 className="w-3 h-3" />
-                              </Button>
-                            </td>
+            <div className="flex flex-col h-full overflow-hidden gap-1">
+              <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+                <div className="overflow-y-auto overflow-x-auto flex-1">
+                  {cart.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center gap-6 h-full">
+                      <LuShoppingBasket className="w-24 h-24 text-accent rotate-45 opacity-50" />
+                      <p className="text-center text-muted text-sm">
+                        Keranjang kosong
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="sticky top-0 bg-surface z-10">
+                          <tr className="border-b border-separator">
+                            <th className="text-left py-2 px-2 text-xs font-semibold text-muted">
+                              Nama Barang
+                            </th>
+                            <th className="text-left py-2 px-2 text-xs font-semibold text-muted">
+                              Pembelian
+                            </th>
+                            <th className="text-right py-2 px-2 text-xs font-semibold text-muted">
+                              Total Harga
+                            </th>
+                            <th className="text-center py-2 px-2 text-xs font-semibold text-muted w-12">
+                              Aksi
+                            </th>
                           </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                        </thead>
+                        <tbody>
+                          {cart.map((item) => {
+                            const itemTotal =
+                              item.product.price * item.quantity;
+                            return (
+                              <tr
+                                key={item.product_id}
+                                className="hover:bg-surface-secondary/20 transition-colors"
+                              >
+                                <td className="py-2 px-2">
+                                  <p className="text-xs font-medium text-foreground">
+                                    {item.product.name}
+                                  </p>
+                                </td>
+                                <td className="py-2 px-2">
+                                  <div className="flex items-center gap-1">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      isIconOnly
+                                      className="w-5 h-5 border"
+                                      onPress={() =>
+                                        updateQuantity(item.product_id, -1)
+                                      }
+                                    >
+                                      <LuMinus className="w-2.5 h-2.5" />
+                                    </Button>
+                                    <span className="text-xs font-medium text-foreground min-w-[20px] text-center">
+                                      {item.quantity}
+                                    </span>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      isIconOnly
+                                      className="w-5 h-5 border"
+                                      onPress={() =>
+                                        updateQuantity(item.product_id, 1)
+                                      }
+                                      isDisabled={
+                                        item.quantity >= item.product.stock
+                                      }
+                                    >
+                                      <LuPlus className="w-2.5 h-2.5" />
+                                    </Button>
+                                  </div>
+                                </td>
+                                <td className="py-2 px-2 text-right">
+                                  <p className="text-xs font-medium text-foreground">
+                                    Rp {itemTotal.toLocaleString("id-ID")}
+                                  </p>
+                                </td>
+                                <td className="py-2 px-2 text-center w-12">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    isIconOnly
+                                    className="w-5 h-5"
+                                    onPress={() =>
+                                      removeFromCart(item.product_id)
+                                    }
+                                  >
+                                    <LuTrash2 className="w-3 h-3" />
+                                  </Button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
             {cart.length > 0 && (
               <>
