@@ -342,7 +342,7 @@ const KasirPage = () => {
                   : "Tammbahkan produk ke keranjang"}
               </p>
             </div>
-            <div className="flex flex-col min-h-36 overflow-y-auto h-full">
+            <div className="flex flex-col min-h-36 overflow-y-auto">
               {cart.length === 0 ? (
                 <div className="flex flex-col items-center justify-center gap-6 h-full">
                   <LuShoppingBasket className="w-24 h-24 text-accent rotate-45 opacity-50" />
@@ -451,7 +451,11 @@ const KasirPage = () => {
                     </span>
                   </div>
                   <div className="flex flex-row gap-2">
-                    <Button variant="ghost" size="sm">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onPress={() => setCart([])}
+                    >
                       Cancel
                     </Button>
                     <Button
