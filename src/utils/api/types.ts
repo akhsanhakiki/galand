@@ -53,6 +53,7 @@ export interface Transaction {
 export interface TransactionCreate {
   items: TransactionItemCreate[];
   created_at?: string;
+  discount_code?: string;
 }
 
 export interface Discount {

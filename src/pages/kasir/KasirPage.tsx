@@ -9,6 +9,10 @@ import {
   SearchField,
   Select,
   ListBox,
+  TextField,
+  Label,
+  Input,
+  InputGroup,
 } from "@heroui/react";
 import {
   LuReceipt,
@@ -37,6 +41,8 @@ const KasirPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(12);
+  const [discountCode, setDiscountCode] = useState("");
+  const [transactionDateTime, setTransactionDateTime] = useState("");
 
   useEffect(() => {
     fetchProducts();
@@ -149,13 +155,33 @@ const KasirPage = () => {
 
     try {
       setIsSubmitting(true);
-      await createTransaction({
+      const transactionData: {
+        items: Array<{ product_id: number; quantity: number }>;
+        created_at?: string;
+        discount_code?: string;
+      } = {
         items: cart.map((item) => ({
           product_id: item.product_id,
           quantity: item.quantity,
         })),
-      });
+      };
+
+      // Only include discount_code if provided
+      if (discountCode.trim()) {
+        transactionData.discount_code = discountCode.trim();
+      }
+
+      // Only include created_at if a datetime is provided
+      if (transactionDateTime) {
+        // Convert datetime-local format (YYYY-MM-DDTHH:mm) to ISO string
+        const date = new Date(transactionDateTime);
+        transactionData.created_at = date.toISOString();
+      }
+
+      await createTransaction(transactionData);
       setCart([]);
+      setDiscountCode("");
+      setTransactionDateTime("");
     } catch (error) {
       // Error handling
     } finally {
@@ -457,8 +483,36 @@ const KasirPage = () => {
             {cart.length > 0 && (
               <>
                 <Separator className="my-3" />
-                <div className="flex flex-col pt-3 items-end gap-6">
-                  <div className="flex items-center justify-between w-full">
+                <div className="flex flex-col pt-3 gap-2">
+                  <div className="flex flex-row gap-2 items-end">
+                    <TextField
+                      value={discountCode}
+                      onChange={setDiscountCode}
+                      className="flex-1"
+                    >
+                      <Label className="text-xs">Kode Diskon</Label>
+                      <InputGroup className="shadow-none border">
+                        <InputGroup.Input
+                          placeholder="Kode diskon"
+                          className="text-xs"
+                        />
+                      </InputGroup>
+                    </TextField>
+                    <TextField className="flex-1">
+                      <Label className="text-xs">Waktu Transaksi</Label>
+                      <InputGroup className="shadow-none border">
+                        <input
+                          type="datetime-local"
+                          value={transactionDateTime}
+                          onChange={(e) =>
+                            setTransactionDateTime(e.target.value)
+                          }
+                          className="w-full bg-transparent border-0 outline-none px-3 py-2 text-xs text-foreground placeholder:text-muted focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                        />
+                      </InputGroup>
+                    </TextField>
+                  </div>
+                  <div className="flex items-center justify-between w-full py-2">
                     <span className="text-sm font-semibold text-foreground">
                       Total:
                     </span>
@@ -466,11 +520,15 @@ const KasirPage = () => {
                       Rp {total.toLocaleString("id-ID")}
                     </span>
                   </div>
-                  <div className="flex flex-row gap-2">
+                  <div className="flex flex-row gap-2 justify-end">
                     <Button
                       variant="ghost"
                       size="sm"
-                      onPress={() => setCart([])}
+                      onPress={() => {
+                        setCart([]);
+                        setDiscountCode("");
+                        setTransactionDateTime("");
+                      }}
                     >
                       Cancel
                     </Button>
