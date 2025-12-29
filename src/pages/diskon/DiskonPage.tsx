@@ -208,9 +208,7 @@ const DiskonPage = () => {
                             className="p-4 rounded-xl hover:shadow-sm transition-all h-auto flex flex-col items-start justify-start gap-1 border"
                           >
                             <div className="flex items-center gap-2 w-full">
-                              <Surface className="p-2 rounded-lg bg-accent/10">
-                                <LuTag className="w-3 h-3 text-accent" />
-                              </Surface>
+                              <LuTag className="w-4 h-4 text-accent" />
                               <p className="font-semibold text-foreground text-sm flex-1 truncate">
                                 {discount.name}
                               </p>
