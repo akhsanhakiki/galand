@@ -49,7 +49,7 @@ const GudangPage = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(20);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const stickyColumnRef = useRef<HTMLDivElement>(null);
 
@@ -473,9 +473,9 @@ const GudangPage = () => {
                                 maxWidth={400}
                                 onResize={handleResize}
                                 isHeader
-                                className="sticky-column-header text-left py-3 px-4 text-sm font-semibold text-muted bg-surface truncate whitespace-nowrap overflow-hidden text-ellipsis h-12 max-h-12 box-border align-middle z-70 border-b border-separator"
+                                className="sticky-column-header text-left py-3 px-4 text-sm font-semibold text-muted bg-surface truncate overflow-hidden text-ellipsis h-12 max-h-12 z-70 border-b border-separator"
                               >
-                                <div className="truncate flex items-center h-full whitespace-nowrap overflow-hidden text-ellipsis">
+                                <div className="truncate flex items-center h-full  overflow-hidden text-ellipsis">
                                   Nama Produk
                                 </div>
                               </ResizableCell>
@@ -485,10 +485,10 @@ const GudangPage = () => {
                             {paginatedProducts.map((product, index) => (
                               <tr
                                 key={product.id}
-                                className="hover:bg-foreground/5 transition-colors group h-12 max-h-12"
+                                className="hover:bg-foreground/5 transition-colors group h-10 max-h-10"
                               >
                                 <td
-                                  className={`sticky-column-cell py-2 px-4 text-xs font-medium text-foreground transition-colors bg-surface group-hover:bg-foreground/5 z-10 border-b border-separator h-12 max-h-12 box-border align-middle overflow-hidden ${
+                                  className={`sticky-column-cell py-1.5 px-4 text-xs font-medium text-foreground transition-colors bg-surface group-hover:bg-foreground/5 z-10 border-b h-10 max-h-10 overflow-hidden ${
                                     index === paginatedProducts.length - 1
                                       ? "border-b-0"
                                       : ""
@@ -640,14 +640,14 @@ const GudangPage = () => {
                             {paginatedProducts.map((product, index) => (
                               <tr
                                 key={product.id}
-                                className={`hover:bg-foreground/5 transition-colors group h-12 max-h-12 ${
+                                className={`hover:bg-foreground/5 transition-colors group h-10 max-h-10 ${
                                   index === paginatedProducts.length - 1
                                     ? "[&>td]:border-b-0"
                                     : ""
                                 }`}
                               >
                                 <td
-                                  className="py-2 px-4 text-xs text-foreground border-r border-b border-separator h-12 max-h-12 box-border align-middle overflow-hidden"
+                                  className="py-1.5 px-4 text-xs text-foreground border-r border-b border-separator h-10 max-h-10 box-border align-middle overflow-hidden"
                                   style={{
                                     width: `${
                                       columnWidths["deskripsi"] || 250
@@ -667,7 +667,7 @@ const GudangPage = () => {
                                   </div>
                                 </td>
                                 <td
-                                  className="py-2 px-4 text-xs font-semibold text-foreground border-r border-b border-separator h-12 max-h-12 box-border align-middle overflow-hidden"
+                                  className="py-1.5 px-4 text-xs font-semibold text-foreground border-r border-b border-separator h-10 max-h-10 box-border align-middle overflow-hidden"
                                   style={{
                                     width: `${columnWidths["stok"] || 100}px`,
                                     minWidth: `${
@@ -683,7 +683,7 @@ const GudangPage = () => {
                                   </div>
                                 </td>
                                 <td
-                                  className="py-2 px-4 text-xs font-semibold text-foreground border-r border-b border-separator h-12 max-h-12 box-border align-middle overflow-hidden"
+                                  className="py-1.5 px-4 text-xs font-semibold text-foreground border-r border-b border-separator h-10 max-h-10 box-border align-middle overflow-hidden"
                                   style={{
                                     width: `${columnWidths["harga"] || 120}px`,
                                     minWidth: `${
@@ -699,7 +699,7 @@ const GudangPage = () => {
                                   </div>
                                 </td>
                                 <td
-                                  className="py-2 px-4 text-xs font-semibold text-foreground border-r border-b border-separator h-12 max-h-12 box-border align-middle overflow-hidden"
+                                  className="py-1.5 px-4 text-xs font-semibold text-foreground border-r border-b border-separator h-10 max-h-10 box-border align-middle overflow-hidden"
                                   style={{
                                     width: `${columnWidths["hpp"] || 120}px`,
                                     minWidth: `${columnWidths["hpp"] || 120}px`,
@@ -714,7 +714,7 @@ const GudangPage = () => {
                                   </div>
                                 </td>
                                 <td
-                                  className="py-2 px-4 text-xs font-semibold text-foreground border-r border-b border-separator h-12 max-h-12 box-border align-middle overflow-hidden"
+                                  className="py-1.5 px-4 text-xs font-semibold text-foreground border-r border-b border-separator h-10 max-h-10 box-border align-middle overflow-hidden"
                                   style={{
                                     width: `${
                                       columnWidths["jumlah-bundle"] || 120
@@ -732,7 +732,7 @@ const GudangPage = () => {
                                   </div>
                                 </td>
                                 <td
-                                  className="py-2 px-4 text-xs font-semibold text-foreground border-r border-b border-separator h-12 max-h-12 box-border align-middle overflow-hidden"
+                                  className="py-1.5 px-4 text-xs font-semibold text-foreground border-r border-b border-separator h-10 max-h-10 box-border align-middle overflow-hidden"
                                   style={{
                                     width: `${
                                       columnWidths["harga-bundle"] || 120
@@ -753,7 +753,7 @@ const GudangPage = () => {
                                   </div>
                                 </td>
                                 <td
-                                  className="py-2 px-4 border-r border-b border-separator h-12 max-h-12 box-border align-middle overflow-hidden"
+                                  className="py-1.5 px-4 border-r border-b border-separator h-10 max-h-10 box-border align-middle overflow-hidden"
                                   style={{
                                     width: `${columnWidths["status"] || 120}px`,
                                     minWidth: `${
@@ -769,7 +769,7 @@ const GudangPage = () => {
                                   </div>
                                 </td>
                                 <td
-                                  className="py-2 px-4 border-b border-separator h-12 max-h-12 box-border align-middle overflow-hidden"
+                                  className="py-1.5 px-4 border-b border-separator h-10 max-h-10 box-border align-middle overflow-hidden"
                                   style={{
                                     width: `${columnWidths["aksi"] || 120}px`,
                                     minWidth: `${
@@ -827,20 +827,24 @@ const GudangPage = () => {
                       </Select.Trigger>
                       <Select.Popover>
                         <ListBox>
-                          <ListBox.Item id="10" textValue="10">
-                            10
-                            <ListBox.ItemIndicator />
-                          </ListBox.Item>
                           <ListBox.Item id="20" textValue="20">
                             20
                             <ListBox.ItemIndicator />
                           </ListBox.Item>
+                          <ListBox.Item id="20" textValue="20">
+                            40
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
                           <ListBox.Item id="30" textValue="30">
-                            30
+                            60
                             <ListBox.ItemIndicator />
                           </ListBox.Item>
                           <ListBox.Item id="40" textValue="40">
-                            40
+                            80
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                          <ListBox.Item id="50" textValue="50">
+                            100
                             <ListBox.ItemIndicator />
                           </ListBox.Item>
                         </ListBox>
