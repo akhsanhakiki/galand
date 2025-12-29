@@ -7,6 +7,9 @@ export type {
   TransactionCreate,
   TransactionItem,
   TransactionItemCreate,
+  Discount,
+  DiscountCreate,
+  DiscountUpdate,
 } from "./types";
 
 // Re-export product functions
@@ -24,3 +27,13 @@ export {
   getTransaction,
   getTransactions,
 } from "./transactions";
+
+// Re-export discount functions
+export {
+  createDiscount,
+  deleteDiscount,
+  getDiscount,
+  getDiscountByCode,
+  getDiscounts,
+  updateDiscount,
+} from "./discounts";

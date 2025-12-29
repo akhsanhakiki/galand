@@ -790,7 +790,7 @@ const GudangPage = () => {
                                     <button
                                       onClick={() => handleDelete(product.id)}
                                       disabled={deletingId === product.id}
-                                      className="text-xs text-primary hover:text-primary-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                      className="text-xs text-danger hover:text-danger-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                       title="Hapus"
                                     >
                                       {deletingId === product.id ? (

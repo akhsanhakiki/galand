@@ -54,3 +54,28 @@ export interface TransactionCreate {
   items: TransactionItemCreate[];
   created_at?: string;
 }
+
+export interface Discount {
+  id: number;
+  name: string;
+  code: string;
+  type: "individual_item" | "for_all_item";
+  percentage: number;
+  product_id: number;
+}
+
+export interface DiscountCreate {
+  name: string;
+  code: string;
+  type: "individual_item" | "for_all_item";
+  percentage: number;
+  product_id?: number;
+}
+
+export interface DiscountUpdate {
+  name?: string | null;
+  code?: string | null;
+  type?: "individual_item" | "for_all_item" | null;
+  percentage?: number | null;
+  product_id?: number | null;
+}
