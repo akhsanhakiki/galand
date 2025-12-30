@@ -1,6 +1,7 @@
 "use client";
 
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { CartProvider } from "../contexts/CartContext";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -9,7 +10,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       defaultTheme="system"
       enableSystem
     >
-      {children}
+      <CartProvider>{children}</CartProvider>
     </NextThemesProvider>
   );
 }

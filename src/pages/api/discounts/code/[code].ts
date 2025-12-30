@@ -21,7 +21,10 @@ export const GET: APIRoute = async ({ params }) => {
       );
     }
 
-    const response = await fetch(`${API_BASE_URL}/discounts/code/${code}`, {
+    // Astro already decodes the URL parameter, so we use it directly
+    // but encode it again for the backend API call
+    const encodedCode = encodeURIComponent(code);
+    const response = await fetch(`${API_BASE_URL}/discounts/code/${encodedCode}`, {
       headers: {
         Accept: "application/json",
       },

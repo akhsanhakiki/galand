@@ -57,6 +57,7 @@ const TransaksiPage = () => {
     { id: "id-transaksi", minWidth: 120, maxWidth: 300, defaultWidth: 150 },
     { id: "total-barang", minWidth: 100, maxWidth: 250, defaultWidth: 130 },
     { id: "jumlah", minWidth: 120, maxWidth: 300, defaultWidth: 150 },
+    { id: "diskon", minWidth: 120, maxWidth: 250, defaultWidth: 150 },
     { id: "tanggal", minWidth: 150, maxWidth: 350, defaultWidth: 200 },
     { id: "aksi", minWidth: 100, maxWidth: 250, defaultWidth: 120 },
   ];
@@ -327,6 +328,17 @@ const TransaksiPage = () => {
                             Jumlah
                           </ResizableCell>
                           <ResizableCell
+                            columnId="diskon"
+                            width={columnWidths["diskon"] || 150}
+                            minWidth={120}
+                            maxWidth={250}
+                            onResize={handleResize}
+                            isHeader
+                            className="text-left py-3 px-4 text-sm font-semibold text-muted border-r border-separator"
+                          >
+                            Diskon
+                          </ResizableCell>
+                          <ResizableCell
                             columnId="tanggal"
                             width={columnWidths["tanggal"] || 200}
                             minWidth={150}
@@ -398,6 +410,16 @@ const TransaksiPage = () => {
                             >
                               Rp{" "}
                               {transaction.total_amount.toLocaleString("id-ID")}
+                            </td>
+                            <td
+                              className="py-2 px-4 text-xs text-foreground border-r border-separator"
+                              style={{
+                                width: `${columnWidths["diskon"] || 150}px`,
+                                minWidth: `${columnWidths["diskon"] || 150}px`,
+                                maxWidth: `${columnWidths["diskon"] || 150}px`,
+                              }}
+                            >
+                              {transaction.discount || "-"}
                             </td>
                             <td
                               className="py-2 px-4 text-xs text-muted border-r border-separator"

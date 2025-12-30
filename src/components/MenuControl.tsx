@@ -35,25 +35,12 @@ const getCurrentPageFromUrl = (): string => {
   return page;
 };
 
-// Helper function to get collapsed state from localStorage
-const getCollapsedStateFromStorage = (): boolean => {
-  if (typeof window === "undefined") return false;
-  const stored = localStorage.getItem("navbar-collapsed");
-  return stored === "true";
-};
-
-// Helper function to save collapsed state to localStorage
-const saveCollapsedStateToStorage = (collapsed: boolean): void => {
-  if (typeof window === "undefined") return;
-  localStorage.setItem("navbar-collapsed", String(collapsed));
-};
-
 const MenuControl = ({
   onMenuClick,
   isMobile = false,
   currentPage: propCurrentPage,
 }: MenuControlProps) => {
-  const [isCollapsed, setIsCollapsed] = useState(getCollapsedStateFromStorage);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [currentPage, setCurrentPage] = useState<string>(
     propCurrentPage || getCurrentPageFromUrl()
   );
@@ -67,11 +54,6 @@ const MenuControl = ({
     updateCurrentPage();
     return () => window.removeEventListener("popstate", updateCurrentPage);
   }, []);
-
-  // Save collapsed state to localStorage whenever it changes
-  useEffect(() => {
-    saveCollapsedStateToStorage(isCollapsed);
-  }, [isCollapsed]);
 
   const handleClick = (menuKey: string) => {
     // Use client-side navigation to avoid page reload

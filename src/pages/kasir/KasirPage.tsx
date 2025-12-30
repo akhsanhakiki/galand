@@ -13,6 +13,7 @@ import {
   Label,
   Input,
   InputGroup,
+  Accordion,
 } from "@heroui/react";
 import {
   LuReceipt,
@@ -24,24 +25,26 @@ import {
   LuChevronRight,
   LuShoppingBasket,
 } from "react-icons/lu";
-import type { Product } from "../../utils/api";
+import type { Product, Discount } from "../../utils/api";
 import { getProducts, createTransaction } from "../../utils/api";
-
-interface CartItem {
-  product_id: number;
-  product: Product;
-  quantity: number;
-}
+import { getDiscountByCode } from "../../utils/api/discounts";
+import { useCart } from "../../contexts/CartContext";
 
 const KasirPage = () => {
+  const { cart, addToCart, updateQuantity, removeFromCart, clearCart } =
+    useCart();
   const [products, setProducts] = useState<Product[]>([]);
-  const [cart, setCart] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(12);
   const [discountCode, setDiscountCode] = useState("");
+  const [validatedDiscount, setValidatedDiscount] = useState<Discount | null>(
+    null
+  );
+  const [discountError, setDiscountError] = useState<string>("");
+  const [isValidatingDiscount, setIsValidatingDiscount] = useState(false);
   const [transactionDateTime, setTransactionDateTime] = useState("");
 
   useEffect(() => {
@@ -60,10 +63,31 @@ const KasirPage = () => {
     }
   };
 
-  const total = cart.reduce(
+  const subtotal = cart.reduce(
     (sum, item) => sum + item.product.price * item.quantity,
     0
   );
+
+  const discountAmount = useMemo(() => {
+    if (!validatedDiscount) return 0;
+
+    if (validatedDiscount.type === "for_all_item") {
+      return (subtotal * validatedDiscount.percentage) / 100;
+    } else if (validatedDiscount.type === "individual_item") {
+      const applicableItems = cart.filter(
+        (item) => item.product_id === validatedDiscount.product_id
+      );
+      const applicableSubtotal = applicableItems.reduce(
+        (sum, item) => sum + item.product.price * item.quantity,
+        0
+      );
+      return (applicableSubtotal * validatedDiscount.percentage) / 100;
+    }
+
+    return 0;
+  }, [validatedDiscount, cart, subtotal]);
+
+  const total = subtotal - discountAmount;
 
   const filteredProducts = useMemo(() => {
     if (!searchQuery) return products;
@@ -98,57 +122,34 @@ const KasirPage = () => {
     setCurrentPage(1);
   }, [itemsPerPage]);
 
-  const addToCart = (product: Product) => {
-    if (product.stock <= 0) {
-      return;
-    }
+  useEffect(() => {
+    const validateDiscount = async () => {
+      const code = discountCode.trim();
 
-    setCart((currentCart) => {
-      const existingItem = currentCart.find(
-        (item) => item.product_id === product.id
-      );
-
-      if (existingItem) {
-        // Check if we can increment (not exceeding stock)
-        if (existingItem.quantity >= product.stock) {
-          return currentCart;
-        }
-        // Increment quantity
-        return currentCart.map((item) =>
-          item.product_id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      } else {
-        // Add new item to cart
-        return [
-          ...currentCart,
-          { product_id: product.id, product, quantity: 1 },
-        ];
+      if (!code) {
+        setValidatedDiscount(null);
+        setDiscountError("");
+        return;
       }
-    });
-  };
 
-  const updateQuantity = (productId: number, delta: number) => {
-    setCart(
-      cart
-        .map((item) => {
-          if (item.product_id === productId) {
-            const newQuantity = item.quantity + delta;
-            const product = item.product;
-            if (newQuantity <= 0) return null;
-            if (newQuantity > product.stock) return item;
-            return { ...item, quantity: newQuantity };
-          }
-          return item;
-        })
-        .filter((item): item is CartItem => item !== null)
-    );
-  };
+      setIsValidatingDiscount(true);
+      setDiscountError("");
 
-  const removeFromCart = (productId: number) => {
-    setCart(cart.filter((item) => item.product_id !== productId));
-  };
+      try {
+        const discount = await getDiscountByCode(code);
+        setValidatedDiscount(discount);
+        setDiscountError("");
+      } catch (error) {
+        setValidatedDiscount(null);
+        setDiscountError("Kode diskon tidak valid");
+      } finally {
+        setIsValidatingDiscount(false);
+      }
+    };
+
+    const timeoutId = setTimeout(validateDiscount, 500);
+    return () => clearTimeout(timeoutId);
+  }, [discountCode]);
 
   const handleCheckout = async () => {
     if (cart.length === 0) return;
@@ -179,8 +180,10 @@ const KasirPage = () => {
       }
 
       await createTransaction(transactionData);
-      setCart([]);
+      clearCart();
       setDiscountCode("");
+      setValidatedDiscount(null);
+      setDiscountError("");
       setTransactionDateTime("");
     } catch (error) {
       // Error handling
@@ -482,51 +485,113 @@ const KasirPage = () => {
             </div>
             {cart.length > 0 && (
               <>
-                <Separator className="my-3" />
                 <div className="flex flex-col pt-3 gap-2">
-                  <div className="flex flex-row gap-2 items-end">
-                    <TextField
-                      value={discountCode}
-                      onChange={setDiscountCode}
-                      className="flex-1"
-                    >
-                      <Label className="text-xs">Kode Diskon</Label>
-                      <InputGroup className="shadow-none border">
-                        <InputGroup.Input
-                          placeholder="Kode diskon"
-                          className="text-xs"
-                        />
-                      </InputGroup>
-                    </TextField>
-                    <TextField className="flex-1">
-                      <Label className="text-xs">Waktu Transaksi</Label>
-                      <InputGroup className="shadow-none border">
-                        <input
-                          type="datetime-local"
-                          value={transactionDateTime}
-                          onChange={(e) =>
-                            setTransactionDateTime(e.target.value)
-                          }
-                          className="w-full bg-transparent border-0 outline-none px-3 py-2 text-xs text-foreground placeholder:text-muted focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                        />
-                      </InputGroup>
-                    </TextField>
-                  </div>
-                  <div className="flex items-center justify-between w-full py-2">
-                    <span className="text-sm font-semibold text-foreground">
-                      Total:
-                    </span>
-                    <span className="text-md font-bold text-accent">
-                      Rp {total.toLocaleString("id-ID")}
-                    </span>
+                  <Accordion className="w-full rounded-2xl overflow-hidden">
+                    <Accordion.Item>
+                      <Accordion.Heading>
+                        <Accordion.Trigger>
+                          <span className="text-xs font-medium text-foreground">
+                            Diskon & Opsi Tambahan
+                          </span>
+                          <Accordion.Indicator />
+                        </Accordion.Trigger>
+                      </Accordion.Heading>
+                      <Accordion.Panel>
+                        <Accordion.Body>
+                          <div className="flex flex-col gap-2">
+                            <div className="flex flex-col gap-1">
+                              <div className="relative">
+                                <TextField
+                                  value={discountCode}
+                                  onChange={setDiscountCode}
+                                  className="w-full"
+                                >
+                                  <Label className="text-xs">Kode Diskon</Label>
+                                  <InputGroup className="shadow-none border">
+                                    <InputGroup.Input
+                                      placeholder="Kode diskon"
+                                      className="text-xs"
+                                      disabled={isValidatingDiscount}
+                                    />
+                                  </InputGroup>
+                                </TextField>
+                                {isValidatingDiscount && (
+                                  <div className="absolute right-3 top-8 flex items-center">
+                                    <Spinner size="sm" />
+                                  </div>
+                                )}
+                              </div>
+                              {discountError && (
+                                <div className="text-xs text-danger">
+                                  {discountError}
+                                </div>
+                              )}
+                              {validatedDiscount && !discountError && (
+                                <div className="text-xs text-success">
+                                  Diskon {validatedDiscount.percentage}%
+                                  diterapkan
+                                  {validatedDiscount.type ===
+                                    "individual_item" && " untuk item tertentu"}
+                                </div>
+                              )}
+                            </div>
+                            <TextField className="w-full">
+                              <Label className="text-xs">Waktu Transaksi</Label>
+                              <InputGroup className="shadow-none border">
+                                <input
+                                  type="datetime-local"
+                                  value={transactionDateTime}
+                                  onChange={(e) =>
+                                    setTransactionDateTime(e.target.value)
+                                  }
+                                  className="w-full bg-transparent border-0 outline-none px-3 py-2 text-xs text-foreground placeholder:text-muted focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                                />
+                              </InputGroup>
+                            </TextField>
+                          </div>
+                        </Accordion.Body>
+                      </Accordion.Panel>
+                    </Accordion.Item>
+                  </Accordion>
+                  <Separator className="my-3" />
+                  <div className="flex flex-col gap-2 py-4">
+                    <div className="flex items-center justify-between w-full">
+                      <span className="text-sm font-semibold text-foreground">
+                        Subtotal:
+                      </span>
+                      <span className="text-sm font-medium text-foreground">
+                        Rp {subtotal.toLocaleString("id-ID")}
+                      </span>
+                    </div>
+                    {validatedDiscount && discountAmount > 0 && (
+                      <div className="flex items-center justify-between w-full">
+                        <span className="text-sm text-muted">
+                          Diskon ({validatedDiscount.percentage}%):
+                        </span>
+                        <span className="text-sm font-medium text-success">
+                          -Rp {discountAmount.toLocaleString("id-ID")}
+                        </span>
+                      </div>
+                    )}
+                    <Separator />
+                    <div className="flex items-center justify-between w-full">
+                      <span className="text-sm font-semibold text-foreground">
+                        Total:
+                      </span>
+                      <span className="text-md font-bold text-accent">
+                        Rp {total.toLocaleString("id-ID")}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex flex-row gap-2 justify-end">
                     <Button
                       variant="ghost"
                       size="sm"
                       onPress={() => {
-                        setCart([]);
+                        clearCart();
                         setDiscountCode("");
+                        setValidatedDiscount(null);
+                        setDiscountError("");
                         setTransactionDateTime("");
                       }}
                     >

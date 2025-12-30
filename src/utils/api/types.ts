@@ -48,6 +48,7 @@ export interface Transaction {
   items: TransactionItem[];
   total_amount: number;
   created_at: string;
+  discount: string | null;
 }
 
 export interface TransactionCreate {

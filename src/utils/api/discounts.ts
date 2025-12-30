@@ -40,7 +40,8 @@ export async function getDiscount(id: number): Promise<Discount> {
 }
 
 export async function getDiscountByCode(code: string): Promise<Discount> {
-  const response = await fetch(`${API_BASE}/code/${code}`, {
+  const encodedCode = encodeURIComponent(code);
+  const response = await fetch(`${API_BASE}/code/${encodedCode}`, {
     headers: {
       Accept: "application/json",
     },
