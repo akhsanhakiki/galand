@@ -57,6 +57,7 @@ const TransaksiPage = () => {
     { id: "id-transaksi", minWidth: 120, maxWidth: 300, defaultWidth: 150 },
     { id: "total-barang", minWidth: 100, maxWidth: 250, defaultWidth: 130 },
     { id: "jumlah", minWidth: 120, maxWidth: 300, defaultWidth: 150 },
+    { id: "profit", minWidth: 120, maxWidth: 300, defaultWidth: 150 },
     { id: "diskon", minWidth: 120, maxWidth: 250, defaultWidth: 150 },
     { id: "tanggal", minWidth: 150, maxWidth: 350, defaultWidth: 200 },
     { id: "aksi", minWidth: 100, maxWidth: 250, defaultWidth: 120 },
@@ -325,7 +326,18 @@ const TransaksiPage = () => {
                             isHeader
                             className="text-left py-3 px-4 text-sm font-semibold text-muted border-r border-separator"
                           >
-                            Jumlah
+                            Total Harga
+                          </ResizableCell>
+                          <ResizableCell
+                            columnId="profit"
+                            width={columnWidths["profit"] || 150}
+                            minWidth={120}
+                            maxWidth={300}
+                            onResize={handleResize}
+                            isHeader
+                            className="text-left py-3 px-4 text-sm font-semibold text-muted border-r border-separator"
+                          >
+                            Profit
                           </ResizableCell>
                           <ResizableCell
                             columnId="diskon"
@@ -398,7 +410,10 @@ const TransaksiPage = () => {
                                 }px`,
                               }}
                             >
-                              {transaction.items?.length || 0}
+                              {transaction.items?.reduce(
+                                (sum, item) => sum + item.quantity,
+                                0
+                              ) || 0}
                             </td>
                             <td
                               className="py-2 px-4 text-xs font-medium text-foreground border-r border-separator"
@@ -410,6 +425,23 @@ const TransaksiPage = () => {
                             >
                               Rp{" "}
                               {transaction.total_amount.toLocaleString("id-ID")}
+                            </td>
+                            <td
+                              className="py-2 px-4 text-xs font-medium text-foreground border-r border-separator"
+                              style={{
+                                width: `${columnWidths["profit"] || 150}px`,
+                                minWidth: `${columnWidths["profit"] || 150}px`,
+                                maxWidth: `${columnWidths["profit"] || 150}px`,
+                              }}
+                            >
+                              {transaction.profit !== null ? (
+                                <>
+                                  Rp{" "}
+                                  {transaction.profit.toLocaleString("id-ID")}
+                                </>
+                              ) : (
+                                "-"
+                              )}
                             </td>
                             <td
                               className="py-2 px-4 text-xs text-foreground border-r border-separator"

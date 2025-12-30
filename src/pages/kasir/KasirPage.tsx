@@ -30,6 +30,24 @@ import { getProducts, createTransaction } from "../../utils/api";
 import { getDiscountByCode } from "../../utils/api/discounts";
 import { useCart } from "../../contexts/CartContext";
 
+// Helper function to calculate item total with bundle pricing
+const calculateItemTotal = (product: Product, quantity: number): number => {
+  // Check if bundle pricing is applicable
+  if (
+    product.bundle_quantity > 0 &&
+    product.bundle_price > 0 &&
+    quantity >= product.bundle_quantity
+  ) {
+    const bundles = Math.floor(quantity / product.bundle_quantity);
+    const itemsInBundles = bundles * product.bundle_quantity;
+    const remaining = quantity % product.bundle_quantity;
+    // bundle_price is per item, so multiply by number of items in bundles
+    return itemsInBundles * product.bundle_price + remaining * product.price;
+  }
+  // Regular pricing
+  return product.price * quantity;
+};
+
 const KasirPage = () => {
   const { cart, addToCart, updateQuantity, removeFromCart, clearCart } =
     useCart();
@@ -63,10 +81,12 @@ const KasirPage = () => {
     }
   };
 
-  const subtotal = cart.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0
-  );
+  const subtotal = useMemo(() => {
+    return cart.reduce(
+      (sum, item) => sum + calculateItemTotal(item.product, item.quantity),
+      0
+    );
+  }, [cart]);
 
   const discountAmount = useMemo(() => {
     if (!validatedDiscount) return 0;
@@ -78,7 +98,7 @@ const KasirPage = () => {
         (item) => item.product_id === validatedDiscount.product_id
       );
       const applicableSubtotal = applicableItems.reduce(
-        (sum, item) => sum + item.product.price * item.quantity,
+        (sum, item) => sum + calculateItemTotal(item.product, item.quantity),
         0
       );
       return (applicableSubtotal * validatedDiscount.percentage) / 100;
@@ -411,8 +431,22 @@ const KasirPage = () => {
                         </thead>
                         <tbody>
                           {cart.map((item) => {
-                            const itemTotal =
-                              item.product.price * item.quantity;
+                            const itemTotal = calculateItemTotal(
+                              item.product,
+                              item.quantity
+                            );
+                            const hasBundle =
+                              item.product.bundle_quantity > 0 &&
+                              item.product.bundle_price > 0 &&
+                              item.quantity >= item.product.bundle_quantity;
+                            const bundles = hasBundle
+                              ? Math.floor(
+                                  item.quantity / item.product.bundle_quantity
+                                )
+                              : 0;
+                            const remaining = hasBundle
+                              ? item.quantity % item.product.bundle_quantity
+                              : 0;
                             return (
                               <tr
                                 key={item.product_id}
@@ -422,6 +456,13 @@ const KasirPage = () => {
                                   <p className="text-xs font-medium text-foreground">
                                     {item.product.name}
                                   </p>
+                                  {hasBundle && (
+                                    <p className="text-xs text-success mt-0.5">
+                                      Bundle: {bundles}x (
+                                      {item.product.bundle_quantity} pcs){" "}
+                                      {remaining > 0 && `+ ${remaining} pcs`}
+                                    </p>
+                                  )}
                                 </td>
                                 <td className="py-2 px-2">
                                   <div className="flex items-center gap-1">

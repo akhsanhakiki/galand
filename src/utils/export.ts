@@ -19,7 +19,7 @@ export const exportToCSV = (transactions: Transaction[]) => {
   const headers = ["ID Transaksi", "Total Barang", "Jumlah", "Tanggal"];
   const rows = transactions.map((t) => [
     t.id.toString(),
-    (t.items?.length || 0).toString(),
+    (t.items?.reduce((sum, item) => sum + item.quantity, 0) || 0).toString(),
     `Rp ${t.total_amount.toLocaleString("id-ID")}`,
     formatDate(t.created_at),
   ]);
@@ -48,7 +48,7 @@ export const exportToCSV = (transactions: Transaction[]) => {
 export const exportToXLSX = (transactions: Transaction[]) => {
   const data = transactions.map((t) => ({
     "ID Transaksi": t.id,
-    "Total Barang": t.items?.length || 0,
+    "Total Barang": t.items?.reduce((sum, item) => sum + item.quantity, 0) || 0,
     Jumlah: t.total_amount,
     Tanggal: formatDate(t.created_at),
   }));
@@ -111,7 +111,7 @@ export const exportToPDF = (transactions: Transaction[]) => {
 
     const row = [
       transaction.id.toString(),
-      (transaction.items?.length || 0).toString(),
+      (transaction.items?.reduce((sum, item) => sum + item.quantity, 0) || 0).toString(),
       `Rp ${transaction.total_amount.toLocaleString("id-ID")}`,
       formatDate(transaction.created_at),
     ];

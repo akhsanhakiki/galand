@@ -49,6 +49,7 @@ export interface Transaction {
   total_amount: number;
   created_at: string;
   discount: string | null;
+  profit: number | null;
 }
 
 export interface TransactionCreate {

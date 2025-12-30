@@ -1,10 +1,11 @@
 "use client";
 
-import { Button, Card, Modal } from "@heroui/react";
-import { useEffect, useState } from "react";
+import { Button, Modal } from "@heroui/react";
+import { useEffect, useState, useMemo } from "react";
 import { LuPrinter } from "react-icons/lu";
-import type { Transaction } from "../utils/api";
+import type { Transaction, Discount } from "../utils/api";
 import { getTransaction } from "../utils/api";
+import { getDiscountByCode } from "../utils/api/discounts";
 import { printTransaction } from "../utils/print";
 
 interface TransactionViewProps {
@@ -20,12 +21,22 @@ export default function TransactionView({
 }: TransactionViewProps) {
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [loading, setLoading] = useState(false);
+  const [discountDetails, setDiscountDetails] = useState<Discount | null>(null);
+  const [loadingDiscount, setLoadingDiscount] = useState(false);
 
   useEffect(() => {
     if (isOpen && transactionId) {
       fetchTransaction();
     }
   }, [isOpen, transactionId]);
+
+  useEffect(() => {
+    if (transaction?.discount) {
+      fetchDiscountDetails(transaction.discount);
+    } else {
+      setDiscountDetails(null);
+    }
+  }, [transaction?.discount]);
 
   const fetchTransaction = async () => {
     if (!transactionId) return;
@@ -40,6 +51,45 @@ export default function TransactionView({
       setLoading(false);
     }
   };
+
+  const fetchDiscountDetails = async (discountCode: string) => {
+    try {
+      setLoadingDiscount(true);
+      const discount = await getDiscountByCode(discountCode);
+      setDiscountDetails(discount);
+    } catch (error) {
+      setDiscountDetails(null);
+    } finally {
+      setLoadingDiscount(false);
+    }
+  };
+
+  const subtotal = useMemo(() => {
+    if (!transaction?.items) return 0;
+    return transaction.items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+  }, [transaction?.items]);
+
+  const discountAmount = useMemo(() => {
+    if (!discountDetails || !transaction?.items) return 0;
+
+    if (discountDetails.type === "for_all_item") {
+      return (subtotal * discountDetails.percentage) / 100;
+    } else if (discountDetails.type === "individual_item") {
+      const applicableItems = transaction.items.filter(
+        (item) => item.product_id === discountDetails.product_id
+      );
+      const applicableSubtotal = applicableItems.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      );
+      return (applicableSubtotal * discountDetails.percentage) / 100;
+    }
+
+    return 0;
+  }, [discountDetails, subtotal, transaction?.items]);
 
   const handlePrint = () => {
     if (!transaction) return;
@@ -112,7 +162,27 @@ export default function TransactionView({
                   </table>
                 </div>
 
-                <div className="border-t border-border pt-4 px-2">
+                <div className="pt-4 px-2">
+                  {transaction.discount && (
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs text-muted">
+                        Discount: {transaction.discount}
+                        {loadingDiscount ? (
+                          <span className="text-xs ml-1">(Loading...)</span>
+                        ) : discountDetails ? (
+                          <span className="text-xs ml-1">
+                            ({discountDetails.percentage}%)
+                          </span>
+                        ) : null}
+                      </span>
+                      {discountAmount > 0 && (
+                        <span className="text-xs font-medium text-success">
+                          -Rp {discountAmount.toLocaleString("id-ID")}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {transaction.discount && <div className="border-t border-border my-2" />}
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-foreground">
                       Total:
