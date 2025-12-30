@@ -71,6 +71,7 @@ const KasirPage = () => {
   const [discountError, setDiscountError] = useState<string>("");
   const [isValidatingDiscount, setIsValidatingDiscount] = useState(false);
   const [transactionDateTime, setTransactionDateTime] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
   const [cartPanelWidth, setCartPanelWidth] = useState(33.33); // Percentage (4/12 = 33.33%)
   const [isResizing, setIsResizing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -233,6 +234,7 @@ const KasirPage = () => {
         items: Array<{ product_id: number; quantity: number }>;
         created_at?: string;
         discount_code?: string;
+        payment_method?: string;
       } = {
         items: cart.map((item) => ({
           product_id: item.product_id,
@@ -252,12 +254,18 @@ const KasirPage = () => {
         transactionData.created_at = date.toISOString();
       }
 
+      // Only include payment_method if provided
+      if (paymentMethod) {
+        transactionData.payment_method = paymentMethod;
+      }
+
       await createTransaction(transactionData);
       clearCart();
       setDiscountCode("");
       setValidatedDiscount(null);
       setDiscountError("");
       setTransactionDateTime("");
+      setPaymentMethod(null);
     } catch (error) {
       // Error handling
     } finally {
@@ -646,6 +654,44 @@ const KasirPage = () => {
                                 />
                               </InputGroup>
                             </TextField>
+                            <Select
+                              className="w-full"
+                              placeholder="Pilih metode pembayaran"
+                              value={paymentMethod}
+                              onChange={(value) => {
+                                if (value) {
+                                  setPaymentMethod(value as string);
+                                } else {
+                                  setPaymentMethod(null);
+                                }
+                              }}
+                            >
+                              <Label className="text-xs">Metode Pembayaran</Label>
+                              <Select.Trigger className="shadow-none border">
+                                <Select.Value />
+                                <Select.Indicator />
+                              </Select.Trigger>
+                              <Select.Popover>
+                                <ListBox>
+                                  <ListBox.Item id="cash" textValue="Cash">
+                                    Cash
+                                    <ListBox.ItemIndicator />
+                                  </ListBox.Item>
+                                  <ListBox.Item id="qris" textValue="Qris">
+                                    Qris
+                                    <ListBox.ItemIndicator />
+                                  </ListBox.Item>
+                                  <ListBox.Item id="transfer_bank" textValue="Transfer Bank">
+                                    Transfer Bank
+                                    <ListBox.ItemIndicator />
+                                  </ListBox.Item>
+                                  <ListBox.Item id="kredit" textValue="Kredit">
+                                    Kredit
+                                    <ListBox.ItemIndicator />
+                                  </ListBox.Item>
+                                </ListBox>
+                              </Select.Popover>
+                            </Select>
                           </div>
                         </Accordion.Body>
                       </Accordion.Panel>
@@ -691,6 +737,7 @@ const KasirPage = () => {
                         setValidatedDiscount(null);
                         setDiscountError("");
                         setTransactionDateTime("");
+                        setPaymentMethod(null);
                       }}
                     >
                       Cancel

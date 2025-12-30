@@ -91,6 +91,17 @@ export default function TransactionView({
     return 0;
   }, [discountDetails, subtotal, transaction?.items]);
 
+  const formatPaymentMethod = (paymentMethod: string | null | undefined) => {
+    if (!paymentMethod) return "-";
+    const methodMap: Record<string, string> = {
+      cash: "Cash",
+      qris: "Qris",
+      transfer_bank: "Transfer Bank",
+      kredit: "Kredit",
+    };
+    return methodMap[paymentMethod] || paymentMethod;
+  };
+
   const handlePrint = () => {
     if (!transaction) return;
     printTransaction(transaction);
@@ -182,7 +193,9 @@ export default function TransactionView({
                       )}
                     </div>
                   )}
-                  {transaction.discount && <div className="border-t border-border my-2" />}
+                  {transaction.discount && (
+                    <div className="border-t border-border my-2" />
+                  )}
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-foreground">
                       Total:
@@ -191,6 +204,16 @@ export default function TransactionView({
                       Rp {transaction.total_amount.toLocaleString("id-ID")}
                     </span>
                   </div>
+                  {transaction.payment_method && (
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-xs text-muted">
+                        Metode Pembayaran:
+                      </span>
+                      <span className="text-xs font-medium text-foreground">
+                        {formatPaymentMethod(transaction.payment_method)}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {transaction.created_at && (

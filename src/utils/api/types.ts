@@ -50,12 +50,14 @@ export interface Transaction {
   created_at: string;
   discount: string | null;
   profit: number | null;
+  payment_method: string | null;
 }
 
 export interface TransactionCreate {
   items: TransactionItemCreate[];
   created_at?: string;
   discount_code?: string;
+  payment_method?: string;
 }
 
 export interface Discount {

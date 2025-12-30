@@ -59,6 +59,7 @@ const TransaksiPage = () => {
     { id: "jumlah", minWidth: 120, maxWidth: 300, defaultWidth: 150 },
     { id: "profit", minWidth: 120, maxWidth: 300, defaultWidth: 150 },
     { id: "diskon", minWidth: 120, maxWidth: 250, defaultWidth: 150 },
+    { id: "metode-pembayaran", minWidth: 130, maxWidth: 250, defaultWidth: 160 },
     { id: "tanggal", minWidth: 150, maxWidth: 350, defaultWidth: 200 },
     { id: "aksi", minWidth: 100, maxWidth: 250, defaultWidth: 120 },
   ];
@@ -167,6 +168,17 @@ const TransaksiPage = () => {
       minute: "2-digit",
       hour12: false,
     });
+  };
+
+  const formatPaymentMethod = (paymentMethod: string | null | undefined) => {
+    if (!paymentMethod) return "-";
+    const methodMap: Record<string, string> = {
+      cash: "Cash",
+      qris: "Qris",
+      transfer_bank: "Transfer Bank",
+      kredit: "Kredit",
+    };
+    return methodMap[paymentMethod] || paymentMethod;
   };
 
   const handleExport = (format: "csv" | "xlsx" | "pdf") => {
@@ -324,6 +336,17 @@ const TransaksiPage = () => {
                             Diskon
                           </ResizableCell>
                           <ResizableCell
+                            columnId="metode-pembayaran"
+                            width={columnWidths["metode-pembayaran"] || 160}
+                            minWidth={130}
+                            maxWidth={250}
+                            onResize={handleResize}
+                            isHeader
+                            className="text-left py-3 px-4 text-sm font-semibold text-muted border-r border-separator"
+                          >
+                            Metode Pembayaran
+                          </ResizableCell>
+                          <ResizableCell
                             columnId="tanggal"
                             width={columnWidths["tanggal"] || 200}
                             minWidth={150}
@@ -433,6 +456,16 @@ const TransaksiPage = () => {
                               }}
                             >
                               {transaction.discount || "-"}
+                            </td>
+                            <td
+                              className="py-2 px-4 text-xs text-foreground border-r border-separator"
+                              style={{
+                                width: `${columnWidths["metode-pembayaran"] || 160}px`,
+                                minWidth: `${columnWidths["metode-pembayaran"] || 160}px`,
+                                maxWidth: `${columnWidths["metode-pembayaran"] || 160}px`,
+                              }}
+                            >
+                              {formatPaymentMethod(transaction.payment_method)}
                             </td>
                             <td
                               className="py-2 px-4 text-xs text-muted border-r border-separator"
