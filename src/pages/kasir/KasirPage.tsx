@@ -283,12 +283,6 @@ const KasirPage = () => {
             <div className="flex items-center justify-center p-8">
               <Spinner size="lg" />
             </div>
-          ) : filteredProducts.length === 0 ? (
-            <div className="text-center py-8 text-muted">
-              {searchQuery
-                ? "Tidak ada produk yang ditemukan"
-                : "Belum ada produk"}
-            </div>
           ) : (
             <div className="flex flex-col gap-4 bg-surface rounded-2xl p-4 h-full">
               <div className="flex flex-row justify-between items-center">
@@ -316,32 +310,42 @@ const KasirPage = () => {
                 <div className="flex-1 overflow-hidden flex flex-col min-h-0">
                   <div className="overflow-y-auto overflow-x-auto flex-1">
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                      {paginatedProducts.map((product) => (
-                        <div
-                          key={product.id}
-                          className={`p-4 rounded-xl hover:shadow-sm transition-all h-auto flex flex-col items-start justify-start gap-1 border ${
-                            product.stock <= 0
-                              ? "opacity-50 cursor-not-allowed"
-                              : "cursor-pointer"
-                          }`}
-                          onClick={() => addToCart(product)}
-                        >
-                          <p className="font-semibold text-foreground text-sm">
-                            {product.name}
+                      {paginatedProducts.length === 0 ? (
+                        <div className="col-span-full flex items-center justify-center py-12">
+                          <p className="text-center text-muted text-sm">
+                            {searchQuery
+                              ? "Tidak ada produk yang ditemukan"
+                              : "Belum ada produk"}
                           </p>
-                          <div className="flex flex-row gap-2 w-full items-center justify-between">
-                            <p className="text-accent font-medium text-sm">
-                              Rp {product.price.toLocaleString("id-ID")}
-                            </p>
-                            <p className="text-xs text-muted mt-1">
-                              Stok:{" "}
-                              <span className="text-foreground font-medium text-xs">
-                                {product.stock}
-                              </span>
-                            </p>
-                          </div>
                         </div>
-                      ))}
+                      ) : (
+                        paginatedProducts.map((product) => (
+                          <div
+                            key={product.id}
+                            className={`p-4 rounded-xl hover:shadow-sm transition-all h-auto flex flex-col items-start justify-start gap-1 border ${
+                              product.stock <= 0
+                                ? "opacity-50 cursor-not-allowed"
+                                : "cursor-pointer"
+                            }`}
+                            onClick={() => addToCart(product)}
+                          >
+                            <p className="font-semibold text-foreground text-sm">
+                              {product.name}
+                            </p>
+                            <div className="flex flex-row gap-2 w-full items-center justify-between">
+                              <p className="text-accent font-medium text-sm">
+                                Rp {product.price.toLocaleString("id-ID")}
+                              </p>
+                              <p className="text-xs text-muted mt-1">
+                                Stok:{" "}
+                                <span className="text-foreground font-medium text-xs">
+                                  {product.stock}
+                                </span>
+                              </p>
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
                 </div>
