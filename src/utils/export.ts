@@ -111,7 +111,9 @@ export const exportToPDF = (transactions: Transaction[]) => {
 
     const row = [
       transaction.id.toString(),
-      (transaction.items?.reduce((sum, item) => sum + item.quantity, 0) || 0).toString(),
+      (
+        transaction.items?.reduce((sum, item) => sum + item.quantity, 0) || 0
+      ).toString(),
       `Rp ${transaction.total_amount.toLocaleString("id-ID")}`,
       formatDate(transaction.created_at),
     ];

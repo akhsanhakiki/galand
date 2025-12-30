@@ -427,7 +427,15 @@ const TransaksiPage = () => {
                               {transaction.total_amount.toLocaleString("id-ID")}
                             </td>
                             <td
-                              className="py-2 px-4 text-xs font-medium text-foreground border-r border-separator"
+                              className={`py-2 px-4 text-xs font-medium border-r border-separator ${
+                                transaction.profit !== null
+                                  ? transaction.profit > 0
+                                    ? "text-success"
+                                    : transaction.profit < 0
+                                    ? "text-danger"
+                                    : "text-foreground"
+                                  : "text-foreground"
+                              }`}
                               style={{
                                 width: `${columnWidths["profit"] || 150}px`,
                                 minWidth: `${columnWidths["profit"] || 150}px`,

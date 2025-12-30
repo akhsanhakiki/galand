@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   Button,
   Surface,
@@ -14,6 +14,7 @@ import {
   Input,
   InputGroup,
   Accordion,
+  NumberField,
 } from "@heroui/react";
 import {
   LuReceipt,
@@ -49,8 +50,14 @@ const calculateItemTotal = (product: Product, quantity: number): number => {
 };
 
 const KasirPage = () => {
-  const { cart, addToCart, updateQuantity, removeFromCart, clearCart } =
-    useCart();
+  const {
+    cart,
+    addToCart,
+    updateQuantity,
+    setQuantity,
+    removeFromCart,
+    clearCart,
+  } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -64,6 +71,9 @@ const KasirPage = () => {
   const [discountError, setDiscountError] = useState<string>("");
   const [isValidatingDiscount, setIsValidatingDiscount] = useState(false);
   const [transactionDateTime, setTransactionDateTime] = useState("");
+  const [cartPanelWidth, setCartPanelWidth] = useState(33.33); // Percentage (4/12 = 33.33%)
+  const [isResizing, setIsResizing] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchProducts();
@@ -171,6 +181,49 @@ const KasirPage = () => {
     return () => clearTimeout(timeoutId);
   }, [discountCode]);
 
+  const handleResizeStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsResizing(true);
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  };
+
+  useEffect(() => {
+    if (!isResizing) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current) return;
+
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const containerWidth = containerRect.width;
+      const mouseX = e.clientX - containerRect.left;
+
+      // Calculate cart panel width from right edge
+      // mouseX is the position of the drag handle (left border of cart panel)
+      const cartWidthPixels = containerWidth - mouseX;
+      const newWidthPercent = (cartWidthPixels / containerWidth) * 100;
+
+      // Constrain between 20% and 60%
+      const constrainedWidth = Math.max(20, Math.min(60, newWidthPercent));
+      setCartPanelWidth(constrainedWidth);
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isResizing]);
+
   const handleCheckout = async () => {
     if (cart.length === 0) return;
 
@@ -221,8 +274,11 @@ const KasirPage = () => {
         </p>
       </div>
 
-      <div className="flex flex-row gap-4 flex-1 min-h-0 items-stretch">
-        <div className="w-8/12 h-full">
+      <div
+        ref={containerRef}
+        className="flex flex-row gap-4 flex-1 min-h-0 items-stretch"
+      >
+        <div className="h-full" style={{ width: `${100 - cartPanelWidth}%` }}>
           {loading ? (
             <div className="flex items-center justify-center p-8">
               <Spinner size="lg" />
@@ -390,7 +446,18 @@ const KasirPage = () => {
           )}
         </div>
 
-        <div className="w-4/12 h-full">
+        <div
+          className="h-full relative"
+          style={{ width: `${cartPanelWidth}%` }}
+        >
+          <div
+            className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize bg-transparent z-30 transition-colors group"
+            onMouseDown={handleResizeStart}
+            style={{ marginLeft: "-2px" }}
+            title="Drag to resize"
+          >
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-8 bg-accent/0 group-hover:bg-accent/30 rounded-full transition-colors" />
+          </div>
           <div className="p-4 sticky top-4 bg-surface rounded-2xl h-full flex flex-col">
             <div className="pb-3 flex flex-col gap-1">
               <h2 className="text-md font-bold text-foreground">Keranjang</h2>
@@ -465,36 +532,22 @@ const KasirPage = () => {
                                   )}
                                 </td>
                                 <td className="py-2 px-2">
-                                  <div className="flex items-center gap-1">
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      isIconOnly
-                                      className="w-5 h-5 border"
-                                      onPress={() =>
-                                        updateQuantity(item.product_id, -1)
+                                  <NumberField
+                                    value={item.quantity}
+                                    onChange={(value) => {
+                                      if (value !== undefined) {
+                                        setQuantity(item.product_id, value);
                                       }
-                                    >
-                                      <LuMinus className="w-2.5 h-2.5" />
-                                    </Button>
-                                    <span className="text-xs font-medium text-foreground min-w-[20px] text-center">
-                                      {item.quantity}
-                                    </span>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      isIconOnly
-                                      className="w-5 h-5 border"
-                                      onPress={() =>
-                                        updateQuantity(item.product_id, 1)
-                                      }
-                                      isDisabled={
-                                        item.quantity >= item.product.stock
-                                      }
-                                    >
-                                      <LuPlus className="w-2.5 h-2.5" />
-                                    </Button>
-                                  </div>
+                                    }}
+                                    minValue={1}
+                                    maxValue={item.product.stock}
+                                  >
+                                    <NumberField.Group className="shadow-none border h-6 text-xs rounded-lg">
+                                      <NumberField.DecrementButton className="w-5 h-5 min-w-5 p-1" />
+                                      <NumberField.Input className="w-[40px] text-xs text-center px-0.5 py-0 h-full" />
+                                      <NumberField.IncrementButton className="w-5 h-5 min-w-5 p-1" />
+                                    </NumberField.Group>
+                                  </NumberField>
                                 </td>
                                 <td className="py-2 px-2 text-right">
                                   <p className="text-xs font-medium text-foreground">
