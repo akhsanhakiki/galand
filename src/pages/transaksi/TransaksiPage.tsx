@@ -63,7 +63,7 @@ const TransaksiPage = () => {
     { id: "aksi", minWidth: 100, maxWidth: 250, defaultWidth: 120 },
   ];
 
-  // Initialize with default widths (SSR-safe)
+  // Initialize with default widths (in-memory only)
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>(
     () => {
       const initial: Record<string, number> = {};
@@ -74,27 +74,6 @@ const TransaksiPage = () => {
     }
   );
 
-  // Load from localStorage on client side only
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const loaded: Record<string, number> = {};
-      columnConfigs.forEach((col) => {
-        const saved = localStorage.getItem(`transaksi-column-width-${col.id}`);
-        if (saved) {
-          const width = parseInt(saved, 10);
-          if (width >= col.minWidth && width <= col.maxWidth) {
-            loaded[col.id] = width;
-          } else {
-            loaded[col.id] = col.defaultWidth;
-          }
-        } else {
-          loaded[col.id] = col.defaultWidth;
-        }
-      });
-      setColumnWidths(loaded);
-    }
-  }, []);
-
   const handleResize = useCallback(
     (columnId: string, width: number) => {
       const column = columnConfigs.find((col) => col.id === columnId);
@@ -103,16 +82,10 @@ const TransaksiPage = () => {
           column.minWidth,
           Math.min(column.maxWidth, width)
         );
-        setColumnWidths((prev) => {
-          const updated = { ...prev, [columnId]: clampedWidth };
-          if (typeof window !== "undefined") {
-            localStorage.setItem(
-              `transaksi-column-width-${columnId}`,
-              clampedWidth.toString()
-            );
-          }
-          return updated;
-        });
+        setColumnWidths((prev) => ({
+          ...prev,
+          [columnId]: clampedWidth,
+        }));
       }
     },
     [columnConfigs]
