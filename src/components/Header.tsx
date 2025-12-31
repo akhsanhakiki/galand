@@ -4,6 +4,7 @@ import { Avatar, Button, Surface } from "@heroui/react";
 import { LuUser, LuSun, LuMoon } from "react-icons/lu";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 
 interface HeaderProps {
   collapsed?: boolean;
@@ -15,11 +16,31 @@ export default function Header({
   isMobile = false,
 }: HeaderProps) {
   const { theme, setTheme } = useTheme();
+  const { user, loading: authLoading } = useAuth();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Get user initials for avatar fallback
+  const getUserInitials = () => {
+    if (user?.name) {
+      return user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    if (user?.email) {
+      return user.email[0].toUpperCase();
+    }
+    return "U";
+  };
+
+  const displayName = user?.name || user?.email?.split("@")[0] || "User";
+  const displayEmail = user?.email || "No email";
 
   // Mobile view - full header at top
   if (isMobile) {
@@ -43,15 +64,22 @@ export default function Header({
             <div className="flex items-center gap-2 pl-2">
               <div className="hidden md:flex flex-col items-end">
                 <span className="text-sm font-medium text-foreground">
-                  Admin
+                  {authLoading ? "Loading..." : displayName}
                 </span>
                 <span className="text-xs text-default-500">
-                  admin@kadara.com
+                  {authLoading ? "" : displayEmail}
                 </span>
               </div>
               <Avatar size="md" className="bg-primary text-primary-foreground">
+                {user?.image ? (
+                  <Avatar.Image src={user.image} alt={displayName} />
+                ) : null}
                 <Avatar.Fallback>
-                  <LuUser className="w-4 h-4" />
+                  {authLoading ? (
+                    <LuUser className="w-4 h-4" />
+                  ) : (
+                    getUserInitials()
+                  )}
                 </Avatar.Fallback>
               </Avatar>
             </div>
@@ -81,8 +109,11 @@ export default function Header({
             )}
           </Button>
           <Avatar size="sm" className="bg-primary text-primary-foreground">
+            {user?.image ? (
+              <Avatar.Image src={user.image} alt={displayName} />
+            ) : null}
             <Avatar.Fallback>
-              <LuUser className="w-3 h-3" />
+              {authLoading ? <LuUser className="w-3 h-3" /> : getUserInitials()}
             </Avatar.Fallback>
           </Avatar>
         </div>
@@ -105,16 +136,23 @@ export default function Header({
           </Button>
           <div className="flex items-center gap-2 px-2 pb-1">
             <Avatar size="sm" className="bg-primary text-primary-foreground">
+              {user?.image ? (
+                <Avatar.Image src={user.image} alt={displayName} />
+              ) : null}
               <Avatar.Fallback>
-                <LuUser className="w-3 h-3" />
+                {authLoading ? (
+                  <LuUser className="w-3 h-3" />
+                ) : (
+                  getUserInitials()
+                )}
               </Avatar.Fallback>
             </Avatar>
             <div className="flex flex-col min-w-0">
               <span className="text-xs font-medium text-foreground truncate">
-                Admin
+                {authLoading ? "Loading..." : displayName}
               </span>
               <span className="text-xs text-default-500 truncate">
-                admin@kadara.com
+                {authLoading ? "" : displayEmail}
               </span>
             </div>
           </div>
