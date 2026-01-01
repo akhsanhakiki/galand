@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  Card,
   Button,
   TextField,
   Input,
@@ -10,7 +9,6 @@ import {
   FieldError,
   Description,
   Alert,
-  Separator,
 } from "@heroui/react";
 import { authClient } from "../utils/auth";
 import { FcGoogle } from "react-icons/fc";
@@ -38,30 +36,64 @@ const LoginPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check for OAuth callback - if we're coming back from OAuth, redirect to ringkasan
+    // Check for OAuth callback - if we're coming back from OAuth, complete the flow
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get("token");
     const code = urlParams.get("code");
-    
+    const error = urlParams.get("error");
+
+    // Handle OAuth errors
+    if (error) {
+      setError(error);
+      setLoading(false);
+      // Clean up URL
+      window.history.replaceState({}, "", "/login");
+      return;
+    }
+
     // If we have a token or code in URL, we're coming back from OAuth
-    // The callback API route will handle saving the token, so just check session
+    // The Neon Auth SDK needs to complete the OAuth flow
     if (token || code) {
-      // Give a moment for the callback to process, then check session
-      setTimeout(() => {
-        authClient
-          .getSession()
-          .then((result) => {
-            if (result.data?.session && result.data?.user) {
-              // Redirect to ringkasan after successful OAuth
-              window.location.href = "/ringkasan";
-            } else {
-              setLoading(false);
-            }
-          })
-          .catch(() => {
+      const completeOAuthFlow = async (attempt = 0) => {
+        try {
+          // Wait a bit for any cookies to be set by the SDK
+          await new Promise((resolve) => setTimeout(resolve, 500 + attempt * 300));
+          
+          // Try to get the session - the SDK should have completed the OAuth flow
+          const result = await authClient.getSession();
+          
+          if (result.data?.session && result.data?.user) {
+            setSession(result.data.session);
+            setUser(result.data.user);
+            // Clean up URL parameters
+            window.history.replaceState({}, "", "/ringkasan");
+            // Redirect to ringkasan after successful OAuth
+            window.location.href = "/ringkasan";
+          } else if (attempt < 3) {
+            // Retry up to 3 more times - OAuth flow might need more time
+            completeOAuthFlow(attempt + 1);
+          } else {
+            // If we've exhausted retries, show error
+            setError("Failed to complete authentication. Please try again.");
             setLoading(false);
-          });
-      }, 500);
+            // Clean up URL
+            window.history.replaceState({}, "", "/login");
+          }
+        } catch (err) {
+          if (attempt < 3) {
+            completeOAuthFlow(attempt + 1);
+          } else {
+            setError(
+              err instanceof Error ? err.message : "Authentication failed. Please try again."
+            );
+            setLoading(false);
+            // Clean up URL
+            window.history.replaceState({}, "", "/login");
+          }
+        }
+      };
+      
+      completeOAuthFlow();
       return;
     }
 
@@ -73,7 +105,10 @@ const LoginPage = () => {
           setSession(result.data.session);
           setUser(result.data.user);
           // If user is already logged in, redirect to ringkasan
-          window.location.href = "/ringkasan";
+          // Use a small delay to ensure state is set
+          setTimeout(() => {
+            window.location.href = "/ringkasan";
+          }, 100);
         } else {
           setLoading(false);
         }
@@ -98,21 +133,39 @@ const LoginPage = () => {
         : await authClient.signIn.email({ email, password });
 
       if (result.error) {
-        setError(result.error.message);
+        setError(result.error.message || "An unexpected error occurred");
         setSubmitting(false);
         return;
       }
 
       // Get session after successful sign in/up
-      const sessionResult = await authClient.getSession();
+      // Retry a few times to ensure session is available
+      let sessionResult = await authClient.getSession();
+      let attempts = 0;
+      while (
+        (!sessionResult.data?.session || !sessionResult.data?.user) &&
+        attempts < 3
+      ) {
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        sessionResult = await authClient.getSession();
+        attempts++;
+      }
+
       if (sessionResult.data?.session && sessionResult.data?.user) {
         setSession(sessionResult.data.session);
         setUser(sessionResult.data.user);
-        // Redirect to ringkasan page after successful login
-        window.location.href = "/ringkasan";
+        // Small delay to ensure state is set before redirect
+        setTimeout(() => {
+          window.location.href = "/ringkasan";
+        }, 100);
+      } else {
+        setError("Failed to establish session. Please try again.");
+        setSubmitting(false);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred");
+      setError(
+        err instanceof Error ? err.message : "An unexpected error occurred"
+      );
     } finally {
       setSubmitting(false);
     }
@@ -137,7 +190,9 @@ const LoginPage = () => {
       });
       // The redirect will happen automatically, so we don't need to do anything else
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to sign in with Google");
+      setError(
+        err instanceof Error ? err.message : "Failed to sign in with Google"
+      );
       setOauthLoading(false);
     }
   };
@@ -145,12 +200,10 @@ const LoginPage = () => {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <Card className="w-full max-w-md p-8">
-          <div className="flex flex-col items-center gap-4">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-accent border-t-transparent" />
-            <p className="text-muted">Loading...</p>
-          </div>
-        </Card>
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-accent border-t-transparent" />
+          <p className="text-muted">Loading...</p>
+        </div>
       </div>
     );
   }
@@ -158,156 +211,229 @@ const LoginPage = () => {
   if (session && user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-4">
-        <Card className="w-full max-w-md">
-          <Card.Header>
-            <Card.Title>Welcome back!</Card.Title>
-            <Card.Description>You are logged in</Card.Description>
-          </Card.Header>
-          <Card.Content className="space-y-2">
+        <div className="w-full max-w-md rounded-lg bg-surface p-8 shadow-sm">
+          <div className="mb-6">
+            <h2 className="text-2xl font-light text-foreground">
+              Welcome back!
+            </h2>
+            <p className="mt-2 text-sm text-muted">You are logged in</p>
+          </div>
+          <div className="space-y-4 mb-6">
             <div>
-              <p className="text-sm text-muted">Email:</p>
-              <p className="font-medium">{user.email}</p>
+              <p className="text-xs text-muted uppercase tracking-wide">
+                Email
+              </p>
+              <p className="mt-1 text-base font-normal text-foreground">
+                {user.email}
+              </p>
             </div>
             {user.name && (
               <div>
-                <p className="text-sm text-muted">Name:</p>
-                <p className="font-medium">{user.name}</p>
+                <p className="text-xs text-muted uppercase tracking-wide">
+                  Name
+                </p>
+                <p className="mt-1 text-base font-normal text-foreground">
+                  {user.name}
+                </p>
               </div>
             )}
-          </Card.Content>
-          <Card.Footer className="flex flex-col gap-2">
+          </div>
+          <div className="flex flex-col gap-3">
             <Button
               fullWidth
               variant="secondary"
               onPress={() => (window.location.href = "/ringkasan")}
+              className="font-normal"
             >
               Go to Dashboard
             </Button>
-            <Button fullWidth variant="ghost" onPress={handleSignOut}>
+            <Button
+              fullWidth
+              variant="ghost"
+              onPress={handleSignOut}
+              className="font-normal"
+            >
               Sign Out
             </Button>
-          </Card.Footer>
-        </Card>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <Card.Header>
-          <Card.Title>{isSignUp ? "Create Account" : "Sign In"}</Card.Title>
-          <Card.Description>
-            {isSignUp
-              ? "Enter your information to create a new account"
-              : "Enter your credentials to access your account"}
-          </Card.Description>
-        </Card.Header>
-        <form onSubmit={handleSubmit}>
-          <Card.Content className="space-y-4">
-            {error && (
-              <Alert status="danger" className="w-full">
-                <Alert.Indicator />
-                <Alert.Content>
-                  <Alert.Title>Error</Alert.Title>
-                  <Alert.Description>{error}</Alert.Description>
-                </Alert.Content>
-              </Alert>
-            )}
-            <TextField
-              isRequired
-              name="email"
-              type="email"
-              value={email}
-              onChange={setEmail}
-              isDisabled={submitting}
-            >
-              <Label>Email</Label>
-              <Input placeholder="email@example.com" />
-              <FieldError />
-            </TextField>
-            <TextField
-              isRequired
-              name="password"
-              type="password"
-              value={password}
-              onChange={setPassword}
-              isDisabled={submitting}
-              validate={(value) => {
-                if (isSignUp && value.length < 8) {
-                  return "Password must be at least 8 characters";
-                }
-                return null;
-              }}
-            >
-              <Label>Password</Label>
-              <Input placeholder="••••••••" />
-              {isSignUp && (
-                <Description>Password must be at least 8 characters</Description>
-              )}
-              <FieldError />
-            </TextField>
-          </Card.Content>
-          <Card.Footer className="mt-4 flex flex-col gap-2">
-            <Button
-              type="submit"
-              fullWidth
-              isPending={submitting}
-              isDisabled={submitting || oauthLoading}
-            >
-              {isSignUp ? "Sign Up" : "Sign In"}
-            </Button>
-
-            <div className="flex items-center gap-3 py-2">
-              <Separator className="flex-1" />
-              <span className="text-xs text-muted">or</span>
-              <Separator className="flex-1" />
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto max-w-7xl px-4 py-8 md:px-8 lg:px-12">
+        <div className="grid min-h-[calc(100vh-4rem)] grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-16">
+          {/* Left Section - Info */}
+          <div className="flex flex-col justify-center space-y-8 lg:pr-8">
+            <div>
+              <h1 className="text-4xl font-light leading-tight text-foreground md:text-5xl lg:text-6xl">
+                {isSignUp ? "Let's get started" : "Let's collaborate"}
+              </h1>
             </div>
-
-            <Button
-              fullWidth
-              variant="tertiary"
-              onPress={handleGoogleSignIn}
-              isPending={oauthLoading}
-              isDisabled={submitting || oauthLoading}
-            >
-              <FcGoogle className="text-xl" />
-              Continue with Google
-            </Button>
-            <div className="text-center text-sm">
-              {isSignUp ? (
-                <p className="text-muted">
-                  Already have an account?{" "}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsSignUp(false);
-                      setError(null);
-                    }}
-                    className="text-accent hover:underline"
-                  >
-                    Sign in
-                  </button>
+            <div className="space-y-6">
+              <div>
+                <p className="text-xs uppercase tracking-wider text-muted">
+                  Contact
                 </p>
-              ) : (
-                <p className="text-muted">
-                  Don't have an account?{" "}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsSignUp(true);
-                      setError(null);
-                    }}
-                    className="text-accent hover:underline"
-                  >
-                    Sign up
-                  </button>
+                <p className="mt-2 text-base text-foreground">
+                  support@galand.com
                 </p>
-              )}
+              </div>
+              <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+                <div>
+                  <p className="text-xs uppercase tracking-wider text-muted">
+                    Find us
+                  </p>
+                  <div className="mt-2 flex gap-4 text-sm text-foreground">
+                    <span>FB</span>
+                    <span>IG</span>
+                    <span>TW</span>
+                    <span>LI</span>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wider text-muted">
+                    Location
+                  </p>
+                  <p className="mt-2 text-base text-foreground">
+                    Jakarta, Indonesia
+                  </p>
+                  <p className="mt-1 text-sm text-muted">+62 21 1234 5678</p>
+                </div>
+              </div>
             </div>
-          </Card.Footer>
-        </form>
-      </Card>
+          </div>
+
+          {/* Right Section - Login Form */}
+          <div className="flex flex-col justify-center">
+            <div className="w-full max-w-md">
+              <h2 className="mb-8 text-2xl font-light text-foreground">
+                {isSignUp ? "Create account" : "Sign in"}
+              </h2>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {error && (
+                  <Alert status="danger" className="w-full">
+                    <Alert.Indicator />
+                    <Alert.Content>
+                      <Alert.Title>Error</Alert.Title>
+                      <Alert.Description>{error}</Alert.Description>
+                    </Alert.Content>
+                  </Alert>
+                )}
+
+                <div className="space-y-6">
+                  <TextField
+                    isRequired
+                    name="email"
+                    type="email"
+                    value={email}
+                    onChange={setEmail}
+                    isDisabled={submitting}
+                    className="login-form-field"
+                  >
+                    <Label>Email</Label>
+                    <Input placeholder="Email address" />
+                    <FieldError />
+                  </TextField>
+
+                  <TextField
+                    isRequired
+                    name="password"
+                    type="password"
+                    value={password}
+                    onChange={setPassword}
+                    isDisabled={submitting}
+                    validate={(value) => {
+                      if (isSignUp && value.length < 8) {
+                        return "Password must be at least 8 characters";
+                      }
+                      return null;
+                    }}
+                    className="login-form-field"
+                  >
+                    <Label>Password</Label>
+                    <Input placeholder="Password" />
+                    {isSignUp && (
+                      <Description className="mt-1 text-xs text-muted">
+                        Password must be at least 8 characters
+                      </Description>
+                    )}
+                    <FieldError />
+                  </TextField>
+                </div>
+
+                <div className="pt-4">
+                  <Button
+                    type="submit"
+                    fullWidth
+                    isPending={submitting}
+                    isDisabled={submitting || oauthLoading}
+                    className="group justify-between bg-foreground text-background hover:bg-foreground/90 font-normal rounded-none px-6 py-3"
+                  >
+                    <span>{isSignUp ? "Sign Up" : "Sign In"}</span>
+                    <span className="transition-transform group-hover:translate-x-1">
+                      →
+                    </span>
+                  </Button>
+                </div>
+
+                <div className="flex items-center gap-4 py-4">
+                  <div className="h-px flex-1 bg-border"></div>
+                  <span className="text-xs text-muted">or</span>
+                  <div className="h-px flex-1 bg-border"></div>
+                </div>
+
+                <Button
+                  fullWidth
+                  variant="ghost"
+                  onPress={handleGoogleSignIn}
+                  isPending={oauthLoading}
+                  isDisabled={submitting || oauthLoading}
+                  className="font-normal rounded-none border border-border hover:bg-surface"
+                >
+                  <FcGoogle className="mr-2 text-xl" />
+                  Continue with Google
+                </Button>
+
+                <div className="pt-4 text-center text-sm">
+                  {isSignUp ? (
+                    <p className="text-muted">
+                      Already have an account?{" "}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsSignUp(false);
+                          setError(null);
+                        }}
+                        className="text-foreground hover:underline font-normal"
+                      >
+                        Sign in
+                      </button>
+                    </p>
+                  ) : (
+                    <p className="text-muted">
+                      Don't have an account?{" "}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsSignUp(true);
+                          setError(null);
+                        }}
+                        className="text-foreground hover:underline font-normal"
+                      >
+                        Sign up
+                      </button>
+                    </p>
+                  )}
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
