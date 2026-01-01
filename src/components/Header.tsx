@@ -186,7 +186,9 @@ export default function Header({
                 variant="ghost"
               >
                 <LuIdCard className="w-4 h-4 mr-2 shrink-0" />
-                {authLoading ? "Loading..." : displayRole}
+                <span className="text-sm font-medium truncate capitalize">
+                  {authLoading ? "Loading..." : displayRole}
+                </span>
               </Button>
               <Button
                 className="w-full transition-all duration-200 rounded-2xl justify-start h-10 hover:bg-default-100 text-foreground"
