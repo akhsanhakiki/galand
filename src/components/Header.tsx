@@ -1,7 +1,15 @@
 "use client";
 
 import { Avatar, Button, Surface, Disclosure } from "@heroui/react";
-import { LuUser, LuSun, LuMoon, LuLogOut } from "react-icons/lu";
+import {
+  LuUser,
+  LuSun,
+  LuMoon,
+  LuLogOut,
+  LuMail,
+  LuShield,
+  LuIdCard,
+} from "react-icons/lu";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
@@ -51,6 +59,7 @@ export default function Header({
 
   const displayName = user?.name || user?.email?.split("@")[0] || "User";
   const displayEmail = user?.email || "No email";
+  const displayRole = user?.role || "User";
 
   // Mobile view - full header at top
   if (isMobile) {
@@ -160,9 +169,9 @@ export default function Header({
                   <span className="text-xs font-medium text-foreground truncate text-left">
                     {authLoading ? "Loading..." : displayName}
                   </span>
-                  <span className="text-xs text-default-500 truncate text-left">
-                    {authLoading ? "" : displayEmail}
-                  </span>
+                  <p className="text-xs font-medium text-foreground truncate">
+                    {authLoading ? "Loading..." : displayEmail}
+                  </p>
                 </div>
               </div>
               <Disclosure.Indicator />
@@ -170,6 +179,15 @@ export default function Header({
           </Disclosure.Heading>
           <Disclosure.Content>
             <Disclosure.Body className="flex flex-col gap-2">
+              {/* User Info Section */}
+
+              <Button
+                className="w-full transition-all duration-200 rounded-2xl justify-start h-10 hover:bg-default-100 text-foreground"
+                variant="ghost"
+              >
+                <LuIdCard className="w-4 h-4 mr-2 shrink-0" />
+                {authLoading ? "Loading..." : displayRole}
+              </Button>
               <Button
                 className="w-full transition-all duration-200 rounded-2xl justify-start h-10 hover:bg-default-100 text-foreground"
                 variant="ghost"
