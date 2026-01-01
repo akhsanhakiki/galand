@@ -74,7 +74,7 @@ const LoginPage = () => {
             completeOAuthFlow(attempt + 1);
           } else {
             // If we've exhausted retries, show error
-            setError("Failed to complete authentication. Please try again.");
+            setError("Gagal menyelesaikan autentikasi. Silakan coba lagi.");
             setLoading(false);
             // Clean up URL
             window.history.replaceState({}, "", "/login");
@@ -84,7 +84,7 @@ const LoginPage = () => {
             completeOAuthFlow(attempt + 1);
           } else {
             setError(
-              err instanceof Error ? err.message : "Authentication failed. Please try again."
+              err instanceof Error ? err.message : "Autentikasi gagal. Silakan coba lagi."
             );
             setLoading(false);
             // Clean up URL
@@ -126,14 +126,14 @@ const LoginPage = () => {
     try {
       const result = isSignUp
         ? await authClient.signUp.email({
-            name: email.split("@")[0] || "User",
+            name: email.split("@")[0] || "Pengguna",
             email,
             password,
           })
         : await authClient.signIn.email({ email, password });
 
       if (result.error) {
-        setError(result.error.message || "An unexpected error occurred");
+        setError(result.error.message || "Terjadi kesalahan yang tidak terduga");
         setSubmitting(false);
         return;
       }
@@ -159,12 +159,12 @@ const LoginPage = () => {
           window.location.href = "/ringkasan";
         }, 100);
       } else {
-        setError("Failed to establish session. Please try again.");
+        setError("Gagal membuat sesi. Silakan coba lagi.");
         setSubmitting(false);
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "An unexpected error occurred"
+        err instanceof Error ? err.message : "Terjadi kesalahan yang tidak terduga"
       );
     } finally {
       setSubmitting(false);
@@ -191,7 +191,7 @@ const LoginPage = () => {
       // The redirect will happen automatically, so we don't need to do anything else
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to sign in with Google"
+        err instanceof Error ? err.message : "Gagal masuk dengan Google"
       );
       setOauthLoading(false);
     }
@@ -202,7 +202,7 @@ const LoginPage = () => {
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-accent border-t-transparent" />
-          <p className="text-muted">Loading...</p>
+          <p className="text-muted">Memuat...</p>
         </div>
       </div>
     );
@@ -214,9 +214,9 @@ const LoginPage = () => {
         <div className="w-full max-w-md rounded-lg bg-surface p-8 shadow-sm">
           <div className="mb-6">
             <h2 className="text-2xl font-light text-foreground">
-              Welcome back!
+              Selamat datang kembali!
             </h2>
-            <p className="mt-2 text-sm text-muted">You are logged in</p>
+            <p className="mt-2 text-sm text-muted">Anda sudah masuk</p>
           </div>
           <div className="space-y-4 mb-6">
             <div>
@@ -230,7 +230,7 @@ const LoginPage = () => {
             {user.name && (
               <div>
                 <p className="text-xs text-muted uppercase tracking-wide">
-                  Name
+                  Nama
                 </p>
                 <p className="mt-1 text-base font-normal text-foreground">
                   {user.name}
@@ -243,9 +243,9 @@ const LoginPage = () => {
               fullWidth
               variant="secondary"
               onPress={() => (window.location.href = "/ringkasan")}
-              className="font-normal"
+              className="font-normal bg-accent text-accent-foreground hover:bg-accent/90"
             >
-              Go to Dashboard
+              Masuk ke Dashboard
             </Button>
             <Button
               fullWidth
@@ -253,7 +253,7 @@ const LoginPage = () => {
               onPress={handleSignOut}
               className="font-normal"
             >
-              Sign Out
+              Keluar
             </Button>
           </div>
         </div>
@@ -267,50 +267,66 @@ const LoginPage = () => {
         <div className="grid min-h-[calc(100vh-4rem)] grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-16">
           {/* Left Section - Info */}
           <div className="flex flex-col justify-center space-y-8 lg:pr-8">
-            <div>
-              <h1 className="text-4xl font-light leading-tight text-foreground md:text-5xl lg:text-6xl">
-                {isSignUp ? "Let's get started" : "Let's collaborate"}
-              </h1>
-            </div>
             <div className="space-y-6">
+              {/* Logo */}
               <div>
-                <p className="text-xs uppercase tracking-wider text-muted">
-                  Contact
-                </p>
-                <p className="mt-2 text-base text-foreground">
-                  support@galand.com
-                </p>
+                <h1 className="text-3xl font-bold text-accent mb-2">kadara</h1>
               </div>
-              <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-                <div>
-                  <p className="text-xs uppercase tracking-wider text-muted">
-                    Find us
-                  </p>
-                  <div className="mt-2 flex gap-4 text-sm text-foreground">
-                    <span>FB</span>
-                    <span>IG</span>
-                    <span>TW</span>
-                    <span>LI</span>
+              
+              {/* Tagline */}
+              <div>
+                <h1 className="text-4xl font-light leading-tight text-foreground md:text-5xl lg:text-6xl">
+                  {isSignUp ? (
+                    <>
+                      Kelola bisnis Anda dengan <span className="text-accent">mudah</span>
+                    </>
+                  ) : (
+                    <>
+                      Sistem kasir yang <span className="text-accent">efisien</span>
+                    </>
+                  )}
+                </h1>
+              </div>
+              
+              {/* Description */}
+              <div className="space-y-3">
+                <p className="text-base text-muted leading-relaxed">
+                  Solusi lengkap untuk mengelola toko Anda. Mulai dari manajemen produk, 
+                  transaksi penjualan, hingga laporan keuangan - semuanya dalam satu platform.
+                </p>
+                <div className="flex flex-wrap gap-4 pt-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                    <span className="text-sm text-muted">Manajemen Produk</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                    <span className="text-sm text-muted">Transaksi Real-time</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                    <span className="text-sm text-muted">Laporan Keuangan</span>
                   </div>
                 </div>
-                <div>
-                  <p className="text-xs uppercase tracking-wider text-muted">
-                    Location
-                  </p>
-                  <p className="mt-2 text-base text-foreground">
-                    Jakarta, Indonesia
-                  </p>
-                  <p className="mt-1 text-sm text-muted">+62 21 1234 5678</p>
-                </div>
               </div>
+            </div>
+            <div className="pt-4">
+              <p className="text-sm text-muted">
+                Made with <span className="text-accent">♥</span> by{" "}
+                <span className="text-foreground font-medium">haki studio</span>
+              </p>
             </div>
           </div>
 
           {/* Right Section - Login Form */}
           <div className="flex flex-col justify-center">
             <div className="w-full max-w-md">
+              {/* Logo for mobile/tablet */}
+              <div className="mb-6 lg:hidden">
+                <h1 className="text-2xl font-bold text-accent">kadara</h1>
+              </div>
               <h2 className="mb-8 text-2xl font-light text-foreground">
-                {isSignUp ? "Create account" : "Sign in"}
+                {isSignUp ? "Buat akun" : "Masuk"}
               </h2>
 
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -318,7 +334,7 @@ const LoginPage = () => {
                   <Alert status="danger" className="w-full">
                     <Alert.Indicator />
                     <Alert.Content>
-                      <Alert.Title>Error</Alert.Title>
+                      <Alert.Title>Kesalahan</Alert.Title>
                       <Alert.Description>{error}</Alert.Description>
                     </Alert.Content>
                   </Alert>
@@ -335,7 +351,7 @@ const LoginPage = () => {
                     className="login-form-field"
                   >
                     <Label>Email</Label>
-                    <Input placeholder="Email address" />
+                    <Input placeholder="Alamat email" />
                     <FieldError />
                   </TextField>
 
@@ -348,17 +364,17 @@ const LoginPage = () => {
                     isDisabled={submitting}
                     validate={(value) => {
                       if (isSignUp && value.length < 8) {
-                        return "Password must be at least 8 characters";
+                        return "Kata sandi minimal 8 karakter";
                       }
                       return null;
                     }}
                     className="login-form-field"
                   >
-                    <Label>Password</Label>
-                    <Input placeholder="Password" />
+                    <Label>Kata Sandi</Label>
+                    <Input placeholder="Kata sandi" />
                     {isSignUp && (
                       <Description className="mt-1 text-xs text-muted">
-                        Password must be at least 8 characters
+                        Kata sandi minimal 8 karakter
                       </Description>
                     )}
                     <FieldError />
@@ -371,9 +387,9 @@ const LoginPage = () => {
                     fullWidth
                     isPending={submitting}
                     isDisabled={submitting || oauthLoading}
-                    className="group justify-between bg-foreground text-background hover:bg-foreground/90 font-normal rounded-none px-6 py-3"
+                    className="group justify-between bg-accent text-accent-foreground hover:bg-accent/90 font-normal rounded-lg px-6 py-3"
                   >
-                    <span>{isSignUp ? "Sign Up" : "Sign In"}</span>
+                    <span>{isSignUp ? "Daftar" : "Masuk"}</span>
                     <span className="transition-transform group-hover:translate-x-1">
                       →
                     </span>
@@ -382,7 +398,7 @@ const LoginPage = () => {
 
                 <div className="flex items-center gap-4 py-4">
                   <div className="h-px flex-1 bg-border"></div>
-                  <span className="text-xs text-muted">or</span>
+                  <span className="text-xs text-muted">atau</span>
                   <div className="h-px flex-1 bg-border"></div>
                 </div>
 
@@ -392,39 +408,39 @@ const LoginPage = () => {
                   onPress={handleGoogleSignIn}
                   isPending={oauthLoading}
                   isDisabled={submitting || oauthLoading}
-                  className="font-normal rounded-none border border-border hover:bg-surface"
+                  className="font-normal rounded-lg border border-border hover:bg-surface"
                 >
                   <FcGoogle className="mr-2 text-xl" />
-                  Continue with Google
+                  Lanjutkan dengan Google
                 </Button>
 
                 <div className="pt-4 text-center text-sm">
                   {isSignUp ? (
                     <p className="text-muted">
-                      Already have an account?{" "}
+                      Sudah punya akun?{" "}
                       <button
                         type="button"
                         onClick={() => {
                           setIsSignUp(false);
                           setError(null);
                         }}
-                        className="text-foreground hover:underline font-normal"
+                        className="text-accent hover:text-accent/80 hover:underline font-normal transition-colors"
                       >
-                        Sign in
+                        Masuk
                       </button>
                     </p>
                   ) : (
                     <p className="text-muted">
-                      Don't have an account?{" "}
+                      Belum punya akun?{" "}
                       <button
                         type="button"
                         onClick={() => {
                           setIsSignUp(true);
                           setError(null);
                         }}
-                        className="text-foreground hover:underline font-normal"
+                        className="text-accent hover:text-accent/80 hover:underline font-normal transition-colors"
                       >
-                        Sign up
+                        Daftar
                       </button>
                     </p>
                   )}

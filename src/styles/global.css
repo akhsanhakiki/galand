@@ -207,35 +207,39 @@
 }
 
 .login-form-field > div:last-child {
-  border: 0 !important;
-  border-bottom: 1px solid var(--border) !important;
-  border-radius: 0 !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 0.5rem !important;
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
+  padding-top: 0.5rem !important;
   padding-bottom: 0.5rem !important;
   box-shadow: none !important;
-  background: transparent !important;
+  background: var(--field-background) !important;
 }
 
 .login-form-field > div:last-child:hover {
-  border-bottom-color: rgba(var(--foreground-rgb, 51, 51, 51), 0.5) !important;
+  border-color: var(--accent) !important;
 }
 
 .login-form-field > div:last-child:focus-within {
-  border-bottom-color: var(--foreground) !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 10%, transparent) !important;
 }
 
 .login-form-field input {
   background: transparent !important;
   border: 0 !important;
-  border-radius: 0 !important;
+  border-radius: 0.5rem !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
-  padding-bottom: 0.5rem !important;
   font-size: 1rem !important;
   font-weight: 400 !important;
 }
 
 .login-form-field input:focus {
   outline: none !important;
+}
+
+.radio__control {
+  border: 1px solid var(--border) !important;
 }
