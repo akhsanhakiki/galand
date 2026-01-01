@@ -168,10 +168,10 @@ const MenuControl = ({
 
         {/* Header Surface */}
         <Surface
-          className={`rounded-3xl transition-all duration-300 h-28 ${
+          className={`rounded-3xl transition-all duration-300 ${
             isCollapsed
               ? "w-[64px] min-w-[64px] p-2"
-              : "w-[240px] min-w-[240px] p-4"
+              : "w-[240px] min-w-[240px] p-3"
           }`}
           variant="default"
         >
