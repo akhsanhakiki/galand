@@ -914,103 +914,139 @@ const RingkasanPage = () => {
                 </div>
               </div>
 
-              {/* Donut Chart */}
-              <div className="p-4 border border-separator rounded-xl">
-                <div className="mb-4">
-                  <div className="flex items-center justify-between w-full">
-                    <div>
-                      <h3 className="text-base font-bold text-foreground">
-                        Top 5 Produk
-                      </h3>
-                      <p className="text-xs text-muted mt-1">
-                        Berdasarkan{" "}
-                        {productViewMode === "revenue"
-                          ? "Pendapatan"
-                          : productViewMode === "quantity"
-                          ? "Kuantitas"
-                          : "Profit"}
-                      </p>
+              {/* Donut Chart with Product List */}
+              <div className="p-4 border border-separator rounded-xl flex-1 min-h-0 flex flex-col">
+                <div className="flex flex-col md:flex-row gap-4 flex-1 min-h-0">
+                  {/* Pie Chart - Left Side */}
+                  <div className="flex-1 min-w-0">
+                    <div className="h-full">
+                      <ChartContainer
+                        config={chartData.reduce(
+                          (acc, item, idx) => ({
+                            ...acc,
+                            [item.name]: {
+                              label: item.name,
+                              color: item.color,
+                            },
+                          }),
+                          {}
+                        )}
+                        className="h-full w-full"
+                      >
+                        <PieChart>
+                          <Pie
+                            data={chartData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={100}
+                            paddingAngle={2}
+                            dataKey="value"
+                            label={({ percent }: any) =>
+                              `${(percent * 100).toFixed(1)}%`
+                            }
+                            labelLine={false}
+                          >
+                            {chartData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <ChartTooltip
+                            content={
+                              <ChartTooltipContent
+                                formatter={(value, name) => {
+                                  const numValue =
+                                    typeof value === "number"
+                                      ? value
+                                      : Number(value);
+                                  return productViewMode === "revenue" ||
+                                    productViewMode === "profit"
+                                    ? formatCurrency(numValue)
+                                    : `${numValue} unit`;
+                                }}
+                              />
+                            }
+                          />
+                        </PieChart>
+                      </ChartContainer>
                     </div>
                   </div>
-                </div>
-                <div>
-                  <div className="h-64">
-                    <ChartContainer
-                      config={chartData.reduce(
-                        (acc, item, idx) => ({
-                          ...acc,
-                          [item.name]: {
-                            label: item.name,
-                            color: item.color,
-                          },
-                        }),
-                        {}
-                      )}
-                      className="h-full w-full"
-                    >
-                      <PieChart>
-                        <Pie
-                          data={chartData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={100}
-                          paddingAngle={2}
-                          dataKey="value"
-                          label={({ percent }: any) =>
-                            `${(percent * 100).toFixed(1)}%`
-                          }
-                          labelLine={false}
-                        >
-                          {chartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <ChartTooltip
-                          content={
-                            <ChartTooltipContent
-                              formatter={(value, name) => {
-                                const numValue =
-                                  typeof value === "number"
-                                    ? value
-                                    : Number(value);
-                                return productViewMode === "revenue" ||
-                                  productViewMode === "profit"
-                                  ? formatCurrency(numValue)
-                                  : `${numValue} unit`;
-                              }}
-                            />
-                          }
-                        />
-                      </PieChart>
-                    </ChartContainer>
-                  </div>
-                  {/* Legend */}
-                  <div className="grid grid-cols-2 gap-2 mt-4">
-                    {chartData.map((item, index) => (
-                      <div
-                        key={item.id}
-                        className="flex items-center gap-2 p-2 rounded-lg hover:bg-foreground/5 cursor-pointer transition-colors"
-                        onClick={() =>
-                          setSelectedProduct(
-                            selectedProduct === item.id ? null : item.id
-                          )
-                        }
-                      >
-                        <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: item.color }}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold text-foreground truncate">
-                            {item.name}
-                          </p>
-                          <p className="text-xs text-muted">
-                            {item.percentage.toFixed(1)}%
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+
+                  {/* Product List - Right Side */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col gap-3 h-full overflow-y-auto">
+                      {chartData.map((item) => {
+                        const product = allProducts.find(
+                          (p) => p.id === item.id
+                        );
+                        if (!product) return null;
+
+                        return (
+                          <div
+                            key={item.id}
+                            className="flex flex-col gap-2 p-3 rounded-lg border border-separator hover:bg-foreground/5 cursor-pointer transition-colors"
+                            onClick={() =>
+                              setSelectedProduct(
+                                selectedProduct === item.id ? null : item.id
+                              )
+                            }
+                          >
+                            <div className="flex items-center gap-2">
+                              <div
+                                className="w-3 h-3 rounded-full shrink-0"
+                                style={{ backgroundColor: item.color }}
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold text-foreground truncate">
+                                  {item.name}
+                                </p>
+                                <p className="text-xs text-muted">
+                                  {item.percentage.toFixed(1)}%
+                                </p>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 mt-1 text-xs">
+                              <div className="flex justify-between">
+                                <span className="text-muted">Harga:</span>
+                                <span className="font-semibold text-foreground">
+                                  {formatCurrency(product.price)}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted">Stok:</span>
+                                <span className="font-semibold text-foreground">
+                                  {product.stock} unit
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted">Terjual:</span>
+                                <span className="font-semibold text-foreground">
+                                  {product.quantitySold} unit
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted">Pendapatan:</span>
+                                <span className="font-semibold text-foreground">
+                                  {formatCurrency(product.revenue)}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted">Profit:</span>
+                                <span className="font-semibold text-success">
+                                  {formatCurrency(product.profit)}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted">Margin:</span>
+                                <span className="font-semibold text-foreground">
+                                  {product.profitMargin}%
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>
