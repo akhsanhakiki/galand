@@ -317,22 +317,24 @@ const RingkasanPage = () => {
   const [customStartDate, setCustomStartDate] = useState<string>("");
   const [customEndDate, setCustomEndDate] = useState<string>("");
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-  
+
   // Generate custom period data based on selected dates
   const customPeriodData = useMemo(() => {
     if (selectedPeriod !== "custom" || !customStartDate || !customEndDate) {
       return timePeriodConfig.custom;
     }
-    
+
     const start = new Date(customStartDate);
     const end = new Date(customEndDate);
-    const daysDiff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-    
+    const daysDiff = Math.ceil(
+      (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
     // Generate data based on date range
     // For now, we'll use a simplified approach - in production, you'd fetch real data
     const data = [];
     const days = Math.min(daysDiff + 1, 30); // Limit to 30 days for display, +1 to include end date
-    
+
     for (let i = 0; i < days; i++) {
       const date = new Date(start);
       date.setDate(date.getDate() + i);
@@ -343,7 +345,7 @@ const RingkasanPage = () => {
         profit: 360000 + Math.random() * 300000,
       });
     }
-    
+
     // Format dates for display
     const formatDate = (dateString: string) => {
       const date = new Date(dateString);
@@ -353,17 +355,18 @@ const RingkasanPage = () => {
         year: "numeric",
       });
     };
-    
+
     return {
       data,
       title: "Tren Pendapatan & Profit",
       subtitle: `${formatDate(customStartDate)} - ${formatDate(customEndDate)}`,
     };
   }, [customStartDate, customEndDate, selectedPeriod]);
-  
-  const currentPeriodData = selectedPeriod === "custom" 
-    ? customPeriodData 
-    : timePeriodConfig[selectedPeriod];
+
+  const currentPeriodData =
+    selectedPeriod === "custom"
+      ? customPeriodData
+      : timePeriodConfig[selectedPeriod];
 
   // Prepare chart data based on view mode
   const chartData = useMemo(() => {
@@ -565,7 +568,9 @@ const RingkasanPage = () => {
                               month: "short",
                             });
                           };
-                          return `${formatDate(customStartDate)} - ${formatDate(customEndDate)}`;
+                          return `${formatDate(customStartDate)} - ${formatDate(
+                            customEndDate
+                          )}`;
                         })()
                       : "Pilih Tanggal"}
                   </Button>
@@ -577,7 +582,10 @@ const RingkasanPage = () => {
                     </Popover.Heading>
                     <div className="flex items-center gap-3">
                       <div className="flex flex-col gap-1">
-                        <label htmlFor="start-date" className="text-xs text-muted">
+                        <label
+                          htmlFor="start-date"
+                          className="text-xs text-muted"
+                        >
                           Dari Tanggal
                         </label>
                         <input
@@ -590,7 +598,10 @@ const RingkasanPage = () => {
                         />
                       </div>
                       <div className="flex flex-col gap-1">
-                        <label htmlFor="end-date" className="text-xs text-muted">
+                        <label
+                          htmlFor="end-date"
+                          className="text-xs text-muted"
+                        >
                           Sampai Tanggal
                         </label>
                         <input
