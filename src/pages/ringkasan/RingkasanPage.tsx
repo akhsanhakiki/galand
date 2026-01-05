@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Surface, Tabs, Card, Button } from "@heroui/react";
+import { Surface, Tabs, Card, Button, Popover } from "@heroui/react";
 import {
   LuTrendingUp,
   LuDollarSign,
@@ -123,7 +123,8 @@ type TimePeriod =
   | "bulanan"
   | "tahunan"
   | "3tahun"
-  | "5tahun";
+  | "5tahun"
+  | "custom";
 
 const timePeriodConfig: Record<
   TimePeriod,
@@ -158,6 +159,11 @@ const timePeriodConfig: Record<
     data: fiveYearTrendData,
     title: "Tren Pendapatan & Profit",
     subtitle: "5 Tahun Terakhir (Per Semester)",
+  },
+  custom: {
+    data: dailyTrendData, // Placeholder, will be replaced with custom data
+    title: "Tren Pendapatan & Profit",
+    subtitle: "Periode Kustom",
   },
 };
 
@@ -308,7 +314,56 @@ const RingkasanPage = () => {
   const [productSortMode, setProductSortMode] =
     useState<ProductSortMode>("revenue");
   const [selectedProduct, setSelectedProduct] = useState<number | null>(null);
-  const currentPeriodData = timePeriodConfig[selectedPeriod];
+  const [customStartDate, setCustomStartDate] = useState<string>("");
+  const [customEndDate, setCustomEndDate] = useState<string>("");
+  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  
+  // Generate custom period data based on selected dates
+  const customPeriodData = useMemo(() => {
+    if (selectedPeriod !== "custom" || !customStartDate || !customEndDate) {
+      return timePeriodConfig.custom;
+    }
+    
+    const start = new Date(customStartDate);
+    const end = new Date(customEndDate);
+    const daysDiff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+    
+    // Generate data based on date range
+    // For now, we'll use a simplified approach - in production, you'd fetch real data
+    const data = [];
+    const days = Math.min(daysDiff + 1, 30); // Limit to 30 days for display, +1 to include end date
+    
+    for (let i = 0; i < days; i++) {
+      const date = new Date(start);
+      date.setDate(date.getDate() + i);
+      const dayName = date.toLocaleDateString("id-ID", { weekday: "short" });
+      data.push({
+        label: `${dayName} ${date.getDate()}/${date.getMonth() + 1}`,
+        revenue: 1200000 + Math.random() * 1000000,
+        profit: 360000 + Math.random() * 300000,
+      });
+    }
+    
+    // Format dates for display
+    const formatDate = (dateString: string) => {
+      const date = new Date(dateString);
+      return date.toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+    };
+    
+    return {
+      data,
+      title: "Tren Pendapatan & Profit",
+      subtitle: `${formatDate(customStartDate)} - ${formatDate(customEndDate)}`,
+    };
+  }, [customStartDate, customEndDate, selectedPeriod]);
+  
+  const currentPeriodData = selectedPeriod === "custom" 
+    ? customPeriodData 
+    : timePeriodConfig[selectedPeriod];
 
   // Prepare chart data based on view mode
   const chartData = useMemo(() => {
@@ -437,43 +492,123 @@ const RingkasanPage = () => {
             Pantau ringkasan penjualan dan inventori Anda
           </p>
         </div>
-        <Tabs
-          selectedKey={selectedPeriod}
-          onSelectionChange={(key) => setSelectedPeriod(key as TimePeriod)}
-          className="w-fit"
-        >
-          <Tabs.ListContainer>
-            <Tabs.List
-              aria-label="Periode Waktu"
-              className="w-fit *:h-8 *:w-fit *:px-3 *:text-xs *:font-normal *:rounded-none *:bg-transparent *:data-[selected=true]:bg-transparent *:data-[selected=true]:text-foreground *:data-[hover=true]:bg-transparent"
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <Tabs
+              selectedKey={selectedPeriod}
+              onSelectionChange={(key) => {
+                setSelectedPeriod(key as TimePeriod);
+                if (key !== "custom") {
+                  setCustomStartDate("");
+                  setCustomEndDate("");
+                  setIsPopoverOpen(false);
+                } else {
+                  setIsPopoverOpen(true);
+                }
+              }}
+              className="w-fit"
             >
-              <Tabs.Tab id="harian">
-                Harian
-                <Tabs.Indicator />
-              </Tabs.Tab>
-              <Tabs.Tab id="mingguan">
-                Mingguan
-                <Tabs.Indicator />
-              </Tabs.Tab>
-              <Tabs.Tab id="bulanan">
-                Bulanan
-                <Tabs.Indicator />
-              </Tabs.Tab>
-              <Tabs.Tab id="tahunan">
-                Tahunan
-                <Tabs.Indicator />
-              </Tabs.Tab>
-              <Tabs.Tab id="3tahun">
-                3 Tahun
-                <Tabs.Indicator />
-              </Tabs.Tab>
-              <Tabs.Tab id="5tahun">
-                5 Tahun
-                <Tabs.Indicator />
-              </Tabs.Tab>
-            </Tabs.List>
-          </Tabs.ListContainer>
-        </Tabs>
+              <Tabs.ListContainer>
+                <Tabs.List
+                  aria-label="Periode Waktu"
+                  className="w-fit *:h-8 *:w-fit *:px-3 *:text-xs *:font-normal *:rounded-none *:bg-transparent *:data-[selected=true]:bg-transparent *:data-[selected=true]:text-foreground *:data-[hover=true]:bg-transparent"
+                >
+                  <Tabs.Tab id="harian">
+                    Harian
+                    <Tabs.Indicator />
+                  </Tabs.Tab>
+                  <Tabs.Tab id="mingguan">
+                    Mingguan
+                    <Tabs.Indicator />
+                  </Tabs.Tab>
+                  <Tabs.Tab id="bulanan">
+                    Bulanan
+                    <Tabs.Indicator />
+                  </Tabs.Tab>
+                  <Tabs.Tab id="tahunan">
+                    Tahunan
+                    <Tabs.Indicator />
+                  </Tabs.Tab>
+                  <Tabs.Tab id="3tahun">
+                    3 Tahun
+                    <Tabs.Indicator />
+                  </Tabs.Tab>
+                  <Tabs.Tab id="5tahun">
+                    5 Tahun
+                    <Tabs.Indicator />
+                  </Tabs.Tab>
+                  <Tabs.Tab id="custom">
+                    Kustom
+                    <Tabs.Indicator />
+                  </Tabs.Tab>
+                </Tabs.List>
+              </Tabs.ListContainer>
+            </Tabs>
+            {selectedPeriod === "custom" && (
+              <Popover
+                isOpen={isPopoverOpen}
+                onOpenChange={setIsPopoverOpen}
+                placement="bottom-start"
+              >
+                <Popover.Trigger>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 px-3 text-xs"
+                  >
+                    {customStartDate && customEndDate
+                      ? (() => {
+                          const formatDate = (dateString: string) => {
+                            const date = new Date(dateString);
+                            return date.toLocaleDateString("id-ID", {
+                              day: "numeric",
+                              month: "short",
+                            });
+                          };
+                          return `${formatDate(customStartDate)} - ${formatDate(customEndDate)}`;
+                        })()
+                      : "Pilih Tanggal"}
+                  </Button>
+                </Popover.Trigger>
+                <Popover.Content className="w-auto">
+                  <Popover.Dialog>
+                    <Popover.Heading className="text-sm font-semibold mb-3">
+                      Pilih Periode Kustom
+                    </Popover.Heading>
+                    <div className="flex items-center gap-3">
+                      <div className="flex flex-col gap-1">
+                        <label htmlFor="start-date" className="text-xs text-muted">
+                          Dari Tanggal
+                        </label>
+                        <input
+                          id="start-date"
+                          type="date"
+                          value={customStartDate}
+                          onChange={(e) => setCustomStartDate(e.target.value)}
+                          max={customEndDate || undefined}
+                          className="h-8 px-3 text-xs rounded-lg border border-separator bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label htmlFor="end-date" className="text-xs text-muted">
+                          Sampai Tanggal
+                        </label>
+                        <input
+                          id="end-date"
+                          type="date"
+                          value={customEndDate}
+                          onChange={(e) => setCustomEndDate(e.target.value)}
+                          min={customStartDate || undefined}
+                          className="h-8 px-3 text-xs rounded-lg border border-separator bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                        />
+                      </div>
+                    </div>
+                  </Popover.Dialog>
+                </Popover.Content>
+              </Popover>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Financial Metrics Cards */}
