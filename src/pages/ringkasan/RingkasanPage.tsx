@@ -548,11 +548,7 @@ const RingkasanPage = () => {
               </Tabs.ListContainer>
             </Tabs>
             {selectedPeriod === "custom" && (
-              <Popover
-                isOpen={isPopoverOpen}
-                onOpenChange={setIsPopoverOpen}
-                placement="bottom-start"
-              >
+              <Popover isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                 <Popover.Trigger>
                   <Button
                     size="sm"
@@ -715,8 +711,20 @@ const RingkasanPage = () => {
                   Pendapatan & Profit
                   <Tabs.Indicator />
                 </Tabs.Tab>
-                <Tabs.Tab id="products">
-                  Analisis Produk
+                <Tabs.Tab id="top5">
+                  Top 5 Produk
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+                <Tabs.Tab id="comparison">
+                  Perbandingan Produk
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+                <Tabs.Tab id="best">
+                  Produk Berkinerja Terbaik
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+                <Tabs.Tab id="attention">
+                  Produk Perlu Perhatian
                   <Tabs.Indicator />
                 </Tabs.Tab>
               </Tabs.List>
@@ -857,8 +865,8 @@ const RingkasanPage = () => {
             </div>
           </Tabs.Panel>
 
-          {/* Products Tab */}
-          <Tabs.Panel id="products" className="flex-1 min-h-0 overflow-auto">
+          {/* Top 5 Produk Tab */}
+          <Tabs.Panel id="top5" className="flex-1 min-h-0 overflow-auto">
             <div className="flex flex-col gap-4 h-full">
               {/* Header with filters */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -867,7 +875,7 @@ const RingkasanPage = () => {
                     <LuChartBar className="w-4 h-4 text-accent" />
                   </Surface>
                   <h2 className="text-lg font-bold text-foreground">
-                    Analisis Produk
+                    Top 5 Produk
                   </h2>
                 </div>
                 <div className="flex items-center gap-2">
@@ -906,353 +914,105 @@ const RingkasanPage = () => {
                 </div>
               </div>
 
-              {/* Charts Section */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Donut Chart */}
-                <Card className="p-4">
-                  <Card.Header>
-                    <div className="flex items-center justify-between w-full">
-                      <div>
-                        <Card.Title className="text-base font-bold">
-                          Top 5 Produk
-                        </Card.Title>
-                        <p className="text-xs text-muted mt-1">
-                          Berdasarkan{" "}
-                          {productViewMode === "revenue"
-                            ? "Pendapatan"
-                            : productViewMode === "quantity"
-                            ? "Kuantitas"
-                            : "Profit"}
-                        </p>
+              {/* Donut Chart */}
+              <div className="p-4 border border-separator rounded-xl">
+                <div className="mb-4">
+                  <div className="flex items-center justify-between w-full">
+                    <div>
+                      <h3 className="text-base font-bold text-foreground">
+                        Top 5 Produk
+                      </h3>
+                      <p className="text-xs text-muted mt-1">
+                        Berdasarkan{" "}
+                        {productViewMode === "revenue"
+                          ? "Pendapatan"
+                          : productViewMode === "quantity"
+                          ? "Kuantitas"
+                          : "Profit"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div className="h-64">
+                    <ChartContainer
+                      config={chartData.reduce(
+                        (acc, item, idx) => ({
+                          ...acc,
+                          [item.name]: {
+                            label: item.name,
+                            color: item.color,
+                          },
+                        }),
+                        {}
+                      )}
+                      className="h-full w-full"
+                    >
+                      <PieChart>
+                        <Pie
+                          data={chartData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={100}
+                          paddingAngle={2}
+                          dataKey="value"
+                          label={({ percent }: any) =>
+                            `${(percent * 100).toFixed(1)}%`
+                          }
+                          labelLine={false}
+                        >
+                          {chartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <ChartTooltip
+                          content={
+                            <ChartTooltipContent
+                              formatter={(value, name) => {
+                                const numValue =
+                                  typeof value === "number"
+                                    ? value
+                                    : Number(value);
+                                return productViewMode === "revenue" ||
+                                  productViewMode === "profit"
+                                  ? formatCurrency(numValue)
+                                  : `${numValue} unit`;
+                              }}
+                            />
+                          }
+                        />
+                      </PieChart>
+                    </ChartContainer>
+                  </div>
+                  {/* Legend */}
+                  <div className="grid grid-cols-2 gap-2 mt-4">
+                    {chartData.map((item, index) => (
+                      <div
+                        key={item.id}
+                        className="flex items-center gap-2 p-2 rounded-lg hover:bg-foreground/5 cursor-pointer transition-colors"
+                        onClick={() =>
+                          setSelectedProduct(
+                            selectedProduct === item.id ? null : item.id
+                          )
+                        }
+                      >
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold text-foreground truncate">
+                            {item.name}
+                          </p>
+                          <p className="text-xs text-muted">
+                            {item.percentage.toFixed(1)}%
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </Card.Header>
-                  <Card.Content>
-                    <div className="h-64">
-                      <ChartContainer
-                        config={chartData.reduce(
-                          (acc, item, idx) => ({
-                            ...acc,
-                            [item.name]: {
-                              label: item.name,
-                              color: item.color,
-                            },
-                          }),
-                          {}
-                        )}
-                        className="h-full w-full"
-                      >
-                        <PieChart>
-                          <Pie
-                            data={chartData}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={60}
-                            outerRadius={100}
-                            paddingAngle={2}
-                            dataKey="value"
-                            label={({ percent }: any) =>
-                              `${(percent * 100).toFixed(1)}%`
-                            }
-                            labelLine={false}
-                          >
-                            {chartData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Pie>
-                          <ChartTooltip
-                            content={
-                              <ChartTooltipContent
-                                formatter={(value, name) => {
-                                  const numValue =
-                                    typeof value === "number"
-                                      ? value
-                                      : Number(value);
-                                  return productViewMode === "revenue" ||
-                                    productViewMode === "profit"
-                                    ? formatCurrency(numValue)
-                                    : `${numValue} unit`;
-                                }}
-                              />
-                            }
-                          />
-                        </PieChart>
-                      </ChartContainer>
-                    </div>
-                    {/* Legend */}
-                    <div className="grid grid-cols-2 gap-2 mt-4">
-                      {chartData.map((item, index) => (
-                        <div
-                          key={item.id}
-                          className="flex items-center gap-2 p-2 rounded-lg hover:bg-foreground/5 cursor-pointer transition-colors"
-                          onClick={() =>
-                            setSelectedProduct(
-                              selectedProduct === item.id ? null : item.id
-                            )
-                          }
-                        >
-                          <div
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: item.color }}
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-semibold text-foreground truncate">
-                              {item.name}
-                            </p>
-                            <p className="text-xs text-muted">
-                              {item.percentage.toFixed(1)}%
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </Card.Content>
-                </Card>
-
-                {/* Bar Chart Comparison */}
-                <Card className="p-4">
-                  <Card.Header>
-                    <Card.Title className="text-base font-bold">
-                      Perbandingan Produk
-                    </Card.Title>
-                  </Card.Header>
-                  <Card.Content>
-                    <div className="h-64">
-                      <ChartContainer
-                        config={chartData.reduce(
-                          (acc, item, idx) => ({
-                            ...acc,
-                            [item.name]: {
-                              label: item.name,
-                              color: item.color,
-                            },
-                          }),
-                          {}
-                        )}
-                        className="h-full w-full"
-                      >
-                        <BarChart data={chartData} layout="vertical">
-                          <CartesianGrid
-                            strokeDasharray="3 3"
-                            horizontal={true}
-                            vertical={false}
-                          />
-                          <XAxis
-                            type="number"
-                            tickFormatter={(value) => {
-                              if (
-                                productViewMode === "revenue" ||
-                                productViewMode === "profit"
-                              ) {
-                                if (value >= 1000000) {
-                                  return `Rp ${(value / 1000000).toFixed(1)}J`;
-                                } else if (value >= 1000) {
-                                  return `Rp ${(value / 1000).toFixed(0)}K`;
-                                }
-                                return `Rp ${value}`;
-                              }
-                              return `${value}`;
-                            }}
-                          />
-                          <YAxis
-                            dataKey="name"
-                            type="category"
-                            width={80}
-                            tick={{ fontSize: 12 }}
-                          />
-                          <ChartTooltip
-                            content={
-                              <ChartTooltipContent
-                                formatter={(value, name) => {
-                                  const numValue =
-                                    typeof value === "number"
-                                      ? value
-                                      : Number(value);
-                                  return productViewMode === "revenue" ||
-                                    productViewMode === "profit"
-                                    ? formatCurrency(numValue)
-                                    : `${numValue} unit`;
-                                }}
-                              />
-                            }
-                          />
-                          <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                            {chartData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ChartContainer>
-                    </div>
-                  </Card.Content>
-                </Card>
-              </div>
-
-              {/* Performance Analysis */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Top Performers */}
-                <Card className="p-4">
-                  <Card.Header>
-                    <div className="flex items-center gap-2">
-                      <Surface className="p-2 rounded-lg bg-success/10">
-                        <LuTrendingUp className="w-4 h-4 text-success" />
-                      </Surface>
-                      <Card.Title className="text-base font-bold">
-                        Produk Berkinerja Terbaik
-                      </Card.Title>
-                    </div>
-                  </Card.Header>
-                  <Card.Content>
-                    <div className="flex flex-col gap-3">
-                      {topPerformers.map((product, index) => (
-                        <div
-                          key={product.id}
-                          className="p-3 rounded-xl bg-success/5 border border-success-soft-hover hover:bg-success/10 transition-colors cursor-pointer"
-                          onClick={() =>
-                            setSelectedProduct(
-                              selectedProduct === product.id ? null : product.id
-                            )
-                          }
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-lg bg-success-soft-hover flex items-center justify-center">
-                                <span className="text-xs font-bold text-success">
-                                  #{index + 1}
-                                </span>
-                              </div>
-                              <div>
-                                <p className="font-semibold text-foreground text-sm">
-                                  {product.name}
-                                </p>
-                                <p className="text-xs text-muted">
-                                  {product.quantitySold} unit terjual
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-1 text-success">
-                              {product.trend === "up" ? (
-                                <LuArrowUp className="w-3 h-3" />
-                              ) : (
-                                <LuArrowDown className="w-3 h-3" />
-                              )}
-                              <span className="text-xs font-semibold">
-                                {Math.abs(product.trendValue).toFixed(1)}%
-                              </span>
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-separator">
-                            <div>
-                              <p className="text-xs text-muted">Pendapatan</p>
-                              <p className="text-sm font-semibold text-foreground">
-                                {formatCurrency(product.revenue)}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-muted">Profit</p>
-                              <p className="text-sm font-semibold text-success">
-                                {formatCurrency(product.profit)}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-muted">Margin</p>
-                              <p className="text-sm font-semibold text-foreground">
-                                {product.profitMargin}%
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                      {topPerformers.length === 0 && (
-                        <p className="text-sm text-muted text-center py-4">
-                          Tidak ada produk dengan kinerja excellent
-                        </p>
-                      )}
-                    </div>
-                  </Card.Content>
-                </Card>
-
-                {/* Poor Performers */}
-                <Card className="p-4">
-                  <Card.Header>
-                    <div className="flex items-center gap-2">
-                      <Surface className="p-2 rounded-lg bg-danger/10">
-                        <LuArrowDown className="w-4 h-4 text-danger" />
-                      </Surface>
-                      <Card.Title className="text-base font-bold">
-                        Produk Perlu Perhatian
-                      </Card.Title>
-                    </div>
-                  </Card.Header>
-                  <Card.Content>
-                    <div className="flex flex-col gap-3">
-                      {poorPerformers.map((product, index) => (
-                        <div
-                          key={product.id}
-                          className="p-3 rounded-xl bg-danger/5 border border-danger-soft-hover hover:bg-danger/10 transition-colors cursor-pointer"
-                          onClick={() =>
-                            setSelectedProduct(
-                              selectedProduct === product.id ? null : product.id
-                            )
-                          }
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-lg bg-danger-soft-hover flex items-center justify-center">
-                                <span className="text-xs font-bold text-danger">
-                                  !
-                                </span>
-                              </div>
-                              <div>
-                                <p className="font-semibold text-foreground text-sm">
-                                  {product.name}
-                                </p>
-                                <p className="text-xs text-muted">
-                                  {product.quantitySold} unit terjual
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-1 text-danger">
-                              {product.trend === "up" ? (
-                                <LuArrowUp className="w-3 h-3" />
-                              ) : (
-                                <LuArrowDown className="w-3 h-3" />
-                              )}
-                              <span className="text-xs font-semibold">
-                                {Math.abs(product.trendValue).toFixed(1)}%
-                              </span>
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-separator">
-                            <div>
-                              <p className="text-xs text-muted">Pendapatan</p>
-                              <p className="text-sm font-semibold text-foreground">
-                                {formatCurrency(product.revenue)}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-muted">Profit</p>
-                              <p className="text-sm font-semibold text-danger">
-                                {formatCurrency(product.profit)}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-muted">Margin</p>
-                              <p className="text-sm font-semibold text-foreground">
-                                {product.profitMargin}%
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                      {poorPerformers.length === 0 && (
-                        <p className="text-sm text-muted text-center py-4">
-                          Semua produk berkinerja baik
-                        </p>
-                      )}
-                    </div>
-                  </Card.Content>
-                </Card>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               {/* Individual Product Detail View */}
@@ -1452,79 +1212,302 @@ const RingkasanPage = () => {
                   </Card.Content>
                 </Card>
               )}
+            </div>
+          </Tabs.Panel>
 
-              {/* All Products List */}
+          {/* Perbandingan Produk Tab */}
+          <Tabs.Panel id="comparison" className="flex-1 min-h-0 overflow-auto">
+            <div className="flex flex-col gap-4 h-full">
+              {/* Header with filters */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <Surface className="p-2 rounded-lg bg-accent/10">
+                    <LuChartBar className="w-4 h-4 text-accent" />
+                  </Surface>
+                  <h2 className="text-lg font-bold text-foreground">
+                    Perbandingan Produk
+                  </h2>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 bg-surface rounded-lg p-1">
+                    <Button
+                      size="sm"
+                      variant={
+                        productViewMode === "revenue" ? "primary" : "ghost"
+                      }
+                      onPress={() => setProductViewMode("revenue")}
+                      className="h-7 px-3 text-xs"
+                    >
+                      Pendapatan
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={
+                        productViewMode === "quantity" ? "primary" : "ghost"
+                      }
+                      onPress={() => setProductViewMode("quantity")}
+                      className="h-7 px-3 text-xs"
+                    >
+                      Kuantitas
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={
+                        productViewMode === "profit" ? "primary" : "ghost"
+                      }
+                      onPress={() => setProductViewMode("profit")}
+                      className="h-7 px-3 text-xs"
+                    >
+                      Profit
+                    </Button>
+                  </div>
+                </div>
+              </div>
               <Card className="p-4">
                 <Card.Header>
                   <Card.Title className="text-base font-bold">
-                    Semua Produk
+                    Perbandingan Produk
                   </Card.Title>
                 </Card.Header>
                 <Card.Content>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {performanceAnalysis
-                      .sort((a, b) => b.revenue - a.revenue)
-                      .map((product) => (
-                        <div
-                          key={product.id}
-                          className={`p-3 rounded-xl border transition-all cursor-pointer ${
-                            selectedProduct === product.id
-                              ? "border-accent bg-accent/5"
-                              : "border-separator hover:border-accent/50 hover:bg-foreground/5"
-                          }`}
-                          onClick={() =>
-                            setSelectedProduct(
-                              selectedProduct === product.id ? null : product.id
-                            )
+                  <div className="h-64">
+                    <ChartContainer
+                      config={chartData.reduce(
+                        (acc, item, idx) => ({
+                          ...acc,
+                          [item.name]: {
+                            label: item.name,
+                            color: item.color,
+                          },
+                        }),
+                        {}
+                      )}
+                      className="h-full w-full"
+                    >
+                      <BarChart data={chartData} layout="vertical">
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          horizontal={true}
+                          vertical={false}
+                        />
+                        <XAxis
+                          type="number"
+                          tickFormatter={(value) => {
+                            if (
+                              productViewMode === "revenue" ||
+                              productViewMode === "profit"
+                            ) {
+                              if (value >= 1000000) {
+                                return `Rp ${(value / 1000000).toFixed(1)}J`;
+                              } else if (value >= 1000) {
+                                return `Rp ${(value / 1000).toFixed(0)}K`;
+                              }
+                              return `Rp ${value}`;
+                            }
+                            return `${value}`;
+                          }}
+                        />
+                        <YAxis
+                          dataKey="name"
+                          type="category"
+                          width={80}
+                          tick={{ fontSize: 12 }}
+                        />
+                        <ChartTooltip
+                          content={
+                            <ChartTooltipContent
+                              formatter={(value, name) => {
+                                const numValue =
+                                  typeof value === "number"
+                                    ? value
+                                    : Number(value);
+                                return productViewMode === "revenue" ||
+                                  productViewMode === "profit"
+                                  ? formatCurrency(numValue)
+                                  : `${numValue} unit`;
+                              }}
+                            />
                           }
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <div
-                                className={`w-2 h-2 rounded-full ${
-                                  product.overallScore === "excellent"
-                                    ? "bg-success"
-                                    : product.overallScore === "good"
-                                    ? "bg-primary"
-                                    : product.overallScore === "average"
-                                    ? "bg-warning"
-                                    : "bg-danger"
-                                }`}
-                              />
+                        />
+                        <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                          {chartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ChartContainer>
+                  </div>
+                </Card.Content>
+              </Card>
+            </div>
+          </Tabs.Panel>
+
+          {/* Produk Berkinerja Terbaik Tab */}
+          <Tabs.Panel id="best" className="flex-1 min-h-0 overflow-auto">
+            <div className="flex flex-col gap-4 h-full">
+              <Card className="p-4">
+                <Card.Header>
+                  <div className="flex items-center gap-2">
+                    <Surface className="p-2 rounded-lg bg-success/10">
+                      <LuTrendingUp className="w-4 h-4 text-success" />
+                    </Surface>
+                    <Card.Title className="text-base font-bold">
+                      Produk Berkinerja Terbaik
+                    </Card.Title>
+                  </div>
+                </Card.Header>
+                <Card.Content>
+                  <div className="flex flex-col gap-3">
+                    {topPerformers.map((product, index) => (
+                      <div
+                        key={product.id}
+                        className="p-3 rounded-xl bg-success/5 border border-success-soft-hover hover:bg-success/10 transition-colors cursor-pointer"
+                        onClick={() =>
+                          setSelectedProduct(
+                            selectedProduct === product.id ? null : product.id
+                          )
+                        }
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-lg bg-success-soft-hover flex items-center justify-center">
+                              <span className="text-xs font-bold text-success">
+                                #{index + 1}
+                              </span>
+                            </div>
+                            <div>
                               <p className="font-semibold text-foreground text-sm">
                                 {product.name}
                               </p>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              {product.trend === "up" ? (
-                                <LuArrowUp className="w-3 h-3 text-success" />
-                              ) : (
-                                <LuArrowDown className="w-3 h-3 text-danger" />
-                              )}
+                              <p className="text-xs text-muted">
+                                {product.quantitySold} unit terjual
+                              </p>
                             </div>
                           </div>
-                          <div className="space-y-1">
-                            <div className="flex justify-between text-xs">
-                              <span className="text-muted">Pendapatan</span>
-                              <span className="font-semibold text-foreground">
-                                {formatCurrency(product.revenue)}
-                              </span>
-                            </div>
-                            <div className="flex justify-between text-xs">
-                              <span className="text-muted">Terjual</span>
-                              <span className="font-semibold text-foreground">
-                                {product.quantitySold} unit
-                              </span>
-                            </div>
-                            <div className="flex justify-between text-xs">
-                              <span className="text-muted">Profit</span>
-                              <span className="font-semibold text-success">
-                                {formatCurrency(product.profit)}
-                              </span>
-                            </div>
+                          <div className="flex items-center gap-1 text-success">
+                            {product.trend === "up" ? (
+                              <LuArrowUp className="w-3 h-3" />
+                            ) : (
+                              <LuArrowDown className="w-3 h-3" />
+                            )}
+                            <span className="text-xs font-semibold">
+                              {Math.abs(product.trendValue).toFixed(1)}%
+                            </span>
                           </div>
                         </div>
-                      ))}
+                        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-separator">
+                          <div>
+                            <p className="text-xs text-muted">Pendapatan</p>
+                            <p className="text-sm font-semibold text-foreground">
+                              {formatCurrency(product.revenue)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted">Profit</p>
+                            <p className="text-sm font-semibold text-success">
+                              {formatCurrency(product.profit)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted">Margin</p>
+                            <p className="text-sm font-semibold text-foreground">
+                              {product.profitMargin}%
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {topPerformers.length === 0 && (
+                      <p className="text-sm text-muted text-center py-4">
+                        Tidak ada produk dengan kinerja excellent
+                      </p>
+                    )}
+                  </div>
+                </Card.Content>
+              </Card>
+            </div>
+          </Tabs.Panel>
+
+          {/* Produk Perlu Perhatian Tab */}
+          <Tabs.Panel id="attention" className="flex-1 min-h-0 overflow-auto">
+            <div className="flex flex-col gap-4 h-full">
+              <Card className="p-4">
+                <Card.Header>
+                  <div className="flex items-center gap-2">
+                    <Surface className="p-2 rounded-lg bg-danger/10">
+                      <LuArrowDown className="w-4 h-4 text-danger" />
+                    </Surface>
+                    <Card.Title className="text-base font-bold">
+                      Produk Perlu Perhatian
+                    </Card.Title>
+                  </div>
+                </Card.Header>
+                <Card.Content>
+                  <div className="flex flex-col gap-3">
+                    {poorPerformers.map((product, index) => (
+                      <div
+                        key={product.id}
+                        className="p-3 rounded-xl bg-danger/5 border border-danger-soft-hover hover:bg-danger/10 transition-colors cursor-pointer"
+                        onClick={() =>
+                          setSelectedProduct(
+                            selectedProduct === product.id ? null : product.id
+                          )
+                        }
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-lg bg-danger-soft-hover flex items-center justify-center">
+                              <span className="text-xs font-bold text-danger">
+                                !
+                              </span>
+                            </div>
+                            <div>
+                              <p className="font-semibold text-foreground text-sm">
+                                {product.name}
+                              </p>
+                              <p className="text-xs text-muted">
+                                {product.quantitySold} unit terjual
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 text-danger">
+                            {product.trend === "up" ? (
+                              <LuArrowUp className="w-3 h-3" />
+                            ) : (
+                              <LuArrowDown className="w-3 h-3" />
+                            )}
+                            <span className="text-xs font-semibold">
+                              {Math.abs(product.trendValue).toFixed(1)}%
+                            </span>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-separator">
+                          <div>
+                            <p className="text-xs text-muted">Pendapatan</p>
+                            <p className="text-sm font-semibold text-foreground">
+                              {formatCurrency(product.revenue)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted">Profit</p>
+                            <p className="text-sm font-semibold text-danger">
+                              {formatCurrency(product.profit)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted">Margin</p>
+                            <p className="text-sm font-semibold text-foreground">
+                              {product.profitMargin}%
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {poorPerformers.length === 0 && (
+                      <p className="text-sm text-muted text-center py-4">
+                        Semua produk berkinerja baik
+                      </p>
+                    )}
                   </div>
                 </Card.Content>
               </Card>
