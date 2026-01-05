@@ -18,11 +18,7 @@ import type {
   DiscountUpdate,
   Product,
 } from "../utils/api";
-import {
-  createDiscount,
-  updateDiscount,
-  getProducts,
-} from "../utils/api";
+import { createDiscount, updateDiscount, getProducts } from "../utils/api";
 
 interface DiscountFormProps {
   discount?: Discount | null;
@@ -179,12 +175,12 @@ export default function DiscountForm({
 
                 <Select
                   isRequired
-                  label="Tipe Diskon"
                   selectedKey={type}
                   onSelectionChange={(key) =>
                     setType(key as "individual_item" | "for_all_item")
                   }
                 >
+                  <Label>Tipe Diskon</Label>
                   <Select.Trigger>
                     <Select.Value />
                     <Select.Indicator />
@@ -218,9 +214,7 @@ export default function DiscountForm({
                     isRequired
                     placeholder="Pilih produk"
                     selectedKey={productId?.toString()}
-                    onSelectionChange={(key) =>
-                      setProductId(Number(key))
-                    }
+                    onSelectionChange={(key) => setProductId(Number(key))}
                   >
                     <Label>Produk</Label>
                     <Select.Trigger>
