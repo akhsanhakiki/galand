@@ -3,7 +3,22 @@
 import * as React from "react";
 import * as RechartsPrimitive from "recharts";
 
-import { cn } from "../../utils/cn";
+import { cn } from "../utils/cn";
+
+// Type definitions for recharts payload
+type TooltipPayloadItem = {
+  value?: string | number | (string | number)[];
+  name?: string | number;
+  dataKey?: string | number;
+  color?: string;
+  payload?: {
+    chartConfig?: ChartConfig;
+    fill?: string;
+    [key: string]: unknown;
+  };
+  graphicalItemId?: string;
+  [key: string]: unknown;
+};
 
 // Chart container component
 const ChartContainer = React.forwardRef<
@@ -24,7 +39,7 @@ const ChartContainer = React.forwardRef<
       data-chart={chartId}
       ref={ref}
       className={cn(
-        "w-full text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-surface [&_.recharts-reference-line-line]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none [&_.recharts-bar-rectangle]:hover:opacity-100 [&_.recharts-bar-rectangle]:hover:fill-[inherit]",
+        "w-full text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-surface [&_.recharts-reference-line-line]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none [&_.recharts-bar-rectangle]:hover:opacity-100 [&_.recharts-bar-rectangle]:hover:fill-inherit",
         className
       )}
       {...props}
@@ -83,6 +98,9 @@ const ChartTooltipContent = React.forwardRef<
       indicator?: "line" | "dot" | "dashed";
       nameKey?: string;
       labelKey?: string;
+      active?: boolean;
+      payload?: TooltipPayloadItem[];
+      label?: string | number;
     }
 >(
   (
@@ -119,7 +137,7 @@ const ChartTooltipContent = React.forwardRef<
       if (labelFormatter) {
         return (
           <div className={cn("font-medium", labelClassName)}>
-            {labelFormatter(value, payload)}
+            {labelFormatter(value, payload as any)}
           </div>
         );
       }
@@ -129,14 +147,7 @@ const ChartTooltipContent = React.forwardRef<
       }
 
       return <div className={cn("font-medium", labelClassName)}>{value}</div>;
-    }, [
-      label,
-      labelFormatter,
-      payload,
-      hideLabel,
-      labelClassName,
-      labelKey,
-    ]);
+    }, [label, labelFormatter, payload, hideLabel, labelClassName, labelKey]);
 
     if (!active || !payload?.length) {
       return null;
@@ -148,16 +159,16 @@ const ChartTooltipContent = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-surface px-2.5 py-1.5 text-xs shadow-md",
+          "grid min-w-32 items-start gap-1.5 rounded-lg border border-border/50 bg-surface px-2.5 py-1.5 text-xs shadow-md",
           className
         )}
       >
         {!nestLabel ? tooltipLabel : null}
         <div className="grid gap-1.5">
-          {payload.map((item, index) => {
+          {payload.map((item: TooltipPayloadItem, index: number) => {
             const key = `${nameKey || item.name || item.dataKey || "value"}`;
             const itemConfig = item.payload?.chartConfig?.[key] || {};
-            const indicatorColor = color || item.payload.fill || item.color;
+            const indicatorColor = color || item.payload?.fill || item.color;
 
             return (
               <div
@@ -168,48 +179,54 @@ const ChartTooltipContent = React.forwardRef<
                 )}
               >
                 {(() => {
-                  const itemValue = typeof item.value === "object" && item.value !== null
-                    ? (item.value as any)?.value ?? item.value
-                    : item.value;
-                  
-                  const displayValue = formatter && itemValue !== undefined && item.name
-                    ? (() => {
-                        try {
-                          const formatted = formatter(
-                            itemValue,
-                            [item],
-                            index,
-                            {
-                              label: labelFormatter
-                                ? labelFormatter(label, payload)
-                                : typeof label === "string"
+                  const itemValue =
+                    typeof item.value === "object" && item.value !== null
+                      ? (item.value as any)?.value ?? item.value
+                      : item.value;
+
+                  const displayValue =
+                    formatter && itemValue !== undefined && item.name
+                      ? (() => {
+                          try {
+                            const formatted = (formatter as any)(
+                              itemValue,
+                              [item],
+                              index,
+                              {
+                                label: labelFormatter
+                                  ? labelFormatter(label, payload as any)
+                                  : typeof label === "string"
                                   ? label
                                   : tooltipLabel,
-                              active,
+                                active,
+                              },
+                              item
+                            );
+                            // Handle array return from formatter
+                            if (Array.isArray(formatted)) {
+                              return formatted[0];
                             }
-                          );
-                          // Handle array return from formatter
-                          if (Array.isArray(formatted)) {
-                            return formatted[0];
+                            // Ensure we return a valid React child
+                            if (
+                              typeof formatted === "object" &&
+                              formatted !== null
+                            ) {
+                              return String(formatted);
+                            }
+                            return formatted;
+                          } catch (e) {
+                            return typeof itemValue === "number"
+                              ? itemValue.toLocaleString()
+                              : String(itemValue ?? "");
                           }
-                          // Ensure we return a valid React child
-                          if (typeof formatted === "object" && formatted !== null) {
-                            return String(formatted);
-                          }
-                          return formatted;
-                        } catch (e) {
-                          return typeof itemValue === "number"
-                            ? itemValue.toLocaleString()
-                            : String(itemValue ?? "");
-                        }
-                      })()
-                    : itemValue !== undefined && itemValue !== null
-                    ? (typeof itemValue === "number"
+                        })()
+                      : itemValue !== undefined && itemValue !== null
+                      ? typeof itemValue === "number"
                         ? itemValue.toLocaleString()
                         : typeof itemValue === "string"
                         ? itemValue
-                        : String(itemValue))
-                    : null;
+                        : String(itemValue)
+                      : null;
 
                   return (
                     <div
@@ -279,6 +296,7 @@ const ChartLegendContent = React.forwardRef<
     Omit<React.ComponentProps<typeof RechartsPrimitive.Legend>, "content"> & {
       hideIcon?: boolean;
       nameKey?: string;
+      payload?: TooltipPayloadItem[];
     }
 >(
   (
@@ -300,16 +318,18 @@ const ChartLegendContent = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-        "flex items-center justify-center gap-4",
-        verticalAlign === "top" ? "pb-3" : "pt-3",
-        className
-      )}
+          "flex items-center justify-center gap-4",
+          verticalAlign === "top" ? "pb-3" : "pt-3",
+          className
+        )}
         {...props}
       >
-        {payload.map((item, index) => {
+        {payload.map((item: TooltipPayloadItem, index: number) => {
           const key = `${nameKey || item.dataKey || "value"}`;
           const itemConfig = item.payload?.chartConfig?.[key] || {};
-          const label = itemConfig?.label || (typeof item.value === "string" ? item.value : key);
+          const label =
+            itemConfig?.label ||
+            (typeof item.value === "string" ? item.value : key);
 
           return (
             <div
@@ -326,9 +346,7 @@ const ChartLegendContent = React.forwardRef<
                   }}
                 />
               ) : null}
-              <span className="text-muted-foreground">
-                {label}
-              </span>
+              <span className="text-muted-foreground">{label}</span>
             </div>
           );
         })}

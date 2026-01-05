@@ -34,7 +34,7 @@ import {
   ChartLegend,
   ChartLegendContent,
   type ChartConfig,
-} from "../../components/ui/chart";
+} from "../../components/chart";
 
 // Dummy data for financial metrics
 const financialData = {
