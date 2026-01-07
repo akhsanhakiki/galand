@@ -16,6 +16,8 @@ import {
   ListBox,
   Tabs,
   Popover,
+  Dropdown,
+  Label,
 } from "@heroui/react";
 import {
   LuPlus,
@@ -25,11 +27,17 @@ import {
   LuCalendar,
   LuChevronLeft,
   LuChevronRight,
+  LuDownload,
 } from "react-icons/lu";
 import type { Expense } from "../../utils/api";
 import { getExpenses, deleteExpense } from "../../utils/api";
 import ExpenseForm from "../../components/ExpenseForm";
 import { ResizableCell } from "../../components/ResizableCell";
+import {
+  exportExpensesToCSV,
+  exportExpensesToXLSX,
+  exportExpensesToPDF,
+} from "../../utils/export";
 
 type TimePeriod =
   | "hari-ini"
@@ -285,6 +293,22 @@ const PengeluaranPage = () => {
     return methodMap[paymentMethod] || paymentMethod;
   };
 
+  const handleExport = (format: "csv" | "xlsx" | "pdf") => {
+    if (filteredExpenses.length === 0) return;
+
+    switch (format) {
+      case "csv":
+        exportExpensesToCSV(filteredExpenses);
+        break;
+      case "xlsx":
+        exportExpensesToXLSX(filteredExpenses);
+        break;
+      case "pdf":
+        exportExpensesToPDF(filteredExpenses);
+        break;
+    }
+  };
+
   const getDateRangeDisplay = useMemo(() => {
     const { startDate, endDate } = getDateRange();
     if (!startDate || !endDate) return "";
@@ -524,6 +548,32 @@ const PengeluaranPage = () => {
                   </Tabs.List>
                 </Tabs.ListContainer>
               </Tabs>
+              <Dropdown>
+                <Button
+                  variant="ghost"
+                  isDisabled={filteredExpenses.length === 0}
+                >
+                  <LuDownload className="w-4 h-4" />
+                  Export
+                </Button>
+                <Dropdown.Popover>
+                  <Dropdown.Menu
+                    onAction={(key) =>
+                      handleExport(key as "csv" | "xlsx" | "pdf")
+                    }
+                  >
+                    <Dropdown.Item id="csv" textValue="Export to CSV">
+                      <Label className="text-xs">Export to CSV</Label>
+                    </Dropdown.Item>
+                    <Dropdown.Item id="xlsx" textValue="Export to XLSX">
+                      <Label className="text-xs">Export to XLSX</Label>
+                    </Dropdown.Item>
+                    <Dropdown.Item id="pdf" textValue="Export to PDF">
+                      <Label className="text-xs">Export to PDF</Label>
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown.Popover>
+              </Dropdown>
             </div>
           </div>
           <div className="flex flex-col h-full overflow-hidden gap-1">

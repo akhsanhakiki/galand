@@ -1,4 +1,4 @@
-import type { Transaction, Product } from "./api";
+import type { Transaction, Product, Expense } from "./api";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 
@@ -269,4 +269,122 @@ export const exportProductsToPDF = (products: Product[]) => {
   });
 
   doc.save(`produk_${new Date().toISOString().split("T")[0]}.pdf`);
+};
+
+// Expense export functions
+export const exportExpensesToCSV = (expenses: Expense[]) => {
+  const headers = ["Jumlah", "Deskripsi", "Kategori", "Metode Pembayaran", "Tanggal"];
+  const rows = expenses.map((e) => [
+    `Rp ${e.amount.toLocaleString("id-ID")}`,
+    e.description,
+    e.category,
+    e.payment_method,
+    formatDate(e.date),
+  ]);
+
+  const csvContent = [
+    headers.join(","),
+    ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+  ].join("\n");
+
+  const blob = new Blob(["\uFEFF" + csvContent], {
+    type: "text/csv;charset=utf-8;",
+  });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute(
+    "download",
+    `pengeluaran_${new Date().toISOString().split("T")[0]}.csv`
+  );
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+export const exportExpensesToXLSX = (expenses: Expense[]) => {
+  const data = expenses.map((e) => ({
+    Jumlah: e.amount,
+    Deskripsi: e.description,
+    Kategori: e.category,
+    "Metode Pembayaran": e.payment_method,
+    Tanggal: formatDate(e.date),
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Pengeluaran");
+
+  XLSX.writeFile(
+    workbook,
+    `pengeluaran_${new Date().toISOString().split("T")[0]}.xlsx`
+  );
+};
+
+export const exportExpensesToPDF = (expenses: Expense[]) => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 14;
+  const startY = margin + 10;
+  let currentY = startY;
+
+  doc.setFontSize(16);
+  doc.text("Laporan Pengeluaran", margin, currentY);
+  currentY += 10;
+
+  doc.setFontSize(10);
+  doc.text(
+    `Tanggal Export: ${new Date().toLocaleString("id-ID")}`,
+    margin,
+    currentY
+  );
+  currentY += 8;
+
+  const tableHeaders = ["Jumlah", "Deskripsi", "Kategori", "Metode", "Tanggal"];
+  const colWidths = [35, 50, 30, 30, 45];
+  const rowHeight = 7;
+
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+
+  let xPos = margin;
+  tableHeaders.forEach((header, index) => {
+    doc.text(header, xPos, currentY);
+    xPos += colWidths[index];
+  });
+
+  currentY += rowHeight;
+  doc.setLineWidth(0.5);
+  doc.line(margin, currentY - 2, pageWidth - margin, currentY - 2);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+
+  expenses.forEach((expense) => {
+    if (currentY + rowHeight > pageHeight - margin) {
+      doc.addPage();
+      currentY = margin + 10;
+    }
+
+    const row = [
+      `Rp ${expense.amount.toLocaleString("id-ID")}`,
+      expense.description,
+      expense.category,
+      expense.payment_method,
+      formatDate(expense.date),
+    ];
+
+    xPos = margin;
+    row.forEach((cell, index) => {
+      const cellText = doc.splitTextToSize(cell, colWidths[index] - 2);
+      doc.text(cellText, xPos, currentY);
+      xPos += colWidths[index];
+    });
+
+    currentY += rowHeight;
+  });
+
+  doc.save(`pengeluaran_${new Date().toISOString().split("T")[0]}.pdf`);
 };
