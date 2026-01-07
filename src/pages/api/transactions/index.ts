@@ -9,9 +9,21 @@ export const GET: APIRoute = async ({ url }) => {
   try {
     const offset = url.searchParams.get("offset") || "0";
     const limit = url.searchParams.get("limit") || "100";
+    const startDate = url.searchParams.get("start_date");
+    const endDate = url.searchParams.get("end_date");
+
+    const queryParams = new URLSearchParams();
+    queryParams.set("offset", offset);
+    queryParams.set("limit", limit);
+    if (startDate) {
+      queryParams.set("start_date", startDate);
+    }
+    if (endDate) {
+      queryParams.set("end_date", endDate);
+    }
 
     const response = await fetch(
-      `${API_BASE_URL}/transactions/?offset=${offset}&limit=${limit}`,
+      `${API_BASE_URL}/transactions/?${queryParams.toString()}`,
       {
         headers: {
           Accept: "application/json",

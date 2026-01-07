@@ -4,16 +4,25 @@ const API_BASE = "/api/transactions";
 
 export async function getTransactions(
   offset = 0,
-  limit = 100
+  limit = 100,
+  startDate?: string,
+  endDate?: string
 ): Promise<Transaction[]> {
-  const response = await fetch(
-    `${API_BASE}?offset=${offset}&limit=${limit}`,
-    {
-      headers: {
-        Accept: "application/json",
-      },
-    }
-  );
+  const queryParams = new URLSearchParams();
+  queryParams.set("offset", offset.toString());
+  queryParams.set("limit", limit.toString());
+  if (startDate) {
+    queryParams.set("start_date", startDate);
+  }
+  if (endDate) {
+    queryParams.set("end_date", endDate);
+  }
+
+  const response = await fetch(`${API_BASE}?${queryParams.toString()}`, {
+    headers: {
+      Accept: "application/json",
+    },
+  });
 
   if (!response.ok) {
     throw new Error("Failed to fetch transactions");

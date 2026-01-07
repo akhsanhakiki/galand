@@ -40,6 +40,7 @@ import {
 } from "../../utils/export";
 
 type TimePeriod =
+  | "semua"
   | "hari-ini"
   | "kemarin"
   | "mingguan"
@@ -124,6 +125,8 @@ const PengeluaranPage = () => {
     let end: Date = new Date(now);
 
     switch (selectedPeriod) {
+      case "semua":
+        return { startDate: undefined, endDate: undefined };
       case "hari-ini":
         start = new Date(now);
         start.setHours(0, 0, 0, 0);
@@ -137,26 +140,29 @@ const PengeluaranPage = () => {
         end.setHours(23, 59, 59, 999);
         break;
       case "mingguan":
+        // Start of current week (Monday)
         start = new Date(now);
-        start.setDate(start.getDate() - 7);
+        const dayOfWeek = start.getDay();
+        const diff = start.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust to Monday
+        start.setDate(diff);
         start.setHours(0, 0, 0, 0);
         end.setHours(23, 59, 59, 999);
         break;
       case "bulanan":
-        start = new Date(now);
-        start.setMonth(start.getMonth() - 1);
+        // Start of current month
+        start = new Date(now.getFullYear(), now.getMonth(), 1);
         start.setHours(0, 0, 0, 0);
         end.setHours(23, 59, 59, 999);
         break;
       case "tahunan":
-        start = new Date(now);
-        start.setFullYear(start.getFullYear() - 1);
+        // Start of current year
+        start = new Date(now.getFullYear(), 0, 1);
         start.setHours(0, 0, 0, 0);
         end.setHours(23, 59, 59, 999);
         break;
       case "3tahun":
-        start = new Date(now);
-        start.setFullYear(start.getFullYear() - 3);
+        // Start of 3 years ago
+        start = new Date(now.getFullYear() - 3, 0, 1);
         start.setHours(0, 0, 0, 0);
         end.setHours(23, 59, 59, 999);
         break;
@@ -492,6 +498,11 @@ const PengeluaranPage = () => {
                   </Popover.Dialog>
                 </Popover.Content>
               </Popover>
+            ) : selectedPeriod === "semua" ? (
+              <div className="flex items-center gap-2 text-xs text-muted">
+                <LuCalendar className="w-3.5 h-3.5" />
+                <span>Semua data</span>
+              </div>
             ) : (
               <div className="flex items-center gap-2 text-xs text-muted">
                 <LuCalendar className="w-3.5 h-3.5" />
@@ -504,7 +515,7 @@ const PengeluaranPage = () => {
                 selectedKey={selectedPeriod}
                 onSelectionChange={(key) => {
                   setSelectedPeriod(key as TimePeriod);
-                  if (key !== "kustom") {
+                  if (key !== "kustom" && key !== "semua") {
                     setCustomStartDate("");
                     setCustomEndDate("");
                     setIsPopoverOpen(false);
@@ -517,6 +528,10 @@ const PengeluaranPage = () => {
                     aria-label="Periode Waktu"
                     className="w-fit *:h-6 *:w-fit *:px-2 *:text-[11px] *:font-normal *:rounded-none *:bg-transparent *:data-[selected=true]:bg-transparent *:data-[selected=true]:text-foreground *:data-[hover=true]:bg-transparent"
                   >
+                    <Tabs.Tab id="semua">
+                      Semua
+                      <Tabs.Indicator />
+                    </Tabs.Tab>
                     <Tabs.Tab id="hari-ini">
                       Hari ini
                       <Tabs.Indicator />
@@ -526,19 +541,19 @@ const PengeluaranPage = () => {
                       <Tabs.Indicator />
                     </Tabs.Tab>
                     <Tabs.Tab id="mingguan">
-                      Mingguan
+                      Minggu ini
                       <Tabs.Indicator />
                     </Tabs.Tab>
                     <Tabs.Tab id="bulanan">
-                      Bulanan
+                      Bulan ini
                       <Tabs.Indicator />
                     </Tabs.Tab>
                     <Tabs.Tab id="tahunan">
-                      Tahunan
+                      Tahun ini
                       <Tabs.Indicator />
                     </Tabs.Tab>
                     <Tabs.Tab id="3tahun">
-                      3 Tahun
+                      3 Tahun ini
                       <Tabs.Indicator />
                     </Tabs.Tab>
                     <Tabs.Tab id="kustom">

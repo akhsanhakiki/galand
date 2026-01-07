@@ -17,6 +17,8 @@ import {
   SearchField,
   Dropdown,
   Label,
+  Tabs,
+  Popover,
 } from "@heroui/react";
 import {
   LuFilter,
@@ -24,7 +26,10 @@ import {
   LuChevronRight,
   LuPrinter,
   LuDownload,
+  LuCalendar,
 } from "react-icons/lu";
+
+type TimePeriod = "semua" | "hari-ini" | "kemarin" | "mingguan" | "bulanan" | "tahunan" | "3tahun" | "kustom";
 import type { Transaction } from "../../utils/api";
 import { getTransactions, getTransaction } from "../../utils/api";
 import TransactionForm from "../../components/TransactionForm";
@@ -37,6 +42,10 @@ const TransaksiPage = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("hari-ini");
+  const [customStartDate, setCustomStartDate] = useState<string>("");
+  const [customEndDate, setCustomEndDate] = useState<string>("");
+  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [transactionFormOpen, setTransactionFormOpen] = useState(false);
   const [viewingTransactionId, setViewingTransactionId] = useState<
     number | null
@@ -92,21 +101,87 @@ const TransaksiPage = () => {
     [columnConfigs]
   );
 
-  useEffect(() => {
-    fetchTransactions();
-  }, [refreshKey]);
+  const getDateRange = useCallback((): { startDate: string | undefined; endDate: string | undefined } => {
+    const now = new Date();
+    let start: Date;
+    let end: Date = new Date(now);
 
-  const fetchTransactions = async () => {
+    switch (selectedPeriod) {
+      case "semua":
+        return { startDate: undefined, endDate: undefined };
+      case "hari-ini":
+        start = new Date(now);
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        break;
+      case "kemarin":
+        start = new Date(now);
+        start.setDate(start.getDate() - 1);
+        start.setHours(0, 0, 0, 0);
+        end = new Date(start);
+        end.setHours(23, 59, 59, 999);
+        break;
+      case "mingguan":
+        // Start of current week (Monday)
+        start = new Date(now);
+        const dayOfWeek = start.getDay();
+        const diff = start.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust to Monday
+        start.setDate(diff);
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        break;
+      case "bulanan":
+        // Start of current month
+        start = new Date(now.getFullYear(), now.getMonth(), 1);
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        break;
+      case "tahunan":
+        // Start of current year
+        start = new Date(now.getFullYear(), 0, 1);
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        break;
+      case "3tahun":
+        // Start of 3 years ago
+        start = new Date(now.getFullYear() - 3, 0, 1);
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        break;
+      case "kustom":
+        if (customStartDate && customEndDate) {
+          start = new Date(customStartDate);
+          end = new Date(customEndDate);
+        } else {
+          return { startDate: undefined, endDate: undefined };
+        }
+        break;
+      default:
+        return { startDate: undefined, endDate: undefined };
+    }
+
+    return {
+      startDate: start.toISOString(),
+      endDate: end.toISOString(),
+    };
+  }, [selectedPeriod, customStartDate, customEndDate]);
+
+  const fetchTransactions = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await getTransactions();
-      setTransactions(data);
+      const { startDate, endDate } = getDateRange();
+      const data = await getTransactions(0, 100, startDate, endDate);
+      setTransactions(data || []);
     } catch (error) {
-      // Error handling - could show toast notification
+      setTransactions([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [getDateRange]);
+
+  useEffect(() => {
+    fetchTransactions();
+  }, [fetchTransactions, refreshKey]);
 
   const filteredTransactions = useMemo(() => {
     if (!searchQuery) return transactions;
@@ -133,11 +208,88 @@ const TransaksiPage = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, selectedPeriod, customStartDate, customEndDate]);
 
   useEffect(() => {
     setCurrentPage(1);
   }, [itemsPerPage]);
+
+  const getDateRangeDisplay = useMemo(() => {
+    try {
+      const now = new Date();
+      let start: Date;
+      let end: Date = new Date(now);
+
+      switch (selectedPeriod) {
+        case "hari-ini":
+          start = new Date(now);
+          start.setHours(0, 0, 0, 0);
+          end.setHours(23, 59, 59, 999);
+          break;
+        case "kemarin":
+          start = new Date(now);
+          start.setDate(start.getDate() - 1);
+          start.setHours(0, 0, 0, 0);
+          end = new Date(start);
+          end.setHours(23, 59, 59, 999);
+          break;
+        case "semua":
+          return "";
+        case "mingguan":
+          // Start of current week (Monday)
+          start = new Date(now);
+          const dayOfWeek = start.getDay();
+          const diff = start.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust to Monday
+          start.setDate(diff);
+          start.setHours(0, 0, 0, 0);
+          end.setHours(23, 59, 59, 999);
+          break;
+        case "bulanan":
+          // Start of current month
+          start = new Date(now.getFullYear(), now.getMonth(), 1);
+          start.setHours(0, 0, 0, 0);
+          end.setHours(23, 59, 59, 999);
+          break;
+        case "tahunan":
+          // Start of current year
+          start = new Date(now.getFullYear(), 0, 1);
+          start.setHours(0, 0, 0, 0);
+          end.setHours(23, 59, 59, 999);
+          break;
+        case "3tahun":
+          // Start of 3 years ago
+          start = new Date(now.getFullYear() - 3, 0, 1);
+          start.setHours(0, 0, 0, 0);
+          end.setHours(23, 59, 59, 999);
+          break;
+        case "kustom":
+          if (customStartDate && customEndDate) {
+            start = new Date(customStartDate);
+            end = new Date(customEndDate);
+          } else {
+            return "";
+          }
+          break;
+        default:
+          return "";
+      }
+
+      const formatDisplayDate = (date: Date) => {
+        return date.toLocaleDateString("id-ID", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        });
+      };
+
+      return `${formatDisplayDate(start)} - ${formatDisplayDate(end)}`;
+    } catch (error) {
+      return "";
+    }
+  }, [selectedPeriod, customStartDate, customEndDate]);
 
   const handleTransactionSuccess = () => {
     setRefreshKey((prev) => prev + 1);
@@ -215,11 +367,11 @@ const TransaksiPage = () => {
         </div>
 
         <div className="p-6 bg-surface rounded-3xl flex flex-col h-full min-h-[500px]">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4">
+          <div className="flex flex-col md:flex-row md:items-center w-full justify-between gap-4 pb-4">
             <SearchField
               value={searchQuery}
               onChange={setSearchQuery}
-              className="w-1/4"
+              className="w-full md:w-1/4"
             >
               <SearchField.Group className="shadow-none border ">
                 <SearchField.SearchIcon />
@@ -227,13 +379,129 @@ const TransaksiPage = () => {
                 <SearchField.ClearButton />
               </SearchField.Group>
             </SearchField>
-            <div className="flex items-center gap-2">
+
+            {selectedPeriod === "kustom" ? (
+              <Popover isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+                <Popover.Trigger>
+                  <div className="flex items-center gap-2 text-xs text-muted cursor-pointer hover:text-foreground transition-colors">
+                    <LuCalendar className="w-4 h-4" />
+                    <span>{getDateRangeDisplay || "Pilih periode"}</span>
+                  </div>
+                </Popover.Trigger>
+                <Popover.Content className="w-auto">
+                  <Popover.Dialog>
+                    <Popover.Heading className="text-sm font-semibold mb-3">
+                      Pilih Periode Kustom
+                    </Popover.Heading>
+                    <div className="flex flex-col gap-3">
+                      <div className="flex flex-col gap-1">
+                        <label
+                          htmlFor="start-datetime"
+                          className="text-xs text-muted"
+                        >
+                          Dari Tanggal & Waktu
+                        </label>
+                        <input
+                          id="start-datetime"
+                          type="datetime-local"
+                          value={customStartDate}
+                          onChange={(e) => setCustomStartDate(e.target.value)}
+                          max={customEndDate || undefined}
+                          className="h-8 px-3 text-xs rounded-lg border border-separator bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label
+                          htmlFor="end-datetime"
+                          className="text-xs text-muted"
+                        >
+                          Sampai Tanggal & Waktu
+                        </label>
+                        <input
+                          id="end-datetime"
+                          type="datetime-local"
+                          value={customEndDate}
+                          onChange={(e) => setCustomEndDate(e.target.value)}
+                          min={customStartDate || undefined}
+                          className="h-8 px-3 text-xs rounded-lg border border-separator bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                        />
+                      </div>
+                    </div>
+                  </Popover.Dialog>
+                </Popover.Content>
+              </Popover>
+            ) : selectedPeriod === "semua" ? (
+              <div className="flex items-center gap-2 text-xs text-muted">
+                <LuCalendar className="w-3.5 h-3.5" />
+                <span>Semua data</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-xs text-muted">
+                <LuCalendar className="w-3.5 h-3.5" />
+                <span>{getDateRangeDisplay || "Pilih periode"}</span>
+              </div>
+            )}
+
+            <div className="flex flex-row items-center gap-2">
+              <Tabs
+                selectedKey={selectedPeriod}
+                onSelectionChange={(key) => {
+                  setSelectedPeriod(key as TimePeriod);
+                  if (key !== "kustom" && key !== "semua") {
+                    setCustomStartDate("");
+                    setCustomEndDate("");
+                    setIsPopoverOpen(false);
+                  }
+                }}
+                className="w-fit"
+              >
+                <Tabs.ListContainer>
+                  <Tabs.List
+                    aria-label="Periode Waktu"
+                    className="w-fit *:h-6 *:w-fit *:px-2 *:text-[11px] *:font-normal *:rounded-none *:bg-transparent *:data-[selected=true]:bg-transparent *:data-[selected=true]:text-foreground *:data-[hover=true]:bg-transparent"
+                  >
+                    <Tabs.Tab id="semua">
+                      Semua
+                      <Tabs.Indicator />
+                    </Tabs.Tab>
+                    <Tabs.Tab id="hari-ini">
+                      Hari ini
+                      <Tabs.Indicator />
+                    </Tabs.Tab>
+                    <Tabs.Tab id="kemarin">
+                      Kemarin
+                      <Tabs.Indicator />
+                    </Tabs.Tab>
+                    <Tabs.Tab id="mingguan">
+                      Minggu ini
+                      <Tabs.Indicator />
+                    </Tabs.Tab>
+                    <Tabs.Tab id="bulanan">
+                      Bulan ini
+                      <Tabs.Indicator />
+                    </Tabs.Tab>
+                    <Tabs.Tab id="tahunan">
+                      Tahun ini
+                      <Tabs.Indicator />
+                    </Tabs.Tab>
+                    <Tabs.Tab id="3tahun">
+                      3 Tahun ini
+                      <Tabs.Indicator />
+                    </Tabs.Tab>
+                    <Tabs.Tab id="kustom">
+                      Kustom
+                      <Tabs.Indicator />
+                    </Tabs.Tab>
+                  </Tabs.List>
+                </Tabs.ListContainer>
+              </Tabs>
               <Dropdown>
                 <Button
                   variant="ghost"
                   isDisabled={filteredTransactions.length === 0}
+                  className="h-6 px-2 text-[11px]"
                 >
-                  <LuDownload className="w-4 h-4" />
+                  <LuDownload className="w-3 h-3" />
                   Export
                 </Button>
                 <Dropdown.Popover>
@@ -254,8 +522,8 @@ const TransaksiPage = () => {
                   </Dropdown.Menu>
                 </Dropdown.Popover>
               </Dropdown>
-              <Button variant="ghost" isIconOnly>
-                <LuFilter className="w-4 h-4" />
+              <Button variant="ghost" isIconOnly className="h-6 w-6">
+                <LuFilter className="w-3 h-3" />
               </Button>
             </div>
           </div>
