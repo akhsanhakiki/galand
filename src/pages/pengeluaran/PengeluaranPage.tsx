@@ -552,8 +552,9 @@ const PengeluaranPage = () => {
                 <Button
                   variant="ghost"
                   isDisabled={filteredExpenses.length === 0}
+                  className="h-6 px-2 text-[11px]"
                 >
-                  <LuDownload className="w-4 h-4" />
+                  <LuDownload className="w-3 h-3" />
                   Export
                 </Button>
                 <Dropdown.Popover>
