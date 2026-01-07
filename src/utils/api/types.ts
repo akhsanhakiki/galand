@@ -84,3 +84,28 @@ export interface DiscountUpdate {
   percentage?: number | null;
   product_id?: number | null;
 }
+
+export interface Expense {
+  id: number;
+  amount: number;
+  description: string;
+  date: string;
+  category: string;
+  payment_method: string;
+}
+
+export interface ExpenseCreate {
+  amount: number;
+  description: string;
+  date: string;
+  category: string;
+  payment_method: string;
+}
+
+export interface ExpenseUpdate {
+  amount?: number | null;
+  description?: string | null;
+  date?: string | null;
+  category?: string | null;
+  payment_method?: string | null;
+}

@@ -10,6 +10,9 @@ export type {
   Discount,
   DiscountCreate,
   DiscountUpdate,
+  Expense,
+  ExpenseCreate,
+  ExpenseUpdate,
 } from "./types";
 
 // Re-export product functions
@@ -37,3 +40,12 @@ export {
   getDiscounts,
   updateDiscount,
 } from "./discounts";
+
+// Re-export expense functions
+export {
+  createExpense,
+  deleteExpense,
+  getExpense,
+  getExpenses,
+  updateExpense,
+} from "./expenses";

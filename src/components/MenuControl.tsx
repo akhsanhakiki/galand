@@ -8,6 +8,7 @@ import {
   LuSettings,
   LuChevronLeft,
   LuChevronRight,
+  LuReceipt,
 } from "react-icons/lu";
 import { Card, Button, Surface } from "@heroui/react";
 import Header from "./Header";
@@ -18,6 +19,7 @@ const menuItems = [
   { title: "Transaksi", icon: LuBanknote, key: "transaksi" },
   { title: "Diskon", icon: LuTag, key: "diskon" },
   { title: "Gudang", icon: LuStore, key: "gudang" },
+  { title: "Pengeluaran", icon: LuReceipt, key: "pengeluaran" },
   { title: "Pengaturan", icon: LuSettings, key: "pengaturan" },
 ];
 

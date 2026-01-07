@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import MainContainer from '../../components/MainContainer.tsx';
+
+export const prerender = false;
+---
+
+<Layout title="Pengeluaran - kadara">
+  <MainContainer client:load />
+</Layout>

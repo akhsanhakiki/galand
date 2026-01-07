@@ -5,6 +5,7 @@ import TransaksiPage from "../pages/transaksi/TransaksiPage";
 import DiskonPage from "../pages/diskon/DiskonPage";
 import GudangPage from "../pages/gudang/GudangPage";
 import KasirPage from "../pages/kasir/KasirPage";
+import PengeluaranPage from "../pages/pengeluaran/PengeluaranPage";
 import PengaturanPage from "../pages/pengaturan/PengaturanPage";
 
 const pageComponents: Record<string, React.ComponentType> = {
@@ -13,6 +14,7 @@ const pageComponents: Record<string, React.ComponentType> = {
   diskon: DiskonPage,
   gudang: GudangPage,
   kasir: KasirPage,
+  pengeluaran: PengeluaranPage,
   pengaturan: PengaturanPage,
 };
 
@@ -35,6 +37,24 @@ const DesktopView = () => {
   const [currentPage, setCurrentPage] = useState<string>(
     getCurrentPageFromUrl()
   );
+
+  // Redirect to /ringkasan on desktop when visiting root route
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const checkAndRedirect = () => {
+      // Check if we're on desktop (md breakpoint is 768px in Tailwind)
+      const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+      const isRootPath = window.location.pathname === "/";
+
+      if (isDesktop && isRootPath) {
+        window.history.pushState({ page: "ringkasan" }, "", "/ringkasan");
+        setCurrentPage("ringkasan");
+      }
+    };
+
+    checkAndRedirect();
+  }, []);
 
   // Update current page when URL changes
   useEffect(() => {

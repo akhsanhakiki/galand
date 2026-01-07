@@ -5,6 +5,7 @@ import TransaksiPage from "../pages/transaksi/TransaksiPage";
 import DiskonPage from "../pages/diskon/DiskonPage";
 import GudangPage from "../pages/gudang/GudangPage";
 import KasirPage from "../pages/kasir/KasirPage";
+import PengeluaranPage from "../pages/pengeluaran/PengeluaranPage";
 import PengaturanPage from "../pages/pengaturan/PengaturanPage";
 import Header from "./Header";
 import { LuArrowLeft } from "react-icons/lu";
@@ -16,6 +17,7 @@ const pageComponents: Record<string, React.ComponentType> = {
   diskon: DiskonPage,
   gudang: GudangPage,
   kasir: KasirPage,
+  pengeluaran: PengeluaranPage,
   pengaturan: PengaturanPage,
 };
 
