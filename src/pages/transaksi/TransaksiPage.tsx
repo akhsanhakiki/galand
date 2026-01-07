@@ -21,7 +21,6 @@ import {
   Popover,
 } from "@heroui/react";
 import {
-  LuFilter,
   LuChevronLeft,
   LuChevronRight,
   LuPrinter,
@@ -621,9 +620,6 @@ const TransaksiPage = () => {
                   </Dropdown.Menu>
                 </Dropdown.Popover>
               </Dropdown>
-              <Button variant="ghost" isIconOnly className="h-6 w-6">
-                <LuFilter className="w-3 h-3" />
-              </Button>
             </div>
           </div>
           <div className="flex flex-col h-full overflow-hidden gap-1">
