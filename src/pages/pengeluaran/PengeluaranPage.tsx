@@ -271,10 +271,6 @@ const PengeluaranPage = () => {
     setCurrentPage(1);
   }, [itemsPerPage]);
 
-  const totalAmount = useMemo(() => {
-    return filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
-  }, [filteredExpenses]);
-
   const formatDate = (dateString?: string) => {
     if (!dateString) return "-";
     const date = new Date(dateString);
@@ -334,37 +330,157 @@ const PengeluaranPage = () => {
     return `${formatDisplayDate(startDate)} - ${formatDisplayDate(endDate)}`;
   }, [selectedPeriod, customStartDate, customEndDate]);
 
-  const stats = {
-    total: expenses.length,
-    totalAmount: totalAmount,
-    thisMonth: expenses.filter((e) => {
-      const expenseDate = new Date(e.date);
-      const now = new Date();
-      return (
-        expenseDate.getMonth() === now.getMonth() &&
-        expenseDate.getFullYear() === now.getFullYear()
-      );
-    }).length,
-  };
+  const stats = useMemo(() => {
+    const periodExpenses = expenses; // Already filtered by date range in loadExpenses
+    const periodTotalAmount = periodExpenses.reduce(
+      (sum, expense) => sum + expense.amount,
+      0
+    );
+
+    return {
+      total: periodExpenses.length,
+      totalAmount: periodTotalAmount,
+      average:
+        periodExpenses.length > 0
+          ? Math.round(periodTotalAmount / periodExpenses.length)
+          : 0,
+    };
+  }, [expenses]);
 
   return (
     <>
       <div className="flex flex-col w-full gap-5 h-full">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex flex-col gap-1">
-            <h1 className="text-xl font-bold text-foreground">Pengeluaran</h1>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-xl font-bold text-foreground">Pengeluaran</h1>
+              {selectedPeriod === "kustom" ? (
+                <Popover isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+                  <Popover.Trigger>
+                    <span className="text-sm text-muted cursor-pointer hover:text-foreground transition-colors">
+                      ({getDateRangeDisplay || "Pilih periode"})
+                    </span>
+                  </Popover.Trigger>
+                  <Popover.Content className="w-auto">
+                    <Popover.Dialog>
+                      <Popover.Heading className="text-sm font-semibold mb-3">
+                        Pilih Periode Kustom
+                      </Popover.Heading>
+                      <div className="flex flex-col gap-3">
+                        <div className="flex flex-col gap-1">
+                          <label
+                            htmlFor="start-datetime"
+                            className="text-xs text-muted"
+                          >
+                            Dari Tanggal & Waktu
+                          </label>
+                          <input
+                            id="start-datetime"
+                            type="datetime-local"
+                            value={customStartDate}
+                            onChange={(e) => setCustomStartDate(e.target.value)}
+                            max={customEndDate || undefined}
+                            className="h-8 px-3 text-xs rounded-lg border border-separator bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <label
+                            htmlFor="end-datetime"
+                            className="text-xs text-muted"
+                          >
+                            Sampai Tanggal & Waktu
+                          </label>
+                          <input
+                            id="end-datetime"
+                            type="datetime-local"
+                            value={customEndDate}
+                            onChange={(e) => setCustomEndDate(e.target.value)}
+                            min={customStartDate || undefined}
+                            className="h-8 px-3 text-xs rounded-lg border border-separator bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+                    </Popover.Dialog>
+                  </Popover.Content>
+                </Popover>
+              ) : selectedPeriod === "semua" ? (
+                <span className="text-sm text-muted">(Semua data)</span>
+              ) : (
+                <span className="text-sm text-muted">
+                  ({getDateRangeDisplay || "Pilih periode"})
+                </span>
+              )}
+            </div>
             <p className="text-muted text-sm">
               Kelola catatan pengeluaran bisnis
             </p>
           </div>
-          <Button
-            variant="primary"
-            className="bg-accent text-accent-foreground"
-            onPress={handleCreate}
-          >
-            <LuPlus className="w-4 h-4 mr-2" />
-            Tambah Pengeluaran
-          </Button>
+          <div className="flex flex-col md:flex-row md:items-center gap-2">
+            <Tabs
+              selectedKey={selectedPeriod}
+              onSelectionChange={(key) => {
+                setSelectedPeriod(key as TimePeriod);
+                if (key === "kustom") {
+                  setIsPopoverOpen(true);
+                } else if (key !== "semua") {
+                  setCustomStartDate("");
+                  setCustomEndDate("");
+                  setIsPopoverOpen(false);
+                } else {
+                  setIsPopoverOpen(false);
+                }
+              }}
+              className="w-fit"
+            >
+              <Tabs.ListContainer className="bg-surface rounded-3xl p-1">
+                <Tabs.List
+                  aria-label="Periode Waktu"
+                  className="w-fit *:h-6 *:w-fit *:px-2 *:text-[11px] *:font-normal *:rounded-none *:bg-transparent *:data-[selected=true]:bg-transparent *:data-[selected=true]:text-foreground *:data-[hover=true]:bg-transparent"
+                >
+                  <Tabs.Tab id="semua">
+                    Semua
+                    <Tabs.Indicator />
+                  </Tabs.Tab>
+                  <Tabs.Tab id="hari-ini">
+                    Hari ini
+                    <Tabs.Indicator />
+                  </Tabs.Tab>
+                  <Tabs.Tab id="kemarin">
+                    Kemarin
+                    <Tabs.Indicator />
+                  </Tabs.Tab>
+                  <Tabs.Tab id="mingguan">
+                    Minggu ini
+                    <Tabs.Indicator />
+                  </Tabs.Tab>
+                  <Tabs.Tab id="bulanan">
+                    Bulan ini
+                    <Tabs.Indicator />
+                  </Tabs.Tab>
+                  <Tabs.Tab id="tahunan">
+                    Tahun ini
+                    <Tabs.Indicator />
+                  </Tabs.Tab>
+                  <Tabs.Tab id="3tahun">
+                    3 Tahun ini
+                    <Tabs.Indicator />
+                  </Tabs.Tab>
+                  <Tabs.Tab id="kustom">
+                    Kustom
+                    <Tabs.Indicator />
+                  </Tabs.Tab>
+                </Tabs.List>
+              </Tabs.ListContainer>
+            </Tabs>
+            <Button
+              variant="primary"
+              className="bg-accent text-accent-foreground"
+              onPress={handleCreate}
+            >
+              <LuPlus className="w-4 h-4 mr-2" />
+              Tambah Pengeluaran
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -373,7 +489,7 @@ const PengeluaranPage = () => {
               <div>
                 <p className="text-xs text-muted mb-1">Total Pengeluaran</p>
                 <p className="text-xl font-bold text-foreground">
-                  {expenses.length}
+                  {stats.total}
                 </p>
               </div>
               <Surface className="p-2 rounded-lg bg-accent/10">
@@ -387,7 +503,7 @@ const PengeluaranPage = () => {
               <div>
                 <p className="text-xs text-muted mb-1">Total Jumlah</p>
                 <p className="text-xl font-bold text-foreground">
-                  Rp {totalAmount.toLocaleString("id-ID")}
+                  Rp {stats.totalAmount.toLocaleString("id-ID")}
                 </p>
               </div>
               <Surface className="p-2 rounded-lg bg-success/10">
@@ -399,9 +515,9 @@ const PengeluaranPage = () => {
           <div className="p-4 bg-surface rounded-3xl">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted mb-1">Bulan Ini</p>
+                <p className="text-xs text-muted mb-1">Total Transaksi</p>
                 <p className="text-xl font-bold text-foreground">
-                  {stats.thisMonth}
+                  {stats.total}
                 </p>
               </div>
               <Surface className="p-2 rounded-lg bg-warning/10">
@@ -415,11 +531,7 @@ const PengeluaranPage = () => {
               <div>
                 <p className="text-xs text-muted mb-1">Rata-rata</p>
                 <p className="text-xl font-bold text-foreground">
-                  {expenses.length > 0
-                    ? `Rp ${Math.round(
-                        totalAmount / expenses.length
-                      ).toLocaleString("id-ID")}`
-                    : "Rp 0"}
+                  Rp {stats.average.toLocaleString("id-ID")}
                 </p>
               </div>
               <Surface className="p-2 rounded-lg bg-info/10">
@@ -448,121 +560,7 @@ const PengeluaranPage = () => {
               </SearchField.Group>
             </SearchField>
 
-            {selectedPeriod === "kustom" ? (
-              <Popover isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                <Popover.Trigger>
-                  <div className="flex items-center gap-2 text-xs text-muted cursor-pointer hover:text-foreground transition-colors">
-                    <LuCalendar className="w-4 h-4" />
-                    <span>{getDateRangeDisplay || "Pilih periode"}</span>
-                  </div>
-                </Popover.Trigger>
-                <Popover.Content className="w-auto">
-                  <Popover.Dialog>
-                    <Popover.Heading className="text-sm font-semibold mb-3">
-                      Pilih Periode Kustom
-                    </Popover.Heading>
-                    <div className="flex flex-col gap-3">
-                      <div className="flex flex-col gap-1">
-                        <label
-                          htmlFor="start-datetime"
-                          className="text-xs text-muted"
-                        >
-                          Dari Tanggal & Waktu
-                        </label>
-                        <input
-                          id="start-datetime"
-                          type="datetime-local"
-                          value={customStartDate}
-                          onChange={(e) => setCustomStartDate(e.target.value)}
-                          max={customEndDate || undefined}
-                          className="h-8 px-3 text-xs rounded-lg border border-separator bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <label
-                          htmlFor="end-datetime"
-                          className="text-xs text-muted"
-                        >
-                          Sampai Tanggal & Waktu
-                        </label>
-                        <input
-                          id="end-datetime"
-                          type="datetime-local"
-                          value={customEndDate}
-                          onChange={(e) => setCustomEndDate(e.target.value)}
-                          min={customStartDate || undefined}
-                          className="h-8 px-3 text-xs rounded-lg border border-separator bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
-                        />
-                      </div>
-                    </div>
-                  </Popover.Dialog>
-                </Popover.Content>
-              </Popover>
-            ) : selectedPeriod === "semua" ? (
-              <div className="flex items-center gap-2 text-xs text-muted">
-                <LuCalendar className="w-3.5 h-3.5" />
-                <span>Semua data</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 text-xs text-muted">
-                <LuCalendar className="w-3.5 h-3.5" />
-                <span>{getDateRangeDisplay || "Pilih periode"}</span>
-              </div>
-            )}
-
             <div className="flex flex-row items-center gap-2">
-              <Tabs
-                selectedKey={selectedPeriod}
-                onSelectionChange={(key) => {
-                  setSelectedPeriod(key as TimePeriod);
-                  if (key !== "kustom" && key !== "semua") {
-                    setCustomStartDate("");
-                    setCustomEndDate("");
-                    setIsPopoverOpen(false);
-                  }
-                }}
-                className="w-fit"
-              >
-                <Tabs.ListContainer>
-                  <Tabs.List
-                    aria-label="Periode Waktu"
-                    className="w-fit *:h-6 *:w-fit *:px-2 *:text-[11px] *:font-normal *:rounded-none *:bg-transparent *:data-[selected=true]:bg-transparent *:data-[selected=true]:text-foreground *:data-[hover=true]:bg-transparent"
-                  >
-                    <Tabs.Tab id="semua">
-                      Semua
-                      <Tabs.Indicator />
-                    </Tabs.Tab>
-                    <Tabs.Tab id="hari-ini">
-                      Hari ini
-                      <Tabs.Indicator />
-                    </Tabs.Tab>
-                    <Tabs.Tab id="kemarin">
-                      Kemarin
-                      <Tabs.Indicator />
-                    </Tabs.Tab>
-                    <Tabs.Tab id="mingguan">
-                      Minggu ini
-                      <Tabs.Indicator />
-                    </Tabs.Tab>
-                    <Tabs.Tab id="bulanan">
-                      Bulan ini
-                      <Tabs.Indicator />
-                    </Tabs.Tab>
-                    <Tabs.Tab id="tahunan">
-                      Tahun ini
-                      <Tabs.Indicator />
-                    </Tabs.Tab>
-                    <Tabs.Tab id="3tahun">
-                      3 Tahun ini
-                      <Tabs.Indicator />
-                    </Tabs.Tab>
-                    <Tabs.Tab id="kustom">
-                      Kustom
-                      <Tabs.Indicator />
-                    </Tabs.Tab>
-                  </Tabs.List>
-                </Tabs.ListContainer>
-              </Tabs>
               <Dropdown>
                 <Button
                   variant="ghost"

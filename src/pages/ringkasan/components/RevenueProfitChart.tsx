@@ -18,7 +18,11 @@ const chartConfig = {
   },
   profit: {
     label: "Profit",
-    color: "var(--primary-400)",
+    color: "hsl(142, 71%, 45%)",
+  },
+  expense: {
+    label: "Pengeluaran",
+    color: "hsl(0, 70%, 55%)",
   },
 } satisfies ChartConfig;
 
@@ -37,6 +41,7 @@ const RevenueProfitChart: React.FC<RevenueProfitChartProps> = ({
   const areaChartOption = useMemo<EChartsOption>(() => {
     const revenueColor = chartConfig.revenue.color;
     const profitColor = chartConfig.profit.color;
+    const expenseColor = chartConfig.expense.color;
 
     // Helper to get RGB color for gradients (ECharts needs RGB for gradients)
     const getRgbColor = (color: string): string => {
@@ -91,6 +96,7 @@ const RevenueProfitChart: React.FC<RevenueProfitChartProps> = ({
 
     const revenueRgb = getRgbColor(revenueColor);
     const profitRgb = getRgbColor(profitColor);
+    const expenseRgb = getRgbColor(expenseColor);
 
     return {
       tooltip: {
@@ -111,7 +117,9 @@ const RevenueProfitChart: React.FC<RevenueProfitChartProps> = ({
             const label =
               param.seriesName === "revenue"
                 ? chartConfig.revenue.label
-                : chartConfig.profit.label;
+                : param.seriesName === "profit"
+                ? chartConfig.profit.label
+                : chartConfig.expense.label;
             result += `${param.marker} ${label}: ${formatCurrency(
               numValue
             )}<br/>`;
@@ -238,6 +246,40 @@ const RevenueProfitChart: React.FC<RevenueProfitChartProps> = ({
             color: profitRgb,
           },
           data: currentPeriodData.data.map((item) => item.profit),
+        },
+        {
+          name: "expense",
+          type: "line",
+          smooth: true,
+          areaStyle: {
+            color: {
+              type: "linear",
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: [
+                {
+                  offset: 0,
+                  color: expenseRgb
+                    .replace("rgb", "rgba")
+                    .replace(")", ", 0.4)"),
+                },
+                {
+                  offset: 1,
+                  color: expenseRgb.replace("rgb", "rgba").replace(")", ", 0)"),
+                },
+              ],
+            },
+          },
+          lineStyle: {
+            color: expenseRgb,
+            width: 2,
+          },
+          itemStyle: {
+            color: expenseRgb,
+          },
+          data: currentPeriodData.data.map((item) => item.expense),
         },
       ],
     };

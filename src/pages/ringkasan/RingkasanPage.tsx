@@ -64,6 +64,7 @@ const RingkasanPage = () => {
         label: `${dayName} ${date.getDate()}/${date.getMonth() + 1}`,
         revenue: 1200000 + Math.random() * 1000000,
         profit: 360000 + Math.random() * 300000,
+        expense: 200000 + Math.random() * 150000,
       });
     }
 
