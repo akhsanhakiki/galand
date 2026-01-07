@@ -597,9 +597,9 @@ const TransaksiPage = () => {
                 <Button
                   variant="ghost"
                   isDisabled={filteredTransactions.length === 0}
-                  className="h-6 px-2 text-[11px]"
+                  size="sm"
                 >
-                  <LuDownload className="w-3 h-3" />
+                  <LuDownload className="w-3.5 h-3.5" />
                   Export
                 </Button>
                 <Dropdown.Popover>
