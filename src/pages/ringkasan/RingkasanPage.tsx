@@ -5,9 +5,9 @@ import { Surface, Tabs, Button, Popover } from "@heroui/react";
 import {
   LuTrendingUp,
   LuDollarSign,
-  LuArrowUp,
   LuPercent,
   LuCoins,
+  LuReceipt,
 } from "react-icons/lu";
 
 // Components
@@ -239,7 +239,7 @@ const RingkasanPage = () => {
       </div>
 
       {/* Financial Metrics Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
         <div className="p-4 bg-surface rounded-xl">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs text-muted">Total Pendapatan</p>
@@ -252,7 +252,6 @@ const RingkasanPage = () => {
               {formatCurrency(financialData.totalRevenue)}
             </p>
             <div className="flex items-center gap-1 text-success">
-              <LuArrowUp className="w-3 h-3" />
               <span className="text-xs">↑ {financialData.revenueGrowth}%</span>
             </div>
           </div>
@@ -270,7 +269,6 @@ const RingkasanPage = () => {
               {formatCurrency(financialData.totalProfit)}
             </p>
             <div className="flex items-center gap-1 text-success">
-              <LuArrowUp className="w-3 h-3" />
               <span className="text-xs">↑ {financialData.profitGrowth}%</span>
             </div>
           </div>
@@ -288,7 +286,6 @@ const RingkasanPage = () => {
               {financialData.profitMargin}%
             </p>
             <div className="flex items-center gap-1 text-success">
-              <LuArrowUp className="w-3 h-3" />
               <span className="text-xs">↑ 2.1%</span>
             </div>
           </div>
@@ -306,10 +303,26 @@ const RingkasanPage = () => {
               {formatCurrency(financialData.averageTransactionValue)}
             </p>
             <div className="flex items-center gap-1 text-success">
-              <LuArrowUp className="w-3 h-3" />
               <span className="text-xs">
                 ↑ {financialData.transactionGrowth}%
               </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4 bg-surface rounded-xl">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs text-muted">Total Pengeluaran</p>
+            <Surface className="p-2 rounded-lg bg-danger/10">
+              <LuReceipt className="w-4 h-4 text-danger" />
+            </Surface>
+          </div>
+          <div className="flex flex-col gap-1">
+            <p className="text-xl font-bold text-foreground">
+              {formatCurrency(financialData.totalExpenses)}
+            </p>
+            <div className="flex items-center gap-1 text-danger">
+              <span className="text-xs">↑ {financialData.expenseGrowth}%</span>
             </div>
           </div>
         </div>

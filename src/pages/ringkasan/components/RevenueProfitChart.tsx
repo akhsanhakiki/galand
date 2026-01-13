@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useRef, useState } from "react";
 import { Surface } from "@heroui/react";
 import { LuChartLine } from "react-icons/lu";
 import ReactECharts from "echarts-for-react";
@@ -37,6 +37,98 @@ interface RevenueProfitChartProps {
 const RevenueProfitChart: React.FC<RevenueProfitChartProps> = ({
   currentPeriodData,
 }) => {
+  const chartRef = useRef<HTMLDivElement>(null);
+  const [themeColors, setThemeColors] = useState({
+    mutedForeground: "#808080",
+    border: "#e5e5e5",
+  });
+
+  // Get computed CSS variable values for theme-aware colors
+  useEffect(() => {
+    const updateThemeColors = () => {
+      // Create temporary elements to get computed color values
+      const mutedEl = document.createElement("div");
+      mutedEl.className = "text-muted";
+      mutedEl.style.position = "absolute";
+      mutedEl.style.visibility = "hidden";
+      mutedEl.style.pointerEvents = "none";
+      document.body.appendChild(mutedEl);
+      const mutedForeground = getComputedStyle(mutedEl).color || "#808080";
+      document.body.removeChild(mutedEl);
+
+      const borderEl = document.createElement("div");
+      borderEl.style.borderColor = "var(--border)";
+      borderEl.style.position = "absolute";
+      borderEl.style.visibility = "hidden";
+      borderEl.style.pointerEvents = "none";
+      borderEl.style.borderWidth = "1px";
+      borderEl.style.borderStyle = "solid";
+      document.body.appendChild(borderEl);
+      let border = getComputedStyle(borderEl).borderColor || "#e5e5e5";
+      document.body.removeChild(borderEl);
+
+      // Fallback to separator if border didn't work
+      if (border === "rgba(0, 0, 0, 0)" || !border) {
+        const separatorEl = document.createElement("div");
+        separatorEl.style.borderColor = "var(--separator)";
+        separatorEl.style.position = "absolute";
+        separatorEl.style.visibility = "hidden";
+        separatorEl.style.pointerEvents = "none";
+        separatorEl.style.borderWidth = "1px";
+        separatorEl.style.borderStyle = "solid";
+        document.body.appendChild(separatorEl);
+        border = getComputedStyle(separatorEl).borderColor || "#e5e5e5";
+        document.body.removeChild(separatorEl);
+      }
+      
+      setThemeColors({
+        mutedForeground: mutedForeground || "#808080",
+        border: border || "#e5e5e5",
+      });
+    };
+
+    updateThemeColors();
+
+    // Watch for theme changes
+    const observer = new MutationObserver(updateThemeColors);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class", "data-theme"],
+    });
+
+    // Also listen to theme changes via media query
+    const darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleThemeChange = () => updateThemeColors();
+    darkModeQuery.addEventListener("change", handleThemeChange);
+
+    return () => {
+      observer.disconnect();
+      darkModeQuery.removeEventListener("change", handleThemeChange);
+    };
+  }, []);
+
+  // Helper to convert hex/rgb to rgba with opacity
+  const getRgbaColor = (color: string, opacity: number): string => {
+    // If it's already rgba/rgb, extract the RGB values
+    const rgbMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if (rgbMatch) {
+      return `rgba(${rgbMatch[1]}, ${rgbMatch[2]}, ${rgbMatch[3]}, ${opacity})`;
+    }
+    
+    // If it's hex
+    const hexMatch = color.match(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/);
+    if (hexMatch) {
+      const hex = hexMatch[1];
+      const r = parseInt(hex.length === 3 ? hex[0] + hex[0] : hex.substring(0, 2), 16);
+      const g = parseInt(hex.length === 3 ? hex[1] + hex[1] : hex.substring(2, 4), 16);
+      const b = parseInt(hex.length === 3 ? hex[2] + hex[2] : hex.substring(4, 6), 16);
+      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    }
+    
+    // Fallback
+    return `rgba(0, 0, 0, ${opacity})`;
+  };
+
   // ECharts option for area chart
   const areaChartOption = useMemo<EChartsOption>(() => {
     const revenueColor = chartConfig.revenue.color;
@@ -146,7 +238,7 @@ const RevenueProfitChart: React.FC<RevenueProfitChartProps> = ({
         },
         axisLabel: {
           margin: 8,
-          color: "var(--muted-foreground)",
+          color: themeColors.mutedForeground,
         },
       },
       yAxis: {
@@ -159,7 +251,7 @@ const RevenueProfitChart: React.FC<RevenueProfitChartProps> = ({
         },
         axisLabel: {
           margin: 8,
-          color: "var(--muted-foreground)",
+          color: themeColors.mutedForeground,
           formatter: (value: number) => {
             if (value >= 1000000) {
               return `Rp ${(value / 1000000).toFixed(0)} J`;
@@ -173,8 +265,8 @@ const RevenueProfitChart: React.FC<RevenueProfitChartProps> = ({
           show: true,
           lineStyle: {
             type: "dashed",
-            color: "rgba(0, 0, 0, 0.1)",
-            opacity: 0.5,
+            color: getRgbaColor(themeColors.border, 0.5),
+            opacity: 1,
           },
         },
       },
@@ -283,7 +375,7 @@ const RevenueProfitChart: React.FC<RevenueProfitChartProps> = ({
         },
       ],
     };
-  }, [currentPeriodData]);
+  }, [currentPeriodData, themeColors]);
 
   return (
     <div className="flex flex-col gap-4 h-full">
@@ -318,7 +410,7 @@ const RevenueProfitChart: React.FC<RevenueProfitChartProps> = ({
           ))}
         </div>
       </div>
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0" ref={chartRef}>
         <div className="h-full w-full">
           <ReactECharts
             option={areaChartOption}

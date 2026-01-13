@@ -50,10 +50,12 @@ export type ChartDataItem = Product & {
 export const financialData = {
   totalRevenue: 12450000,
   totalProfit: 3750000,
+  totalExpenses: 8700000,
   profitMargin: 30.1,
   averageTransactionValue: 50816,
   revenueGrowth: 12.5,
   profitGrowth: 15.2,
+  expenseGrowth: 8.3,
   transactionCount: 245,
   transactionGrowth: 5.3,
 };
