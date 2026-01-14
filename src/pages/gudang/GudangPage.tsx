@@ -270,21 +270,9 @@ const GudangPage = () => {
         }
       `}</style>
       <div className="flex flex-col w-full gap-5 h-full">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-xl font-bold text-foreground">Gudang</h1>
-            <p className="text-muted text-sm">
-              Kelola inventori dan stok produk
-            </p>
-          </div>
-          <Button
-            variant="primary"
-            className="bg-accent text-accent-foreground"
-            onPress={handleCreate}
-          >
-            <LuPlus className="w-4 h-4 mr-2" />
-            Tambah Produk
-          </Button>
+        <div className="flex flex-col gap-1">
+          <h1 className="text-xl font-bold text-foreground">Gudang</h1>
+          <p className="text-muted text-sm">Kelola inventori dan stok produk</p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -363,9 +351,10 @@ const GudangPage = () => {
                 <Button
                   variant="ghost"
                   isDisabled={filteredProducts.length === 0}
+                  size="sm"
                 >
-                  <LuDownload className="w-4 h-4" />
-                  Export
+                  <LuDownload className="w-3.5 h-3.5" />
+                  <span className="text-xs">Export</span>
                 </Button>
                 <Dropdown.Popover>
                   <Dropdown.Menu
@@ -385,6 +374,15 @@ const GudangPage = () => {
                   </Dropdown.Menu>
                 </Dropdown.Popover>
               </Dropdown>
+              <Button
+                variant="primary"
+                className="bg-accent text-accent-foreground"
+                onPress={handleCreate}
+                size="sm"
+              >
+                <LuPlus className="w-3.5 h-3.5" />
+                <span className="text-xs">Tambah Produk</span>
+              </Button>
             </div>
           </div>
           <div className="flex flex-col h-full overflow-hidden gap-1">

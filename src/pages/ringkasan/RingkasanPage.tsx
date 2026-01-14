@@ -69,14 +69,13 @@ const RingkasanPage = () => {
           return;
         }
 
-        const data = await getSummary(
-          dateRange.startDate,
-          dateRange.endDate
-        );
+        const data = await getSummary(dateRange.startDate, dateRange.endDate);
         setSummaryData(data);
         setIsInitialLoad(false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch summary");
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch summary"
+        );
         setSummaryData(null);
         setIsInitialLoad(false);
       } finally {
@@ -113,7 +112,9 @@ const RingkasanPage = () => {
   };
 
   // Transform API chart data to TrendData format
-  const transformChartData = (chartData: SummaryResponse["chart_data"]): TrendData[] => {
+  const transformChartData = (
+    chartData: SummaryResponse["chart_data"]
+  ): TrendData[] => {
     return chartData.map((item) => {
       const date = new Date(item.date);
       const dayName = date.toLocaleDateString("id-ID", { weekday: "short" });
@@ -186,7 +187,9 @@ const RingkasanPage = () => {
 
     let subtitle = "";
     if (selectedPeriod === "custom" && customStartDate && customEndDate) {
-      subtitle = `${formatDate(customStartDate)} - ${formatDate(customEndDate)}`;
+      subtitle = `${formatDate(customStartDate)} - ${formatDate(
+        customEndDate
+      )}`;
     } else {
       subtitle = timePeriodConfig[selectedPeriod].subtitle;
     }
@@ -257,15 +260,15 @@ const RingkasanPage = () => {
   }
 
   return (
-    <div className="flex flex-col w-full h-full gap-4">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div className="flex flex-col w-full gap-5 h-full">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-xl font-bold text-foreground">Ringkasan</h1>
           <p className="text-muted text-sm">
             Pantau ringkasan penjualan dan inventori Anda
           </p>
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col md:flex-row md:items-center gap-2">
           <div className="flex items-center gap-2">
             <Tabs
               selectedKey={selectedPeriod}
@@ -285,7 +288,7 @@ const RingkasanPage = () => {
               }}
               className="w-fit"
             >
-              <Tabs.ListContainer>
+              <Tabs.ListContainer className="bg-surface rounded-3xl p-1">
                 <Tabs.List
                   aria-label="Periode Waktu"
                   className="w-fit *:h-8 *:w-fit *:px-3 *:text-xs *:font-normal *:rounded-none *:bg-transparent *:data-[selected=true]:bg-transparent *:data-[selected=true]:text-foreground *:data-[hover=true]:bg-transparent"
@@ -398,7 +401,7 @@ const RingkasanPage = () => {
 
       {/* Financial Metrics Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-        <div className="p-4 bg-surface rounded-xl">
+        <div className="p-4 bg-surface rounded-3xl">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs text-muted">Total Pendapatan</p>
             <Surface className="p-2 rounded-lg bg-accent/10">
@@ -411,13 +414,15 @@ const RingkasanPage = () => {
             </p>
             {financialData.revenueGrowth > 0 && (
               <div className="flex items-center gap-1 text-success">
-                <span className="text-xs">↑ {financialData.revenueGrowth}%</span>
+                <span className="text-xs">
+                  ↑ {financialData.revenueGrowth}%
+                </span>
               </div>
             )}
           </div>
         </div>
 
-        <div className="p-4 bg-surface rounded-xl">
+        <div className="p-4 bg-surface rounded-3xl">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs text-muted">Total Profit</p>
             <Surface className="p-2 rounded-lg bg-success/10">
@@ -436,7 +441,7 @@ const RingkasanPage = () => {
           </div>
         </div>
 
-        <div className="p-4 bg-surface rounded-xl">
+        <div className="p-4 bg-surface rounded-3xl">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs text-muted">Profit Margin</p>
             <Surface className="p-2 rounded-lg bg-warning/10">
@@ -450,7 +455,7 @@ const RingkasanPage = () => {
           </div>
         </div>
 
-        <div className="p-4 bg-surface rounded-xl">
+        <div className="p-4 bg-surface rounded-3xl">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs text-muted">Rata-rata Transaksi</p>
             <Surface className="p-2 rounded-lg bg-primary/10">
@@ -471,7 +476,7 @@ const RingkasanPage = () => {
           </div>
         </div>
 
-        <div className="p-4 bg-surface rounded-xl">
+        <div className="p-4 bg-surface rounded-3xl">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs text-muted">Total Pengeluaran</p>
             <Surface className="p-2 rounded-lg bg-danger/10">
@@ -484,7 +489,9 @@ const RingkasanPage = () => {
             </p>
             {financialData.expenseGrowth > 0 && (
               <div className="flex items-center gap-1 text-danger">
-                <span className="text-xs">↑ {financialData.expenseGrowth}%</span>
+                <span className="text-xs">
+                  ↑ {financialData.expenseGrowth}%
+                </span>
               </div>
             )}
           </div>
@@ -492,7 +499,7 @@ const RingkasanPage = () => {
       </div>
 
       {/* Tabs for Chart and Product Performance */}
-      <div className="flex-1 min-h-0 bg-surface rounded-xl p-4">
+      <div className="flex-1 min-h-0 bg-surface rounded-3xl p-4">
         <Tabs
           defaultSelectedKey="chart"
           className="w-full h-full flex flex-col"
@@ -504,7 +511,7 @@ const RingkasanPage = () => {
                 className="w-fit *:h-8 *:w-fit *:px-4 *:text-xs *:font-normal"
               >
                 <Tabs.Tab id="chart">
-                  Pendapatan & Profit
+                  Grafik Pendapatan & Pengeluaran
                   <Tabs.Indicator />
                 </Tabs.Tab>
                 <Tabs.Tab id="top5">

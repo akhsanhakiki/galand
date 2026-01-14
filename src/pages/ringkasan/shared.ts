@@ -136,42 +136,42 @@ export const timePeriodConfig: Record<
 > = {
   semua: {
     data: dailyTrendData, // Placeholder, will be replaced with API data
-    title: "Tren Pendapatan & Profit",
+    title: "Grafik Pendapatan & Pengeluaran",
     subtitle: "Semua Data",
   },
   harian: {
     data: dailyTrendData,
-    title: "Tren Pendapatan & Profit Harian",
+    title: "Grafik Pendapatan & Pengeluaran Harian",
     subtitle: "7 Hari Terakhir",
   },
   mingguan: {
     data: weeklyTrendData,
-    title: "Tren Pendapatan & Profit Mingguan",
+    title: "Grafik Pendapatan & Pengeluaran Mingguan",
     subtitle: "4 Minggu Terakhir",
   },
   bulanan: {
     data: monthlyTrendData,
-    title: "Tren Pendapatan & Profit Bulanan",
+    title: "Grafik Pendapatan & Pengeluaran Bulanan",
     subtitle: "12 Bulan Terakhir",
   },
   tahunan: {
     data: yearlyTrendData,
-    title: "Tren Pendapatan & Profit Tahunan",
+    title: "Grafik Pendapatan & Pengeluaran Tahunan",
     subtitle: "5 Tahun Terakhir",
   },
   "3tahun": {
     data: threeYearTrendData,
-    title: "Tren Pendapatan & Profit",
+    title: "Grafik Pendapatan & Pengeluaran",
     subtitle: "3 Tahun Terakhir (Per Kuartal)",
   },
   "5tahun": {
     data: fiveYearTrendData,
-    title: "Tren Pendapatan & Profit",
+    title: "Grafik Pendapatan & Pengeluaran",
     subtitle: "5 Tahun Terakhir (Per Semester)",
   },
   custom: {
     data: dailyTrendData, // Placeholder, will be replaced with custom data
-    title: "Tren Pendapatan & Profit",
+    title: "Grafik Pendapatan & Pengeluaran",
     subtitle: "Periode Kustom",
   },
 };

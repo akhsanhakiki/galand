@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
-import { Surface, Button } from "@heroui/react";
+import { Surface, Tabs } from "@heroui/react";
 import { TbChartDonut } from "react-icons/tb";
 import ReactECharts from "echarts-for-react";
 import type { EChartsOption } from "echarts";
@@ -199,6 +199,13 @@ const Top5Products: React.FC<Top5ProductsProps> = ({
     setSelectedChartProduct(null);
   }, [productViewMode, productSortMode, products]);
 
+  // Auto-switch from profit to revenue if profit is selected (since profit option is removed)
+  useEffect(() => {
+    if (productViewMode === "profit") {
+      onViewModeChange("revenue");
+    }
+  }, [productViewMode, onViewModeChange]);
+
   // Auto-scroll to highlighted card
   useEffect(() => {
     if (selectedChartProduct !== null) {
@@ -225,32 +232,32 @@ const Top5Products: React.FC<Top5ProductsProps> = ({
           <h2 className="text-lg font-bold text-foreground">Top 5 Produk</h2>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 bg-surface rounded-lg p-1">
-            <Button
-              size="sm"
-              variant={productViewMode === "revenue" ? "primary" : "ghost"}
-              onPress={() => onViewModeChange("revenue")}
-              className="h-7 px-3 text-xs"
-            >
-              Pendapatan
-            </Button>
-            <Button
-              size="sm"
-              variant={productViewMode === "quantity" ? "primary" : "ghost"}
-              onPress={() => onViewModeChange("quantity")}
-              className="h-7 px-3 text-xs"
-            >
-              Kuantitas
-            </Button>
-            <Button
-              size="sm"
-              variant={productViewMode === "profit" ? "primary" : "ghost"}
-              onPress={() => onViewModeChange("profit")}
-              className="h-7 px-3 text-xs"
-            >
-              Profit
-            </Button>
-          </div>
+          <Tabs
+            selectedKey={productViewMode === "profit" ? "revenue" : productViewMode}
+            onSelectionChange={(key) => {
+              const mode = key as ProductViewMode;
+              if (mode !== "profit") {
+                onViewModeChange(mode);
+              }
+            }}
+            className="w-fit"
+          >
+            <Tabs.ListContainer>
+              <Tabs.List
+                aria-label="View Mode"
+                className="w-fit *:h-8 *:w-fit *:px-4 *:text-xs *:font-normal"
+              >
+                <Tabs.Tab id="revenue">
+                  Pendapatan
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+                <Tabs.Tab id="quantity">
+                  Kuantitas
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+              </Tabs.List>
+            </Tabs.ListContainer>
+          </Tabs>
         </div>
       </div>
 

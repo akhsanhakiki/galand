@@ -53,7 +53,7 @@ const PengeluaranPage = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("hari-ini");
+  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("semua");
   const [customStartDate, setCustomStartDate] = useState<string>("");
   const [customEndDate, setCustomEndDate] = useState<string>("");
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
@@ -472,14 +472,6 @@ const PengeluaranPage = () => {
                 </Tabs.List>
               </Tabs.ListContainer>
             </Tabs>
-            <Button
-              variant="primary"
-              className="bg-accent text-accent-foreground"
-              onPress={handleCreate}
-            >
-              <LuPlus className="w-4 h-4 mr-2" />
-              Tambah Pengeluaran
-            </Button>
           </div>
         </div>
 
@@ -588,6 +580,15 @@ const PengeluaranPage = () => {
                   </Dropdown.Menu>
                 </Dropdown.Popover>
               </Dropdown>
+              <Button
+                variant="primary"
+                className="bg-accent text-accent-foreground"
+                onPress={handleCreate}
+                size="sm"
+              >
+                <LuPlus className="w-3.5 h-3.5" />
+                <span className="text-xs">Tambah Pengeluaran</span>
+              </Button>
             </div>
           </div>
           <div className="flex flex-col h-full overflow-hidden gap-1">

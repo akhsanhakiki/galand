@@ -92,21 +92,11 @@ const DiskonPage = () => {
   return (
     <>
       <div className="flex flex-col w-full gap-5 h-full">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-xl font-bold text-foreground">Diskon</h1>
-            <p className="text-muted text-sm">
-              Kelola kode diskon dan promo penjualan
-            </p>
-          </div>
-          <Button
-            variant="primary"
-            className="bg-accent text-accent-foreground"
-            onPress={handleCreate}
-          >
-            <LuPlus className="w-4 h-4 mr-2" />
-            Tambah Diskon
-          </Button>
+        <div className="flex flex-col gap-1">
+          <h1 className="text-xl font-bold text-foreground">Diskon</h1>
+          <p className="text-muted text-sm">
+            Kelola kode diskon dan promo penjualan
+          </p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -178,14 +168,6 @@ const DiskonPage = () => {
             ) : (
               <div className="flex flex-col gap-4 bg-surface rounded-2xl p-4 h-full">
                 <div className="flex flex-row justify-between items-center">
-                  <div className="flex flex-col gap-1">
-                    <h2 className="text-md font-bold text-foreground">
-                      Daftar Diskon
-                    </h2>
-                    <p className="text-xs text-muted">
-                      Kelola diskon dan promo penjualan
-                    </p>
-                  </div>
                   <SearchField
                     value={searchQuery}
                     onChange={setSearchQuery}
@@ -197,6 +179,15 @@ const DiskonPage = () => {
                       <SearchField.ClearButton />
                     </SearchField.Group>
                   </SearchField>
+                  <Button
+                    variant="primary"
+                    className="bg-accent text-accent-foreground"
+                    onPress={handleCreate}
+                    size="sm"
+                  >
+                    <LuPlus className="w-3.5 h-3.5" />
+                    <span className="text-xs">Tambah Diskon</span>
+                  </Button>
                 </div>
                 <div className="flex flex-col h-full overflow-hidden gap-1">
                   <div className="flex-1 overflow-hidden flex flex-col min-h-0">
