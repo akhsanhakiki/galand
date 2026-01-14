@@ -1,16 +1,17 @@
 import {
-  allProducts,
   CHART_COLORS,
   type ProductViewMode,
   type ProductSortMode,
   type ChartDataItem,
+  type Product,
 } from "../shared";
 
 export const prepareChartData = (
   productViewMode: ProductViewMode,
-  productSortMode: ProductSortMode
+  productSortMode: ProductSortMode,
+  products: Product[] = []
 ): ChartDataItem[] => {
-  const sorted = [...allProducts].sort((a, b) => {
+  const sorted = [...products].sort((a, b) => {
     switch (productSortMode) {
       case "revenue":
         return b.revenue - a.revenue;

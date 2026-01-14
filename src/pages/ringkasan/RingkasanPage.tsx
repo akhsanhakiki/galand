@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { Surface, Tabs, Button, Popover } from "@heroui/react";
+import React, { useState, useMemo, useEffect } from "react";
+import { Surface, Tabs, Button, Popover, Spinner } from "@heroui/react";
 import {
   LuTrendingUp,
   LuDollarSign,
@@ -19,18 +19,22 @@ import ProductsNeedingAttention from "./components/ProductsNeedingAttention";
 
 // Shared utilities and types
 import {
-  financialData,
   timePeriodConfig,
   formatCurrency,
+  getDateRangeForPeriod,
   type TimePeriod,
   type ProductViewMode,
   type ProductSortMode,
+  type TrendData,
+  type Product,
 } from "./shared";
 import { prepareChartData } from "./utils/chartData";
 import { calculatePerformanceAnalysis } from "./utils/performanceAnalysis";
+import { getSummary } from "../../utils/api";
+import type { SummaryResponse, SummaryProduct } from "../../utils/api";
 
 const RingkasanPage = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("harian");
+  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("semua");
   const [productViewMode, setProductViewMode] =
     useState<ProductViewMode>("revenue");
   const [productSortMode, setProductSortMode] =
@@ -38,37 +42,139 @@ const RingkasanPage = () => {
   const [customStartDate, setCustomStartDate] = useState<string>("");
   const [customEndDate, setCustomEndDate] = useState<string>("");
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [summaryData, setSummaryData] = useState<SummaryResponse | null>(null);
 
-  // Generate custom period data based on selected dates
-  const customPeriodData = useMemo(() => {
-    if (selectedPeriod !== "custom" || !customStartDate || !customEndDate) {
-      return timePeriodConfig.custom;
-    }
+  // Fetch summary data from API
+  useEffect(() => {
+    const fetchSummary = async () => {
+      // Only show loading spinner on initial load, not on period changes
+      if (isInitialLoad) {
+        setLoading(true);
+      }
+      setError(null);
 
-    const start = new Date(customStartDate);
-    const end = new Date(customEndDate);
-    const daysDiff = Math.ceil(
-      (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
-    );
+      try {
+        const dateRange = getDateRangeForPeriod(
+          selectedPeriod,
+          customStartDate,
+          customEndDate
+        );
 
-    // Generate data based on date range
-    // For now, we'll use a simplified approach - in production, you'd fetch real data
-    const data = [];
-    const days = Math.min(daysDiff + 1, 30); // Limit to 30 days for display, +1 to include end date
+        if (!dateRange) {
+          setSummaryData(null);
+          setLoading(false);
+          return;
+        }
 
-    for (let i = 0; i < days; i++) {
-      const date = new Date(start);
-      date.setDate(date.getDate() + i);
+        const data = await getSummary(
+          dateRange.startDate,
+          dateRange.endDate
+        );
+        setSummaryData(data);
+        setIsInitialLoad(false);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to fetch summary");
+        setSummaryData(null);
+        setIsInitialLoad(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSummary();
+  }, [selectedPeriod, customStartDate, customEndDate, isInitialLoad]);
+
+  // Transform API product data to Product type
+  const transformProduct = (apiProduct: SummaryProduct): Product => {
+    // Calculate profit - if not available, estimate from revenue (assume 30% margin)
+    const estimatedProfit = apiProduct.total_revenue * 0.3;
+    const profit = estimatedProfit;
+    const profitMargin =
+      apiProduct.total_revenue > 0
+        ? (profit / apiProduct.total_revenue) * 100
+        : 0;
+
+    return {
+      id: apiProduct.product_id,
+      name: apiProduct.product_name,
+      quantitySold: apiProduct.quantity_sold,
+      revenue: apiProduct.total_revenue,
+      profit: profit,
+      profitMargin: profitMargin,
+      stock: 0, // Not available from API
+      price: 0, // Not available from API
+      cost: 0, // Not available from API
+      trend: "up", // Default
+      trendValue: 0, // Default
+    };
+  };
+
+  // Transform API chart data to TrendData format
+  const transformChartData = (chartData: SummaryResponse["chart_data"]): TrendData[] => {
+    return chartData.map((item) => {
+      const date = new Date(item.date);
       const dayName = date.toLocaleDateString("id-ID", { weekday: "short" });
-      data.push({
-        label: `${dayName} ${date.getDate()}/${date.getMonth() + 1}`,
-        revenue: 1200000 + Math.random() * 1000000,
-        profit: 360000 + Math.random() * 300000,
-        expense: 200000 + Math.random() * 150000,
-      });
+      const day = date.getDate();
+      const month = date.getMonth() + 1;
+      const label = `${dayName} ${day}/${month}`;
+
+      return {
+        label,
+        revenue: item.revenue,
+        profit: item.profit,
+        expense: item.expenses,
+      };
+    });
+  };
+
+  // Calculate financial data from API response
+  const financialData = useMemo(() => {
+    if (!summaryData) {
+      return {
+        totalRevenue: 0,
+        totalProfit: 0,
+        totalExpenses: 0,
+        profitMargin: 0,
+        averageTransactionValue: 0,
+        revenueGrowth: 0,
+        profitGrowth: 0,
+        expenseGrowth: 0,
+        transactionCount: 0,
+        transactionGrowth: 0,
+      };
     }
 
-    // Format dates for display
+    const profitMargin =
+      summaryData.total_revenue > 0
+        ? (summaryData.total_profit / summaryData.total_revenue) * 100
+        : 0;
+
+    return {
+      totalRevenue: summaryData.total_revenue,
+      totalProfit: summaryData.total_profit,
+      totalExpenses: summaryData.total_expenses,
+      profitMargin: profitMargin,
+      averageTransactionValue: summaryData.average_transaction,
+      revenueGrowth: 0, // Not in API
+      profitGrowth: 0, // Not in API
+      expenseGrowth: 0, // Not in API
+      transactionCount: 0, // Not in API
+      transactionGrowth: 0, // Not in API
+    };
+  }, [summaryData]);
+
+  // Generate period data from API response
+  const currentPeriodData = useMemo(() => {
+    if (!summaryData) {
+      return timePeriodConfig[selectedPeriod];
+    }
+
+    const chartData = transformChartData(summaryData.chart_data);
+
+    // Format dates for subtitle
     const formatDate = (dateString: string) => {
       const date = new Date(dateString);
       return date.toLocaleDateString("id-ID", {
@@ -78,26 +184,40 @@ const RingkasanPage = () => {
       });
     };
 
-    return {
-      data,
-      title: "Tren Pendapatan & Profit",
-      subtitle: `${formatDate(customStartDate)} - ${formatDate(customEndDate)}`,
-    };
-  }, [customStartDate, customEndDate, selectedPeriod]);
+    let subtitle = "";
+    if (selectedPeriod === "custom" && customStartDate && customEndDate) {
+      subtitle = `${formatDate(customStartDate)} - ${formatDate(customEndDate)}`;
+    } else {
+      subtitle = timePeriodConfig[selectedPeriod].subtitle;
+    }
 
-  const currentPeriodData =
-    selectedPeriod === "custom"
-      ? customPeriodData
-      : timePeriodConfig[selectedPeriod];
+    return {
+      data: chartData,
+      title: timePeriodConfig[selectedPeriod].title,
+      subtitle,
+    };
+  }, [summaryData, selectedPeriod, customStartDate, customEndDate]);
+
+  // Transform API products to Product array
+  const allProducts = useMemo(() => {
+    if (!summaryData) return [];
+    return [
+      ...summaryData.top_5_products.map(transformProduct),
+      ...summaryData.underperforming_products.map(transformProduct),
+    ];
+  }, [summaryData]);
 
   // Prepare chart data based on view mode
   const chartData = useMemo(
-    () => prepareChartData(productViewMode, productSortMode),
-    [productViewMode, productSortMode]
+    () => prepareChartData(productViewMode, productSortMode, allProducts),
+    [productViewMode, productSortMode, allProducts]
   );
 
   // Performance analysis
-  const performanceAnalysis = useMemo(() => calculatePerformanceAnalysis(), []);
+  const performanceAnalysis = useMemo(
+    () => calculatePerformanceAnalysis(allProducts),
+    [allProducts]
+  );
 
   const topPerformers = performanceAnalysis
     .filter((p) => p.overallScore === "excellent")
@@ -105,6 +225,36 @@ const RingkasanPage = () => {
   const poorPerformers = performanceAnalysis
     .filter((p) => p.overallScore === "poor")
     .slice(0, 3);
+
+  // Transform top 5 products for Top5Products component
+  const top5Products = useMemo(() => {
+    if (!summaryData) return [];
+    return summaryData.top_5_products.map(transformProduct);
+  }, [summaryData]);
+
+  // Transform underperforming products
+  const underperformingProducts = useMemo(() => {
+    if (!summaryData) return [];
+    return summaryData.underperforming_products.map(transformProduct);
+  }, [summaryData]);
+
+  // Only show loading spinner on initial load
+  if (loading && isInitialLoad) {
+    return (
+      <div className="flex items-center justify-center w-full h-full">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center w-full h-full gap-4">
+        <p className="text-danger text-lg font-semibold">Error</p>
+        <p className="text-muted">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col w-full h-full gap-4">
@@ -121,12 +271,16 @@ const RingkasanPage = () => {
               selectedKey={selectedPeriod}
               onSelectionChange={(key) => {
                 setSelectedPeriod(key as TimePeriod);
-                if (key !== "custom") {
+                if (key === "custom") {
+                  setIsPopoverOpen(true);
+                } else if (key !== "semua") {
                   setCustomStartDate("");
                   setCustomEndDate("");
                   setIsPopoverOpen(false);
                 } else {
-                  setIsPopoverOpen(true);
+                  setCustomStartDate("");
+                  setCustomEndDate("");
+                  setIsPopoverOpen(false);
                 }
               }}
               className="w-fit"
@@ -136,6 +290,10 @@ const RingkasanPage = () => {
                   aria-label="Periode Waktu"
                   className="w-fit *:h-8 *:w-fit *:px-3 *:text-xs *:font-normal *:rounded-none *:bg-transparent *:data-[selected=true]:bg-transparent *:data-[selected=true]:text-foreground *:data-[hover=true]:bg-transparent"
                 >
+                  <Tabs.Tab id="semua">
+                    Semua
+                    <Tabs.Indicator />
+                  </Tabs.Tab>
                   <Tabs.Tab id="harian">
                     Harian
                     <Tabs.Indicator />
@@ -251,9 +409,11 @@ const RingkasanPage = () => {
             <p className="text-xl font-bold text-foreground">
               {formatCurrency(financialData.totalRevenue)}
             </p>
-            <div className="flex items-center gap-1 text-success">
-              <span className="text-xs">↑ {financialData.revenueGrowth}%</span>
-            </div>
+            {financialData.revenueGrowth > 0 && (
+              <div className="flex items-center gap-1 text-success">
+                <span className="text-xs">↑ {financialData.revenueGrowth}%</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -268,9 +428,11 @@ const RingkasanPage = () => {
             <p className="text-xl font-bold text-foreground">
               {formatCurrency(financialData.totalProfit)}
             </p>
-            <div className="flex items-center gap-1 text-success">
-              <span className="text-xs">↑ {financialData.profitGrowth}%</span>
-            </div>
+            {financialData.profitGrowth > 0 && (
+              <div className="flex items-center gap-1 text-success">
+                <span className="text-xs">↑ {financialData.profitGrowth}%</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -283,11 +445,8 @@ const RingkasanPage = () => {
           </div>
           <div className="flex flex-col gap-1">
             <p className="text-xl font-bold text-foreground">
-              {financialData.profitMargin}%
+              {financialData.profitMargin.toFixed(2)}%
             </p>
-            <div className="flex items-center gap-1 text-success">
-              <span className="text-xs">↑ 2.1%</span>
-            </div>
           </div>
         </div>
 
@@ -302,11 +461,13 @@ const RingkasanPage = () => {
             <p className="text-xl font-bold text-foreground">
               {formatCurrency(financialData.averageTransactionValue)}
             </p>
-            <div className="flex items-center gap-1 text-success">
-              <span className="text-xs">
-                ↑ {financialData.transactionGrowth}%
-              </span>
-            </div>
+            {financialData.transactionGrowth > 0 && (
+              <div className="flex items-center gap-1 text-success">
+                <span className="text-xs">
+                  ↑ {financialData.transactionGrowth}%
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -321,9 +482,11 @@ const RingkasanPage = () => {
             <p className="text-xl font-bold text-foreground">
               {formatCurrency(financialData.totalExpenses)}
             </p>
-            <div className="flex items-center gap-1 text-danger">
-              <span className="text-xs">↑ {financialData.expenseGrowth}%</span>
-            </div>
+            {financialData.expenseGrowth > 0 && (
+              <div className="flex items-center gap-1 text-danger">
+                <span className="text-xs">↑ {financialData.expenseGrowth}%</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -372,6 +535,7 @@ const RingkasanPage = () => {
           {/* Top 5 Produk Tab */}
           <Tabs.Panel id="top5" className="flex-1 min-h-0 overflow-auto">
             <Top5Products
+              products={top5Products}
               productViewMode={productViewMode}
               productSortMode={productSortMode}
               onViewModeChange={setProductViewMode}

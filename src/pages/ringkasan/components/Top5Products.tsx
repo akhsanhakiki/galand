@@ -4,21 +4,23 @@ import { TbChartDonut } from "react-icons/tb";
 import ReactECharts from "echarts-for-react";
 import type { EChartsOption } from "echarts";
 import {
-  allProducts,
   CHART_COLORS,
   formatCurrency,
   type ProductViewMode,
   type ProductSortMode,
   type ChartDataItem,
+  type Product,
 } from "../shared";
 
 interface Top5ProductsProps {
+  products: Product[];
   productViewMode: ProductViewMode;
   productSortMode: ProductSortMode;
   onViewModeChange: (mode: ProductViewMode) => void;
 }
 
 const Top5Products: React.FC<Top5ProductsProps> = ({
+  products,
   productViewMode,
   productSortMode,
   onViewModeChange,
@@ -31,7 +33,7 @@ const Top5Products: React.FC<Top5ProductsProps> = ({
 
   // Prepare chart data based on view mode
   const chartData = useMemo<ChartDataItem[]>(() => {
-    const sorted = [...allProducts].sort((a, b) => {
+    const sorted = [...products].sort((a, b) => {
       switch (productSortMode) {
         case "revenue":
           return b.revenue - a.revenue;
@@ -190,12 +192,12 @@ const Top5Products: React.FC<Top5ProductsProps> = ({
         },
       ],
     };
-  }, [chartData, productViewMode]);
+  }, [chartData, productViewMode, products]);
 
   // Reset selection when chart data changes
   useEffect(() => {
     setSelectedChartProduct(null);
-  }, [productViewMode, productSortMode]);
+  }, [productViewMode, productSortMode, products]);
 
   // Auto-scroll to highlighted card
   useEffect(() => {
@@ -265,7 +267,7 @@ const Top5Products: React.FC<Top5ProductsProps> = ({
                 onEvents={{
                   click: (params: any) => {
                     // Find the product by name from the clicked segment
-                    const clickedProduct = allProducts.find(
+                    const clickedProduct = products.find(
                       (p) => p.name === params.name
                     );
                     if (clickedProduct) {
@@ -290,7 +292,7 @@ const Top5Products: React.FC<Top5ProductsProps> = ({
               className="flex flex-col gap-3 h-full overflow-y-auto"
             >
               {chartData.map((item) => {
-                const product = allProducts.find((p) => p.id === item.id);
+                const product = products.find((p) => p.id === item.id);
                 if (!product) return null;
 
                 return (

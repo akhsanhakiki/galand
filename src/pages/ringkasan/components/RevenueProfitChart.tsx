@@ -34,10 +34,13 @@ interface RevenueProfitChartProps {
   };
 }
 
-const RevenueProfitChart: React.FC<RevenueProfitChartProps> = ({
+const RevenueProfitChart: React.FC<RevenueProfitChartProps> = React.memo(({
   currentPeriodData,
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
+  const echartsInstanceRef = useRef<any>(null);
+  const previousDataKeyRef = useRef<string>("");
+  const previousThemeColorsRef = useRef<string>("");
   const [themeColors, setThemeColors] = useState({
     mutedForeground: "#808080",
     border: "#e5e5e5",
@@ -129,6 +132,29 @@ const RevenueProfitChart: React.FC<RevenueProfitChartProps> = ({
     return `rgba(0, 0, 0, ${opacity})`;
   };
 
+  // Track data and theme changes separately to control animation
+  const dataKey = useMemo(() => JSON.stringify(currentPeriodData.data), [currentPeriodData.data]);
+  const themeKey = useMemo(() => JSON.stringify(themeColors), [themeColors]);
+  
+  // Determine if data changed (should animate) or only theme changed (should not animate)
+  // Check BEFORE updating refs to get correct comparison
+  const isFirstRender = previousDataKeyRef.current === "";
+  const isDataChange = !isFirstRender && previousDataKeyRef.current !== dataKey;
+  const isThemeChangeOnly = !isDataChange && previousThemeColorsRef.current !== themeKey && previousThemeColorsRef.current !== "";
+  
+  // Only animate when data changes (including first render), not when only theme colors change
+  const shouldAnimate = (isDataChange || isFirstRender) && !isThemeChangeOnly;
+  
+  // Update refs after determining animation state
+  useEffect(() => {
+    if (isDataChange || isFirstRender) {
+      previousDataKeyRef.current = dataKey;
+    }
+    if (previousThemeColorsRef.current !== themeKey) {
+      previousThemeColorsRef.current = themeKey;
+    }
+  }, [dataKey, themeKey, isDataChange, isFirstRender]);
+
   // ECharts option for area chart
   const areaChartOption = useMemo<EChartsOption>(() => {
     const revenueColor = chartConfig.revenue.color;
@@ -191,6 +217,10 @@ const RevenueProfitChart: React.FC<RevenueProfitChartProps> = ({
     const expenseRgb = getRgbColor(expenseColor);
 
     return {
+      animation: shouldAnimate,
+      animationDuration: shouldAnimate ? 800 : 0,
+      animationEasing: shouldAnimate ? "cubicOut" : "linear",
+      animationDelay: shouldAnimate ? 0 : undefined,
       tooltip: {
         trigger: "axis",
         backgroundColor: "rgba(0, 0, 0, 0.8)",
@@ -375,7 +405,7 @@ const RevenueProfitChart: React.FC<RevenueProfitChartProps> = ({
         },
       ],
     };
-  }, [currentPeriodData, themeColors]);
+  }, [currentPeriodData, themeColors, shouldAnimate]);
 
   return (
     <div className="flex flex-col gap-4 h-full">
@@ -416,11 +446,18 @@ const RevenueProfitChart: React.FC<RevenueProfitChartProps> = ({
             option={areaChartOption}
             style={{ height: "100%", width: "100%" }}
             opts={{ renderer: "svg" }}
+            notMerge={!shouldAnimate}
+            lazyUpdate={false}
+            onChartReady={(chart) => {
+              echartsInstanceRef.current = chart;
+            }}
           />
         </div>
       </div>
     </div>
   );
-};
+});
+
+RevenueProfitChart.displayName = "RevenueProfitChart";
 
 export default RevenueProfitChart;

@@ -13,6 +13,9 @@ export type {
   Expense,
   ExpenseCreate,
   ExpenseUpdate,
+  SummaryResponse,
+  SummaryChartData,
+  SummaryProduct,
 } from "./types";
 
 // Re-export product functions
@@ -49,3 +52,6 @@ export {
   getExpenses,
   updateExpense,
 } from "./expenses";
+
+// Re-export summary functions
+export { getSummary } from "./summary";

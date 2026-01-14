@@ -1,15 +1,18 @@
-import { allProducts, type ProductWithScore } from "../shared";
+import { type ProductWithScore, type Product } from "../shared";
 
-export const calculatePerformanceAnalysis = (): ProductWithScore[] => {
+export const calculatePerformanceAnalysis = (
+  products: Product[] = []
+): ProductWithScore[] => {
+  if (products.length === 0) return [];
+
   const avgRevenue =
-    allProducts.reduce((sum, p) => sum + p.revenue, 0) / allProducts.length;
+    products.reduce((sum, p) => sum + p.revenue, 0) / products.length;
   const avgQuantity =
-    allProducts.reduce((sum, p) => sum + p.quantitySold, 0) /
-    allProducts.length;
+    products.reduce((sum, p) => sum + p.quantitySold, 0) / products.length;
   const avgProfit =
-    allProducts.reduce((sum, p) => sum + p.profit, 0) / allProducts.length;
+    products.reduce((sum, p) => sum + p.profit, 0) / products.length;
 
-  return allProducts.map((product) => {
+  return products.map((product) => {
     const revenueScore =
       product.revenue >= avgRevenue * 1.2
         ? "excellent"

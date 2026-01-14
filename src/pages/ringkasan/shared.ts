@@ -1,6 +1,7 @@
 // Shared types, constants, and utilities for RingkasanPage
 
 export type TimePeriod =
+  | "semua"
   | "harian"
   | "mingguan"
   | "bulanan"
@@ -133,6 +134,11 @@ export const timePeriodConfig: Record<
   TimePeriod,
   { data: TrendData[]; title: string; subtitle: string }
 > = {
+  semua: {
+    data: dailyTrendData, // Placeholder, will be replaced with API data
+    title: "Tren Pendapatan & Profit",
+    subtitle: "Semua Data",
+  },
   harian: {
     data: dailyTrendData,
     title: "Tren Pendapatan & Profit Harian",
@@ -293,4 +299,91 @@ export const CHART_COLORS = [
 // Helper function to format currency
 export const formatCurrency = (value: number) => {
   return `Rp ${value.toLocaleString("id-ID")}`;
+};
+
+// Helper function to get date range for a given period
+export const getDateRangeForPeriod = (
+  period: TimePeriod,
+  customStart?: string,
+  customEnd?: string
+): { startDate?: string; endDate?: string } | null => {
+  const now = new Date();
+  let start: Date;
+  let end: Date = new Date(now);
+
+  switch (period) {
+    case "semua": {
+      return { startDate: undefined, endDate: undefined };
+    }
+    case "harian": {
+      // Last 7 days
+      start = new Date(now);
+      start.setDate(start.getDate() - 6); // Include today, so 6 days ago
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+      break;
+    }
+    case "mingguan": {
+      // Last 4 weeks (28 days)
+      start = new Date(now);
+      start.setDate(start.getDate() - 27); // Include today
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+      break;
+    }
+    case "bulanan": {
+      // Last 12 months
+      start = new Date(now.getFullYear(), now.getMonth() - 11, 1);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+      break;
+    }
+    case "tahunan": {
+      // Last 5 years
+      start = new Date(now.getFullYear() - 4, 0, 1);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+      break;
+    }
+    case "3tahun": {
+      // Last 3 years
+      start = new Date(now.getFullYear() - 2, 0, 1);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+      break;
+    }
+    case "5tahun": {
+      // Last 5 years
+      start = new Date(now.getFullYear() - 4, 0, 1);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+      break;
+    }
+    case "custom": {
+      if (customStart && customEnd) {
+        start = new Date(customStart);
+        end = new Date(customEnd);
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+      } else {
+        return null;
+      }
+      break;
+    }
+    default:
+      return null;
+  }
+
+  // Format as YYYY-MM-DD
+  const formatDate = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  return {
+    startDate: formatDate(start),
+    endDate: formatDate(end),
+  };
 };

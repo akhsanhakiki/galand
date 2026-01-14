@@ -109,3 +109,27 @@ export interface ExpenseUpdate {
   category?: string | null;
   payment_method?: string | null;
 }
+
+export interface SummaryChartData {
+  date: string;
+  revenue: number;
+  profit: number;
+  expenses: number;
+}
+
+export interface SummaryProduct {
+  product_id: number;
+  product_name: string;
+  total_revenue: number;
+  quantity_sold: number;
+}
+
+export interface SummaryResponse {
+  total_revenue: number;
+  total_profit: number;
+  average_transaction: number;
+  total_expenses: number;
+  chart_data: SummaryChartData[];
+  top_5_products: SummaryProduct[];
+  underperforming_products: SummaryProduct[];
+}
