@@ -133,3 +133,22 @@ export interface SummaryResponse {
   top_5_products: SummaryProduct[];
   underperforming_products: SummaryProduct[];
 }
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: "user" | "admin";
+  emailVerified: boolean;
+  image: string | null;
+}
+
+export interface UserCreate {
+  email: string;
+  name: string;
+  role: "user" | "admin";
+}
+
+export interface UserUpdate {
+  role?: "user" | "admin";
+}

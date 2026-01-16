@@ -16,6 +16,9 @@ export type {
   SummaryResponse,
   SummaryChartData,
   SummaryProduct,
+  User,
+  UserCreate,
+  UserUpdate,
 } from "./types";
 
 // Re-export product functions
@@ -55,3 +58,11 @@ export {
 
 // Re-export summary functions
 export { getSummary } from "./summary";
+
+// Re-export user functions
+export {
+  createUser,
+  deleteUser,
+  getUsers,
+  updateUser,
+} from "./users";
