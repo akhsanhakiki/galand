@@ -291,7 +291,7 @@ const RingkasanPage = () => {
               <Tabs.ListContainer className="bg-surface rounded-3xl p-1">
                 <Tabs.List
                   aria-label="Periode Waktu"
-                  className="w-fit *:h-8 *:w-fit *:px-3 *:text-xs *:font-normal *:rounded-none *:bg-transparent *:data-[selected=true]:bg-transparent *:data-[selected=true]:text-foreground *:data-[hover=true]:bg-transparent"
+                  className=" w-fit *:h-6 *:w-fit *:px-2 *:text-[11px] *:font-normal *:rounded-none *:bg-transparent *:data-[selected=true]:bg-transparent *:data-[selected=true]:text-foreground *:data-[hover=true]:bg-transparent"
                 >
                   <Tabs.Tab id="semua">
                     Semua
