@@ -133,7 +133,7 @@ const PengaturanPage = () => {
           <Tabs.ListContainer>
             <Tabs.List
               aria-label="Pengaturan"
-              className="w-fit *:h-8 *:w-fit *:px-4 *:text-xs *:font-normal"
+              className="w-fit *:h-7 *:w-fit *:px-3 *:text-xs *:font-normal"
             >
               <Tabs.Tab id="profil">
                 Profil
