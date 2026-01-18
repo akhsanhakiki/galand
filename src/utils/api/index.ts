@@ -19,6 +19,12 @@ export type {
   User,
   UserCreate,
   UserUpdate,
+  Organization,
+  OrganizationCreate,
+  OrganizationUpdate,
+  OrganizationMember,
+  OrganizationMemberCreate,
+  OrganizationMemberUpdate,
 } from "./types";
 
 // Re-export product functions
@@ -66,3 +72,16 @@ export {
   getUsers,
   updateUser,
 } from "./users";
+
+// Re-export organization functions
+export {
+  getOrganizations,
+  getOrganization,
+  createOrganization,
+  updateOrganization,
+  deleteOrganization,
+  getOrganizationMembers,
+  addOrganizationMember,
+  updateOrganizationMember,
+  removeOrganizationMember,
+} from "./organizations";

@@ -152,3 +152,47 @@ export interface UserCreate {
 export interface UserUpdate {
   role?: "user" | "admin";
 }
+
+export interface Organization {
+  id: string;
+  name: string;
+  slug: string;
+  logo: string | null;
+  createdAt: string;
+  metadata: string;
+}
+
+export interface OrganizationCreate {
+  name: string;
+  logo?: string;
+  metadata?: string;
+}
+
+export interface OrganizationUpdate {
+  name?: string;
+  logo?: string;
+  metadata?: string;
+}
+
+export interface OrganizationMember {
+  id: string;
+  organizationId: string;
+  userId: string;
+  role: string;
+  createdAt: string;
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    image: string | null;
+  };
+}
+
+export interface OrganizationMemberCreate {
+  userId: string;
+  role: string;
+}
+
+export interface OrganizationMemberUpdate {
+  role: string;
+}

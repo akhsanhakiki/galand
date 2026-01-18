@@ -27,8 +27,31 @@ import {
 } from "react-icons/lu";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTheme } from "next-themes";
-import type { User, UserCreate } from "../../utils/api/types";
-import { getUsers, createUser, updateUser, deleteUser } from "../../utils/api";
+import type {
+  User,
+  UserCreate,
+  Organization,
+  OrganizationCreate,
+  OrganizationUpdate,
+  OrganizationMember,
+  OrganizationMemberCreate,
+  OrganizationMemberUpdate,
+} from "../../utils/api/types";
+import {
+  getUsers,
+  createUser,
+  updateUser,
+  deleteUser,
+  getOrganizations,
+  getOrganization,
+  createOrganization,
+  updateOrganization,
+  deleteOrganization,
+  getOrganizationMembers,
+  addOrganizationMember,
+  updateOrganizationMember,
+  removeOrganizationMember,
+} from "../../utils/api";
 
 const APP_VERSION = "0.0.1";
 
@@ -49,6 +72,28 @@ const PengaturanPage = () => {
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [editingRole, setEditingRole] = useState<"user" | "admin">("user");
 
+  // Organization management state
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [organizationsLoading, setOrganizationsLoading] = useState(false);
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+  const [orgMembers, setOrgMembers] = useState<OrganizationMember[]>([]);
+  const [orgMembersLoading, setOrgMembersLoading] = useState(false);
+  const [isOrgModalOpen, setIsOrgModalOpen] = useState(false);
+  const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
+  const [orgForm, setOrgForm] = useState<OrganizationCreate>({
+    name: "",
+    logo: "",
+    metadata: "",
+  });
+  const [memberForm, setMemberForm] = useState<OrganizationMemberCreate>({
+    userId: "",
+    role: "admin",
+  });
+  const [editingOrgId, setEditingOrgId] = useState<string | null>(null);
+  const [editingOrgForm, setEditingOrgForm] = useState<OrganizationUpdate>({});
+  const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
+  const [editingMemberRole, setEditingMemberRole] = useState<string>("admin");
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -67,7 +112,14 @@ const PengaturanPage = () => {
 
   useEffect(() => {
     fetchUsers();
+    fetchOrganizations();
   }, []);
+
+  useEffect(() => {
+    if (selectedOrgId) {
+      fetchOrganizationMembers(selectedOrgId);
+    }
+  }, [selectedOrgId]);
 
   const handleInviteUser = async () => {
     if (!inviteForm.email || !inviteForm.name) {
@@ -108,6 +160,122 @@ const PengaturanPage = () => {
     }
   };
 
+  // Organization functions
+  const fetchOrganizations = async () => {
+    setOrganizationsLoading(true);
+    try {
+      const data = await getOrganizations(0, 100);
+      setOrganizations(data);
+      if (data.length > 0 && !selectedOrgId) {
+        const firstOrgId = data[0].id;
+        setSelectedOrgId(firstOrgId);
+        fetchOrganizationMembers(firstOrgId);
+      }
+    } catch (error) {
+      // Error handling
+    } finally {
+      setOrganizationsLoading(false);
+    }
+  };
+
+  const fetchOrganizationMembers = async (organizationId: string) => {
+    setOrgMembersLoading(true);
+    try {
+      const data = await getOrganizationMembers(organizationId);
+      setOrgMembers(data);
+    } catch (error) {
+      // Error handling
+    } finally {
+      setOrgMembersLoading(false);
+    }
+  };
+
+  const handleCreateOrganization = async () => {
+    if (!orgForm.name) {
+      return;
+    }
+    try {
+      await createOrganization(orgForm);
+      setIsOrgModalOpen(false);
+      setOrgForm({ name: "", logo: "", metadata: "" });
+      fetchOrganizations();
+    } catch (error) {
+      // Error handling
+    }
+  };
+
+  const handleUpdateOrganization = async (orgId: string) => {
+    try {
+      await updateOrganization(orgId, editingOrgForm);
+      setEditingOrgId(null);
+      setEditingOrgForm({});
+      fetchOrganizations();
+    } catch (error) {
+      // Error handling
+    }
+  };
+
+  const handleDeleteOrganization = async (orgId: string) => {
+    if (!confirm("Apakah Anda yakin ingin menghapus toko ini?")) {
+      return;
+    }
+    try {
+      await deleteOrganization(orgId);
+      if (selectedOrgId === orgId) {
+        setSelectedOrgId(null);
+        setOrgMembers([]);
+      }
+      fetchOrganizations();
+    } catch (error) {
+      // Error handling
+    }
+  };
+
+  const handleAddMember = async () => {
+    if (!selectedOrgId || !memberForm.userId) {
+      return;
+    }
+    try {
+      await addOrganizationMember(selectedOrgId, memberForm);
+      setIsMemberModalOpen(false);
+      setMemberForm({ userId: "", role: "admin" });
+      fetchOrganizationMembers(selectedOrgId);
+    } catch (error) {
+      // Error handling
+    }
+  };
+
+  const handleUpdateMember = async (memberId: string) => {
+    if (!selectedOrgId) {
+      return;
+    }
+    try {
+      await updateOrganizationMember(selectedOrgId, memberId, {
+        role: editingMemberRole,
+      });
+      setEditingMemberId(null);
+      setEditingMemberRole("admin");
+      fetchOrganizationMembers(selectedOrgId);
+    } catch (error) {
+      // Error handling
+    }
+  };
+
+  const handleRemoveMember = async (memberId: string) => {
+    if (!selectedOrgId) {
+      return;
+    }
+    if (!confirm("Apakah Anda yakin ingin menghapus anggota ini?")) {
+      return;
+    }
+    try {
+      await removeOrganizationMember(selectedOrgId, memberId);
+      fetchOrganizationMembers(selectedOrgId);
+    } catch (error) {
+      // Error handling
+    }
+  };
+
   // Get current theme for display
   const currentTheme = mounted
     ? theme === "system"
@@ -130,37 +298,48 @@ const PengaturanPage = () => {
           defaultSelectedKey="profil"
           className="w-full gap-4 flex-1 flex flex-col"
         >
-          <Tabs.ListContainer>
-            <Tabs.List
-              aria-label="Pengaturan"
-              className="w-fit *:h-7 *:w-fit *:px-3 *:text-xs *:font-normal"
+          <div className="flex items-center justify-between w-full">
+            <Tabs.ListContainer>
+              <Tabs.List
+                aria-label="Pengaturan"
+                className="w-fit *:h-7 *:w-fit *:px-3 *:text-xs *:font-normal"
+              >
+                <Tabs.Tab id="profil">
+                  Profil
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+                <Tabs.Tab id="toko">
+                  Toko
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+                <Tabs.Tab id="tema">
+                  Tema
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+                <Tabs.Tab id="notifikasi">
+                  Notifikasi
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+                <Tabs.Tab id="umum">
+                  Umum
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+                <Tabs.Tab id="pengguna">
+                  Pengguna
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+              </Tabs.List>
+            </Tabs.ListContainer>
+            <Button
+              variant="primary"
+              className="bg-accent text-accent-foreground"
+              onPress={() => setIsOrgModalOpen(true)}
+              size="sm"
             >
-              <Tabs.Tab id="profil">
-                Profil
-                <Tabs.Indicator />
-              </Tabs.Tab>
-              <Tabs.Tab id="toko">
-                Toko
-                <Tabs.Indicator />
-              </Tabs.Tab>
-              <Tabs.Tab id="tema">
-                Tema
-                <Tabs.Indicator />
-              </Tabs.Tab>
-              <Tabs.Tab id="notifikasi">
-                Notifikasi
-                <Tabs.Indicator />
-              </Tabs.Tab>
-              <Tabs.Tab id="umum">
-                Umum
-                <Tabs.Indicator />
-              </Tabs.Tab>
-              <Tabs.Tab id="pengguna">
-                Pengguna
-                <Tabs.Indicator />
-              </Tabs.Tab>
-            </Tabs.List>
-          </Tabs.ListContainer>
+              <LuUserPlus className="w-3.5 h-3.5" />
+              <span className="text-xs">Tambah Toko</span>
+            </Button>
+          </div>
 
           {/* Profil Tab */}
           <Tabs.Panel id="profil">
@@ -202,26 +381,284 @@ const PengaturanPage = () => {
 
           {/* Toko Tab */}
           <Tabs.Panel id="toko">
-            <div className="flex flex-col gap-3 text-left">
-              <TextField defaultValue="Kadara Store" className="max-w-md">
-                <Label className="text-xs font-medium">Nama Toko</Label>
-                <InputGroup className="shadow-none border ">
-                  <InputGroup.Input />
-                </InputGroup>
-              </TextField>
-              <TextField
-                defaultValue="Jl. Contoh No. 123, Jakarta"
-                className="max-w-md"
-              >
-                <Label className="text-xs font-medium">Alamat</Label>
-                <TextArea rows={3} className="shadow-none border " />
-              </TextField>
-              <Button
-                variant="primary"
-                className="bg-accent text-accent-foreground w-fit"
-              >
-                Simpan Perubahan
-              </Button>
+            <div className="flex flex-col gap-4 text-left h-full">
+
+              <div className="flex flex-row gap-4 flex-1 min-h-0 overflow-hidden">
+                {/* First Column: Organizations List */}
+                <div className="flex flex-col w-1/3 min-w-0 border-r border-gray-200/50 pr-4">
+                  <p className="text-xs font-medium text-foreground mb-2">
+                    Toko
+                  </p>
+                  {organizationsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <p className="text-sm text-muted">Memuat...</p>
+                    </div>
+                  ) : organizations.length === 0 ? (
+                    <div className="flex items-center justify-center py-8">
+                      <p className="text-sm text-muted">Tidak ada toko</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2 overflow-y-auto flex-1">
+                      {organizations.map((org) => (
+                        <div
+                          key={org.id}
+                          className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                            selectedOrgId === org.id
+                              ? "border-accent bg-accent/10"
+                              : "border-gray-200/50 bg-surface hover:bg-default/50"
+                          }`}
+                          onClick={() => setSelectedOrgId(org.id)}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              {org.logo && (
+                                <img
+                                  src={org.logo}
+                                  alt={org.name}
+                                  className="w-8 h-8 rounded flex-shrink-0"
+                                />
+                              )}
+                              <div className="flex flex-col min-w-0 flex-1">
+                                <p className="text-sm font-medium text-foreground truncate">
+                                  {org.name}
+                                </p>
+                                <p className="text-[10px] text-muted truncate">
+                                  {org.slug}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                              {editingOrgId === org.id ? (
+                                <div className="flex items-center gap-1.5">
+                                  <TextField
+                                    value={editingOrgForm.name || org.name}
+                                    onChange={(value) =>
+                                      setEditingOrgForm({
+                                        ...editingOrgForm,
+                                        name: value,
+                                      })
+                                    }
+                                    className="w-28"
+                                    onPress={(e) => e.stopPropagation()}
+                                  >
+                                    <InputGroup className="h-7 text-xs">
+                                      <InputGroup.Input />
+                                    </InputGroup>
+                                  </TextField>
+                                  <Button
+                                    size="sm"
+                                    variant="primary"
+                                    className="bg-accent text-accent-foreground h-7 text-xs px-2"
+                                    onPress={(e) => {
+                                      e.stopPropagation();
+                                      handleUpdateOrganization(org.id);
+                                    }}
+                                  >
+                                    Simpan
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 text-xs px-2"
+                                    onPress={(e) => {
+                                      e.stopPropagation();
+                                      setEditingOrgId(null);
+                                      setEditingOrgForm({});
+                                    }}
+                                  >
+                                    Batal
+                                  </Button>
+                                </div>
+                              ) : (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 w-7 min-w-7 p-0"
+                                    onPress={(e) => {
+                                      e.stopPropagation();
+                                      setEditingOrgId(org.id);
+                                      setEditingOrgForm({ name: org.name });
+                                    }}
+                                  >
+                                    <LuPencil className="w-3 h-3" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="text-danger h-7 w-7 min-w-7 p-0"
+                                    onPress={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteOrganization(org.id);
+                                    }}
+                                  >
+                                    <LuTrash2 className="w-3 h-3" />
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          {org.metadata && (
+                            <p className="text-[10px] text-muted mt-2 truncate">
+                              {org.metadata}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Second Column: Members List */}
+                <div className="flex flex-col flex-1 min-w-0">
+                  {selectedOrgId ? (
+                    <>
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs font-medium text-foreground">
+                          Anggota
+                        </p>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 text-xs px-2"
+                          onPress={() => setIsMemberModalOpen(true)}
+                        >
+                          <LuUserPlus className="w-3 h-3" />
+                          <span className="text-[10px]">Tambah Anggota</span>
+                        </Button>
+                      </div>
+                      {orgMembersLoading ? (
+                        <div className="flex items-center justify-center py-8">
+                          <p className="text-sm text-muted">Memuat anggota...</p>
+                        </div>
+                      ) : orgMembers.length === 0 ? (
+                        <div className="flex items-center justify-center py-8">
+                          <p className="text-sm text-muted">Tidak ada anggota</p>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-2 overflow-y-auto flex-1">
+                          {orgMembers.map((member) => (
+                            <div
+                              key={member.id}
+                              className="flex items-center justify-between p-3 rounded-lg border border-gray-200/50 bg-surface"
+                            >
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                {member.user.image && (
+                                  <img
+                                    src={member.user.image}
+                                    alt={member.user.name}
+                                    className="w-8 h-8 rounded-full flex-shrink-0"
+                                  />
+                                )}
+                                <div className="flex flex-col min-w-0 flex-1">
+                                  <p className="text-sm font-medium text-foreground truncate">
+                                    {member.user.name}
+                                  </p>
+                                  <p className="text-[10px] text-muted truncate">
+                                    {member.user.email}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1.5 flex-shrink-0">
+                                {editingMemberId === member.id ? (
+                                  <div className="flex items-center gap-1.5">
+                                    <Select
+                                      selectedKey={editingMemberRole}
+                                      onSelectionChange={(key) => {
+                                        setEditingMemberRole(key as string);
+                                      }}
+                                      className="w-24"
+                                    >
+                                      <Select.Trigger className="h-7 text-xs">
+                                        <Select.Value />
+                                        <Select.Indicator />
+                                      </Select.Trigger>
+                                      <Select.Popover>
+                                        <ListBox>
+                                          <ListBox.Item
+                                            key="admin"
+                                            id="admin"
+                                            textValue="admin"
+                                          >
+                                            Admin
+                                            <ListBox.ItemIndicator />
+                                          </ListBox.Item>
+                                          <ListBox.Item
+                                            key="user"
+                                            id="user"
+                                            textValue="user"
+                                          >
+                                            User
+                                            <ListBox.ItemIndicator />
+                                          </ListBox.Item>
+                                        </ListBox>
+                                      </Select.Popover>
+                                    </Select>
+                                    <Button
+                                      size="sm"
+                                      variant="primary"
+                                      className="bg-accent text-accent-foreground h-7 text-xs px-2"
+                                      onPress={() =>
+                                        handleUpdateMember(member.id)
+                                      }
+                                    >
+                                      Simpan
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-7 text-xs px-2"
+                                      onPress={() => {
+                                        setEditingMemberId(null);
+                                        setEditingMemberRole("admin");
+                                      }}
+                                    >
+                                      Batal
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <div className="px-2 py-0.5 rounded-full bg-accent/10 text-accent text-[10px] font-medium">
+                                      {member.role}
+                                    </div>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-7 w-7 min-w-7 p-0"
+                                      onPress={() => {
+                                        setEditingMemberId(member.id);
+                                        setEditingMemberRole(member.role);
+                                      }}
+                                    >
+                                      <LuPencil className="w-3 h-3" />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="text-danger h-7 w-7 min-w-7 p-0"
+                                      onPress={() =>
+                                        handleRemoveMember(member.id)
+                                      }
+                                    >
+                                      <LuTrash2 className="w-3 h-3" />
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <p className="text-sm text-muted">
+                        Pilih toko untuk melihat anggota
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </Tabs.Panel>
 
@@ -586,6 +1023,173 @@ const PengaturanPage = () => {
                 onPress={handleInviteUser}
               >
                 Undang
+              </Button>
+            </Modal.Footer>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
+
+      {/* Create Organization Modal */}
+      <Modal.Backdrop
+        isOpen={isOrgModalOpen}
+        onOpenChange={setIsOrgModalOpen}
+      >
+        <Modal.Container>
+          <Modal.Dialog className="sm:max-w-md">
+            <Modal.CloseTrigger />
+            <Modal.Header>
+              <Modal.Heading>Tambah Toko Baru</Modal.Heading>
+            </Modal.Header>
+            <Modal.Body>
+              <div className="flex flex-col gap-4">
+                <TextField
+                  value={orgForm.name}
+                  onChange={(value) =>
+                    setOrgForm({ ...orgForm, name: value })
+                  }
+                >
+                  <Label className="text-xs font-medium">Nama Toko</Label>
+                  <InputGroup className="shadow-none border">
+                    <InputGroup.Input />
+                  </InputGroup>
+                </TextField>
+                <TextField
+                  value={orgForm.logo || ""}
+                  onChange={(value) =>
+                    setOrgForm({ ...orgForm, logo: value })
+                  }
+                >
+                  <Label className="text-xs font-medium">Logo URL</Label>
+                  <InputGroup className="shadow-none border">
+                    <InputGroup.Input />
+                  </InputGroup>
+                </TextField>
+                <TextField
+                  value={orgForm.metadata || ""}
+                  onChange={(value) =>
+                    setOrgForm({ ...orgForm, metadata: value })
+                  }
+                >
+                  <Label className="text-xs font-medium">Metadata</Label>
+                  <TextArea rows={3} className="shadow-none border" />
+                </TextField>
+              </div>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                variant="ghost"
+                onPress={() => setIsOrgModalOpen(false)}
+              >
+                Batal
+              </Button>
+              <Button
+                variant="primary"
+                className="bg-accent text-accent-foreground"
+                onPress={handleCreateOrganization}
+              >
+                Tambah
+              </Button>
+            </Modal.Footer>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
+
+      {/* Add Member Modal */}
+      <Modal.Backdrop
+        isOpen={isMemberModalOpen}
+        onOpenChange={setIsMemberModalOpen}
+      >
+        <Modal.Container>
+          <Modal.Dialog className="sm:max-w-md">
+            <Modal.CloseTrigger />
+            <Modal.Header>
+              <Modal.Heading>Tambah Anggota</Modal.Heading>
+            </Modal.Header>
+            <Modal.Body>
+              <div className="flex flex-col gap-4">
+                <Select
+                  selectedKey={memberForm.userId}
+                  onSelectionChange={(key) => {
+                    setMemberForm({
+                      ...memberForm,
+                      userId: key as string,
+                    });
+                  }}
+                >
+                  <Label className="text-xs font-medium">Pengguna</Label>
+                  <Select.Trigger>
+                    <Select.Value placeholder="Pilih pengguna" />
+                    <Select.Indicator />
+                  </Select.Trigger>
+                  <Select.Popover>
+                    <ListBox>
+                      {users.map((user) => (
+                        <ListBox.Item
+                          key={user.id}
+                          id={user.id}
+                          textValue={user.name}
+                        >
+                          <div className="flex items-center gap-2">
+                            {user.image && (
+                              <img
+                                src={user.image}
+                                alt={user.name}
+                                className="w-6 h-6 rounded-full"
+                              />
+                            )}
+                            <div>
+                              <p className="text-sm">{user.name}</p>
+                              <p className="text-xs text-muted">{user.email}</p>
+                            </div>
+                          </div>
+                          <ListBox.ItemIndicator />
+                        </ListBox.Item>
+                      ))}
+                    </ListBox>
+                  </Select.Popover>
+                </Select>
+                <Select
+                  selectedKey={memberForm.role}
+                  onSelectionChange={(key) => {
+                    setMemberForm({
+                      ...memberForm,
+                      role: key as string,
+                    });
+                  }}
+                >
+                  <Label className="text-xs font-medium">Peran</Label>
+                  <Select.Trigger>
+                    <Select.Value />
+                    <Select.Indicator />
+                  </Select.Trigger>
+                  <Select.Popover>
+                    <ListBox>
+                      <ListBox.Item key="admin" id="admin" textValue="admin">
+                        Admin
+                        <ListBox.ItemIndicator />
+                      </ListBox.Item>
+                      <ListBox.Item key="user" id="user" textValue="user">
+                        User
+                        <ListBox.ItemIndicator />
+                      </ListBox.Item>
+                    </ListBox>
+                  </Select.Popover>
+                </Select>
+              </div>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                variant="ghost"
+                onPress={() => setIsMemberModalOpen(false)}
+              >
+                Batal
+              </Button>
+              <Button
+                variant="primary"
+                className="bg-accent text-accent-foreground"
+                onPress={handleAddMember}
+              >
+                Tambah
               </Button>
             </Modal.Footer>
           </Modal.Dialog>
