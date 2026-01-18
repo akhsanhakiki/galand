@@ -9,9 +9,11 @@ import {
   LuChevronLeft,
   LuChevronRight,
   LuReceipt,
+  LuChevronDown,
 } from "react-icons/lu";
-import { Card, Button, Surface } from "@heroui/react";
+import { Card, Button, Surface, Disclosure } from "@heroui/react";
 import Header from "./Header";
+import { useOrganization } from "../contexts/OrganizationContext";
 
 const menuItems = [
   { title: "Ringkasan", icon: LuChartPie, key: "ringkasan" },
@@ -46,6 +48,22 @@ const MenuControl = ({
   const [currentPage, setCurrentPage] = useState<string>(
     propCurrentPage || getCurrentPageFromUrl()
   );
+  const [isOrgDropdownOpen, setIsOrgDropdownOpen] = useState(false);
+  const {
+    currentOrganization,
+    organizations,
+    loading: orgLoading,
+    setCurrentOrganization,
+  } = useOrganization();
+
+  const handleOrganizationSelect = async (org: NonNullable<typeof currentOrganization>) => {
+    try {
+      await setCurrentOrganization(org);
+      setIsOrgDropdownOpen(false);
+    } catch (error) {
+      // Handle error silently or show a toast notification
+    }
+  };
 
   // Update current page when URL changes
   useEffect(() => {
@@ -178,6 +196,122 @@ const MenuControl = ({
           variant="default"
         >
           <Header collapsed={isCollapsed} isMobile={false} />
+        </Surface>
+
+        {/* Active Toko Surface */}
+        <Surface
+          className={`rounded-3xl transition-all duration-300 ${
+            isCollapsed
+              ? "w-[64px] min-w-[64px] p-2"
+              : "w-[240px] min-w-[240px] p-3"
+          }`}
+          variant="default"
+        >
+          {isCollapsed ? (
+            <div className="flex flex-col items-center justify-center">
+              <LuStore className="w-5 h-5 text-primary" />
+            </div>
+          ) : (
+            <Disclosure
+              isExpanded={isOrgDropdownOpen}
+              onExpandedChange={setIsOrgDropdownOpen}
+              className="w-full"
+            >
+              <Disclosure.Heading>
+                <Button
+                  slot="trigger"
+                  className="w-full transition-all duration-200 rounded-2xl justify-between h-auto p-2 hover:bg-default-100 text-foreground"
+                  variant="ghost"
+                >
+                  <div className="flex flex-col gap-2 flex-1 min-w-0">
+                    {orgLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded bg-default-200 animate-pulse" />
+                        <div className="flex-1">
+                          <div className="h-3 w-24 bg-default-200 rounded animate-pulse mb-1" />
+                          <div className="h-2 w-16 bg-default-200 rounded animate-pulse" />
+                        </div>
+                      </div>
+                    ) : currentOrganization ? (
+                      <div className="flex items-center gap-2">
+                        {currentOrganization.logo ? (
+                          <img
+                            src={currentOrganization.logo}
+                            alt={currentOrganization.name}
+                            className="w-8 h-8 rounded object-cover"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center">
+                            <LuStore className="w-4 h-4 text-primary" />
+                          </div>
+                        )}
+                        <div className="flex flex-col min-w-0 flex-1">
+                          <p className="text-sm font-medium text-foreground truncate text-left">
+                            {currentOrganization.name}
+                          </p>
+                          <p className="text-[10px] text-muted truncate text-left">
+                            {currentOrganization.slug}
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded bg-default-200 flex items-center justify-center">
+                          <LuStore className="w-4 h-4 text-default-400" />
+                        </div>
+                        <div className="flex flex-col min-w-0 flex-1">
+                          <p className="text-sm font-medium text-muted truncate">
+                            Tidak ada toko
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <Disclosure.Indicator>
+                    <LuChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOrgDropdownOpen ? 'rotate-180' : ''}`} />
+                  </Disclosure.Indicator>
+                </Button>
+              </Disclosure.Heading>
+              <Disclosure.Content>
+                <Disclosure.Body className="flex flex-col gap-1 max-h-48 overflow-y-auto">
+                  {organizations.map((org) => (
+                    <Button
+                      key={org.id}
+                      className={`w-full transition-all duration-200 rounded-2xl justify-start h-auto p-2 text-foreground ${
+                        currentOrganization?.id === org.id
+                          ? "bg-primary-100 text-primary-700 font-medium"
+                          : "hover:bg-default-100"
+                      }`}
+                      variant="ghost"
+                      onPress={() => handleOrganizationSelect(org)}
+                    >
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        {org.logo ? (
+                          <img
+                            src={org.logo}
+                            alt={org.name}
+                            className="w-6 h-6 rounded shrink-0 object-cover"
+                          />
+                        ) : (
+                          <div className="w-6 h-6 rounded bg-primary/10 flex items-center justify-center shrink-0">
+                            <LuStore className="w-3 h-3 text-primary" />
+                          </div>
+                        )}
+                        <div className="flex flex-col min-w-0 flex-1">
+                          <p className="text-xs font-medium text-foreground truncate text-left">
+                            {org.name}
+                          </p>
+                          <p className="text-[10px] text-muted truncate">
+                            {org.slug}
+                          </p>
+                        </div>
+                      </div>
+                    </Button>
+                  ))}
+                </Disclosure.Body>
+              </Disclosure.Content>
+            </Disclosure>
+          )}
         </Surface>
       </div>
     </>
