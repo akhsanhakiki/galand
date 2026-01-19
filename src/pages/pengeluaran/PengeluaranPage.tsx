@@ -38,6 +38,7 @@ import {
   exportExpensesToXLSX,
   exportExpensesToPDF,
 } from "../../utils/export";
+import { useOrganization } from "../../contexts/OrganizationContext";
 
 type TimePeriod =
   | "semua"
@@ -50,6 +51,7 @@ type TimePeriod =
   | "kustom";
 
 const PengeluaranPage = () => {
+  const { organizationChangeKey } = useOrganization();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -205,7 +207,7 @@ const PengeluaranPage = () => {
 
   useEffect(() => {
     loadExpenses();
-  }, [loadExpenses]);
+  }, [loadExpenses, organizationChangeKey]);
 
   const handleCreate = () => {
     setEditingExpense(null);

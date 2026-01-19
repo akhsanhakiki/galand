@@ -1,4 +1,5 @@
 import type { Transaction, TransactionCreate } from "./types";
+import { getNeonAuthUrl } from "../env";
 
 const API_BASE = "/api/transactions";
 
@@ -18,10 +19,37 @@ export async function getTransactions(
     queryParams.set("end_date", endDate);
   }
 
-  const response = await fetch(`${API_BASE}?${queryParams.toString()}`, {
+  // Fetch get-session endpoint directly to get the raw session token
+  // The response structure is: { session: { token: "..." }, user: {...} }
+  const neonAuthUrl = getNeonAuthUrl();
+  const sessionResponse = await fetch(`${neonAuthUrl}/get-session`, {
+    method: "GET",
+    credentials: "include", // Include cookies for authentication
     headers: {
       Accept: "application/json",
     },
+  });
+
+  if (!sessionResponse.ok) {
+    throw new Error("Failed to get session. Please log in again.");
+  }
+
+  const sessionData = await sessionResponse.json();
+  
+  // Extract token from the direct API response: { session: { token: "..." } }
+  const token = sessionData?.session?.token;
+
+  if (!token) {
+    throw new Error("No session token available. Please log in again.");
+  }
+
+  const headers: HeadersInit = {
+    Accept: "*/*",
+    Authorization: `Bearer ${token}`,
+  };
+
+  const response = await fetch(`${API_BASE}?${queryParams.toString()}`, {
+    headers,
   });
 
   if (!response.ok) {

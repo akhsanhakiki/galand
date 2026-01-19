@@ -40,8 +40,10 @@ import {
   exportProductsToPDF,
 } from "../../utils/export";
 import { ResizableCell } from "../../components/ResizableCell";
+import { useOrganization } from "../../contexts/OrganizationContext";
 
 const GudangPage = () => {
+  const { organizationChangeKey } = useOrganization();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -102,7 +104,7 @@ const GudangPage = () => {
 
   useEffect(() => {
     loadProducts();
-  }, []);
+  }, [organizationChangeKey]);
 
   const loadProducts = async () => {
     try {

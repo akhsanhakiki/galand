@@ -45,8 +45,10 @@ import TransactionView from "../../components/TransactionView";
 import { printTransaction } from "../../utils/print";
 import { exportToCSV, exportToXLSX, exportToPDF } from "../../utils/export";
 import { ResizableCell } from "../../components/ResizableCell";
+import { useOrganization } from "../../contexts/OrganizationContext";
 
 const TransaksiPage = () => {
+  const { organizationChangeKey } = useOrganization();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -197,7 +199,7 @@ const TransaksiPage = () => {
 
   useEffect(() => {
     fetchTransactions();
-  }, [fetchTransactions, refreshKey]);
+  }, [fetchTransactions, refreshKey, organizationChangeKey]);
 
   const filteredTransactions = useMemo(() => {
     if (!searchQuery) return transactions;

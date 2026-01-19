@@ -14,7 +14,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     >
       <AuthProvider>
         <OrganizationProvider>
-          <CartProvider>{children}</CartProvider>
+        <CartProvider>{children}</CartProvider>
         </OrganizationProvider>
       </AuthProvider>
     </NextThemesProvider>

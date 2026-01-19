@@ -32,8 +32,10 @@ import { prepareChartData } from "./utils/chartData";
 import { calculatePerformanceAnalysis } from "./utils/performanceAnalysis";
 import { getSummary } from "../../utils/api";
 import type { SummaryResponse, SummaryProduct } from "../../utils/api";
+import { useOrganization } from "../../contexts/OrganizationContext";
 
 const RingkasanPage = () => {
+  const { organizationChangeKey } = useOrganization();
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("semua");
   const [productViewMode, setProductViewMode] =
     useState<ProductViewMode>("revenue");
@@ -84,7 +86,7 @@ const RingkasanPage = () => {
     };
 
     fetchSummary();
-  }, [selectedPeriod, customStartDate, customEndDate, isInitialLoad]);
+  }, [selectedPeriod, customStartDate, customEndDate, isInitialLoad, organizationChangeKey]);
 
   // Transform API product data to Product type
   const transformProduct = (apiProduct: SummaryProduct): Product => {

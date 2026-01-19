@@ -13,8 +13,10 @@ import {
 import type { Discount } from "../../utils/api";
 import { getDiscounts, deleteDiscount } from "../../utils/api";
 import DiscountForm from "../../components/DiscountForm";
+import { useOrganization } from "../../contexts/OrganizationContext";
 
 const DiskonPage = () => {
+  const { organizationChangeKey } = useOrganization();
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,7 +27,7 @@ const DiskonPage = () => {
 
   useEffect(() => {
     loadDiscounts();
-  }, [searchQuery]);
+  }, [searchQuery, organizationChangeKey]);
 
   const loadDiscounts = async () => {
     try {

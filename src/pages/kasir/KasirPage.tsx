@@ -30,6 +30,7 @@ import type { Product, Discount } from "../../utils/api";
 import { getProducts, createTransaction } from "../../utils/api";
 import { getDiscountByCode } from "../../utils/api/discounts";
 import { useCart } from "../../contexts/CartContext";
+import { useOrganization } from "../../contexts/OrganizationContext";
 
 // Helper function to calculate item total with bundle pricing
 const calculateItemTotal = (product: Product, quantity: number): number => {
@@ -50,6 +51,7 @@ const calculateItemTotal = (product: Product, quantity: number): number => {
 };
 
 const KasirPage = () => {
+  const { organizationChangeKey } = useOrganization();
   const {
     cart,
     addToCart,
@@ -78,7 +80,7 @@ const KasirPage = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [organizationChangeKey]);
 
   const fetchProducts = async () => {
     try {

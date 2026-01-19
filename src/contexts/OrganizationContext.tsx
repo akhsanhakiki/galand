@@ -29,6 +29,7 @@ interface OrganizationContextType {
   currentOrganization: NeonOrganization | null;
   organizations: NeonOrganization[];
   loading: boolean;
+  organizationChangeKey: number; // Key that increments when organization changes, used to trigger refetch
   setCurrentOrganization: (org: NeonOrganization | null) => Promise<void>;
   refreshOrganizations: () => Promise<void>;
 }
@@ -40,6 +41,7 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
   const [currentOrganization, setCurrentOrganizationState] = useState<NeonOrganization | null>(null);
   const [organizations, setOrganizations] = useState<NeonOrganization[]>([]);
   const [loading, setLoading] = useState(true);
+  const [organizationChangeKey, setOrganizationChangeKey] = useState(0);
 
   // Fetch organizations and active organization
   const refreshOrganizations = useCallback(async () => {
@@ -55,6 +57,11 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
 
       // Fetch all organizations the user belongs to
       const { data: orgsList, error: orgsError } = await authClient.organization.list();
+      
+      console.log('=== Neon Auth Organization.list() Result ===');
+      console.log('Organizations list:', orgsList);
+      console.log('Organizations error:', orgsError);
+      console.log('============================================');
       
       if (orgsError) {
         setOrganizations([]);
@@ -72,6 +79,16 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
           membersLimit: 100,
         },
       });
+      
+      console.log('=== Neon Auth getFullOrganization() Result ===');
+      console.log('Active organization:', activeOrg);
+      console.log('Active organization error:', activeError);
+      if (activeOrg) {
+        console.log('Active org keys:', Object.keys(activeOrg));
+        console.log('Active org ID:', activeOrg.id);
+        console.log('Active org name:', activeOrg.name);
+      }
+      console.log('==============================================');
 
       if (activeError || !activeOrg) {
         // If no active org, use first organization if available
@@ -102,6 +119,8 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
         throw new Error(error.message || "Failed to unset active organization");
       }
       setCurrentOrganizationState(null);
+      // Increment key to trigger refetch in all pages
+      setOrganizationChangeKey((prev) => prev + 1);
       return;
     }
 
@@ -116,6 +135,8 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
 
     // Refresh to get updated active organization with full details
     await refreshOrganizations();
+    // Increment key to trigger refetch in all pages
+    setOrganizationChangeKey((prev) => prev + 1);
   }, [refreshOrganizations]);
 
   // Initial load and refresh when user changes
@@ -129,6 +150,7 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
         currentOrganization,
         organizations,
         loading,
+        organizationChangeKey,
         setCurrentOrganization,
         refreshOrganizations,
       }}
