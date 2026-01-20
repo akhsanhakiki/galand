@@ -184,10 +184,36 @@ const LoginPage = () => {
     setOauthLoading(true);
 
     try {
-      await authClient.signIn.social({
-        provider: "google",
-        callbackURL: `${window.location.origin}/api/auth/callback`,
-      });
+      const origin = window.location.origin;
+      const callbackUrlPrimary = new URL("/auth/callback", origin).toString();
+      const callbackUrlLegacy = new URL("/api/auth/callback", origin).toString();
+
+      try {
+        // Prefer the dedicated callback page (commonly what Neon/Google allowlists expect).
+        // The page will complete the OAuth flow client-side via the Neon Auth SDK.
+        await authClient.signIn.social({
+          provider: "google",
+          callbackURL: callbackUrlPrimary,
+        });
+      } catch (primaryErr) {
+        // Some environments might still have the legacy `/api/auth/callback` allowlisted.
+        // If Neon rejects the callback URL, retry with the legacy route.
+        const message =
+          primaryErr instanceof Error ? primaryErr.message : String(primaryErr);
+
+        if (
+          message.includes("INVALID_CALLBACKURL") ||
+          message.toLowerCase().includes("invalid callbackurl") ||
+          message.toLowerCase().includes("invalid callback")
+        ) {
+          await authClient.signIn.social({
+            provider: "google",
+            callbackURL: callbackUrlLegacy,
+          });
+        } else {
+          throw primaryErr;
+        }
+      }
       // The redirect will happen automatically, so we don't need to do anything else
     } catch (err) {
       setError(
