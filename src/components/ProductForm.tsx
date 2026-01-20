@@ -1,6 +1,16 @@
 "use client";
 
-import { Button, Card, Input, Label, Modal, NumberField, Spinner, TextArea, TextField } from "@heroui/react";
+import {
+  Button,
+  Card,
+  Input,
+  Label,
+  Modal,
+  NumberField,
+  Spinner,
+  TextArea,
+  TextField,
+} from "@heroui/react";
 import { useEffect, useState } from "react";
 import type { Product, ProductCreate, ProductUpdate } from "../utils/api";
 import { createProduct, updateProduct } from "../utils/api";
@@ -20,29 +30,45 @@ export default function ProductForm({
 }: ProductFormProps) {
   const [name, setName] = useState("");
   const [price, setPrice] = useState<number | undefined>();
+  const [cogs, setCogs] = useState<number | undefined>();
   const [description, setDescription] = useState("");
   const [stock, setStock] = useState<number | undefined>();
+  const [bundleQuantity, setBundleQuantity] = useState<number | undefined>();
+  const [bundlePrice, setBundlePrice] = useState<number | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (product) {
       setName(product.name || "");
       setPrice(product.price);
+      setCogs(product.cogs);
       setDescription(product.description || "");
       setStock(product.stock);
+      setBundleQuantity(product.bundle_quantity);
+      setBundlePrice(product.bundle_price);
     } else {
       setName("");
       setPrice(undefined);
+      setCogs(undefined);
       setDescription("");
       setStock(undefined);
+      setBundleQuantity(undefined);
+      setBundlePrice(undefined);
     }
   }, [product, isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name || price === undefined || stock === undefined) {
-      alert("Please fill in all required fields");
+    if (
+      !name ||
+      price === undefined ||
+      cogs === undefined ||
+      stock === undefined ||
+      bundleQuantity === undefined ||
+      bundlePrice === undefined
+    ) {
+      alert("Harap isi semua field yang wajib");
       return;
     }
 
@@ -52,15 +78,24 @@ export default function ProductForm({
         const updateData: ProductUpdate = {};
         if (name !== product.name) updateData.name = name;
         if (price !== product.price) updateData.price = price;
-        if (description !== product.description) updateData.description = description;
+        if (cogs !== product.cogs) updateData.cogs = cogs;
+        if (description !== product.description)
+          updateData.description = description;
         if (stock !== product.stock) updateData.stock = stock;
+        if (bundleQuantity !== product.bundle_quantity)
+          updateData.bundle_quantity = bundleQuantity;
+        if (bundlePrice !== product.bundle_price)
+          updateData.bundle_price = bundlePrice;
         await updateProduct(product.id, updateData);
       } else {
         const createData: ProductCreate = {
           name,
           price,
+          cogs,
           description,
           stock,
+          bundle_quantity: bundleQuantity,
+          bundle_price: bundlePrice,
         };
         await createProduct(createData);
       }
@@ -68,7 +103,7 @@ export default function ProductForm({
       onClose();
       resetForm();
     } catch (error) {
-      alert("Failed to save product");
+      alert("Gagal menyimpan produk");
     } finally {
       setIsSubmitting(false);
     }
@@ -77,8 +112,11 @@ export default function ProductForm({
   const resetForm = () => {
     setName("");
     setPrice(undefined);
+    setCogs(undefined);
     setDescription("");
     setStock(undefined);
+    setBundleQuantity(undefined);
+    setBundlePrice(undefined);
   };
 
   const handleClose = () => {
@@ -98,7 +136,7 @@ export default function ProductForm({
           <form onSubmit={handleSubmit}>
             <Modal.Header>
               <Modal.Heading>
-                {product ? "Edit Product" : "Create Product"}
+                {product ? "Edit Produk" : "Buat Produk"}
               </Modal.Heading>
             </Modal.Header>
             <Modal.Body>
@@ -109,8 +147,8 @@ export default function ProductForm({
                   onChange={setName}
                   value={name}
                 >
-                  <Label>Product Name</Label>
-                  <Input placeholder="Enter product name" />
+                  <Label>Nama Produk</Label>
+                  <Input placeholder="Masukkan nama produk" />
                 </TextField>
 
                 <NumberField
@@ -125,7 +163,7 @@ export default function ProductForm({
                   value={price}
                   onChange={setPrice}
                 >
-                  <Label>Price</Label>
+                  <Label>Harga</Label>
                   <NumberField.Group>
                     <NumberField.DecrementButton />
                     <NumberField.Input className="w-full" />
@@ -133,9 +171,33 @@ export default function ProductForm({
                   </NumberField.Group>
                 </NumberField>
 
-                <TextField name="description" onChange={setDescription} value={description}>
-                  <Label>Description</Label>
-                  <TextArea placeholder="Enter product description" rows={3} />
+                <NumberField
+                  formatOptions={{
+                    style: "currency",
+                    currency: "IDR",
+                    minimumFractionDigits: 0,
+                  }}
+                  isRequired
+                  minValue={0}
+                  name="cogs"
+                  value={cogs}
+                  onChange={setCogs}
+                >
+                  <Label>COGS (Harga Pokok Penjualan)</Label>
+                  <NumberField.Group>
+                    <NumberField.DecrementButton />
+                    <NumberField.Input className="w-full" />
+                    <NumberField.IncrementButton />
+                  </NumberField.Group>
+                </NumberField>
+
+                <TextField
+                  name="description"
+                  onChange={setDescription}
+                  value={description}
+                >
+                  <Label>Deskripsi</Label>
+                  <TextArea placeholder="Masukkan deskripsi produk" rows={3} />
                 </TextField>
 
                 <NumberField
@@ -145,7 +207,42 @@ export default function ProductForm({
                   value={stock}
                   onChange={setStock}
                 >
-                  <Label>Stock</Label>
+                  <Label>Stok</Label>
+                  <NumberField.Group>
+                    <NumberField.DecrementButton />
+                    <NumberField.Input className="w-full" />
+                    <NumberField.IncrementButton />
+                  </NumberField.Group>
+                </NumberField>
+
+                <NumberField
+                  isRequired
+                  minValue={1}
+                  name="bundleQuantity"
+                  value={bundleQuantity}
+                  onChange={setBundleQuantity}
+                >
+                  <Label>Jumlah Bundle</Label>
+                  <NumberField.Group>
+                    <NumberField.DecrementButton />
+                    <NumberField.Input className="w-full" />
+                    <NumberField.IncrementButton />
+                  </NumberField.Group>
+                </NumberField>
+
+                <NumberField
+                  formatOptions={{
+                    style: "currency",
+                    currency: "IDR",
+                    minimumFractionDigits: 0,
+                  }}
+                  isRequired
+                  minValue={0}
+                  name="bundlePrice"
+                  value={bundlePrice}
+                  onChange={setBundlePrice}
+                >
+                  <Label>Harga Bundle</Label>
                   <NumberField.Group>
                     <NumberField.DecrementButton />
                     <NumberField.Input className="w-full" />
@@ -160,16 +257,16 @@ export default function ProductForm({
                 slot="close"
                 variant="secondary"
               >
-                Cancel
+                Batal
               </Button>
               <Button isPending={isSubmitting} type="submit" variant="primary">
                 {isSubmitting ? (
                   <>
                     <Spinner color="current" size="sm" />
-                    Saving...
+                    Menyimpan...
                   </>
                 ) : (
-                  "Save"
+                  "Simpan"
                 )}
               </Button>
             </Modal.Footer>

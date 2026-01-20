@@ -1,19 +1,27 @@
 import type { Product, ProductCreate, ProductUpdate } from "./types";
+import { getBearerAuthHeaders } from "./session";
 
 const API_BASE = "/api/products";
 
 export async function getProducts(
   offset = 0,
-  limit = 100
+  limit = 100,
+  search?: string
 ): Promise<Product[]> {
-  const response = await fetch(
-    `${API_BASE}?offset=${offset}&limit=${limit}`,
-    {
-      headers: {
-        Accept: "application/json",
-      },
-    }
-  );
+  const queryParams = new URLSearchParams();
+  queryParams.set("offset", offset.toString());
+  queryParams.set("limit", limit.toString());
+  if (search) {
+    queryParams.set("search", search);
+  }
+
+  const headers = await getBearerAuthHeaders({
+    Accept: "application/json",
+  });
+
+  const response = await fetch(`${API_BASE}?${queryParams.toString()}`, {
+    headers,
+  });
 
   if (!response.ok) {
     throw new Error("Failed to fetch products");
@@ -23,10 +31,12 @@ export async function getProducts(
 }
 
 export async function getProduct(id: number): Promise<Product> {
+  const headers = await getBearerAuthHeaders({
+    Accept: "application/json",
+  });
+
   const response = await fetch(`${API_BASE}/${id}`, {
-    headers: {
-      Accept: "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -39,12 +49,14 @@ export async function getProduct(id: number): Promise<Product> {
 export async function createProduct(
   product: ProductCreate
 ): Promise<Product> {
+  const headers = await getBearerAuthHeaders({
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  });
+
   const response = await fetch(API_BASE, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
+    headers,
     body: JSON.stringify(product),
   });
 
@@ -59,12 +71,14 @@ export async function updateProduct(
   id: number,
   product: ProductUpdate
 ): Promise<Product> {
+  const headers = await getBearerAuthHeaders({
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  });
+
   const response = await fetch(`${API_BASE}/${id}`, {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
+    headers,
     body: JSON.stringify(product),
   });
 
@@ -76,11 +90,13 @@ export async function updateProduct(
 }
 
 export async function deleteProduct(id: number): Promise<void> {
+  const headers = await getBearerAuthHeaders({
+    Accept: "application/json",
+  });
+
   const response = await fetch(`${API_BASE}/${id}`, {
     method: "DELETE",
-    headers: {
-      Accept: "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {

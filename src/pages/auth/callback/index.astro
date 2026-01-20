@@ -1,0 +1,10 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import OAuthCallback from '../../../components/OAuthCallback.tsx';
+
+export const prerender = false;
+---
+
+<Layout title="Completing authentication...">
+  <OAuthCallback client:load />
+</Layout>

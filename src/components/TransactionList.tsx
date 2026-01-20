@@ -77,14 +77,22 @@ export default function TransactionList({ onView }: TransactionListProps) {
                   <p className="text-sm text-muted">
                     {transaction.items?.length || 0} item(s)
                   </p>
-                  {transaction.total && (
-                    <p className="mt-2 text-lg font-semibold">
-                      Total: Rp {transaction.total.toLocaleString("id-ID")}
-                    </p>
-                  )}
+                  <p className="mt-2 text-lg font-semibold">
+                    Total: Rp {transaction.total_amount.toLocaleString("id-ID")}
+                  </p>
                   {transaction.created_at && (
                     <p className="mt-1 text-xs text-muted">
-                      {new Date(transaction.created_at).toLocaleString()}
+                      {new Date(transaction.created_at).toLocaleString(
+                        "id-ID",
+                        {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: false,
+                        }
+                      )}
                     </p>
                   )}
                 </Card.Content>

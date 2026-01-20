@@ -5,7 +5,7 @@ export const prerender = false;
 
 const API_BASE_URL = getApiBaseUrl();
 
-export const GET: APIRoute = async ({ params }) => {
+export const GET: APIRoute = async ({ params, request }) => {
   try {
     const id = params.id;
 
@@ -21,10 +21,20 @@ export const GET: APIRoute = async ({ params }) => {
       );
     }
 
+    // Extract Authorization header from the incoming request
+    const authHeader = request.headers.get("Authorization");
+
+    const headers: HeadersInit = {
+      Accept: "application/json",
+    };
+
+    // Forward the Authorization header if present
+    if (authHeader) {
+      headers["Authorization"] = authHeader;
+    }
+
     const response = await fetch(`${API_BASE_URL}/transactions/${id}`, {
-      headers: {
-        Accept: "application/json",
-      },
+      headers,
     });
 
     if (!response.ok) {

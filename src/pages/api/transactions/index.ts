@@ -5,18 +5,40 @@ export const prerender = false;
 
 const API_BASE_URL = getApiBaseUrl();
 
-export const GET: APIRoute = async ({ url }) => {
+export const GET: APIRoute = async ({ url, request }) => {
   try {
     const offset = url.searchParams.get("offset") || "0";
     const limit = url.searchParams.get("limit") || "100";
+    const startDate = url.searchParams.get("start_date");
+    const endDate = url.searchParams.get("end_date");
+
+    const queryParams = new URLSearchParams();
+    queryParams.set("offset", offset);
+    queryParams.set("limit", limit);
+    if (startDate) {
+      queryParams.set("start_date", startDate);
+    }
+    if (endDate) {
+      queryParams.set("end_date", endDate);
+    }
+
+    // Extract Authorization header from the incoming request
+    const authHeader = request.headers.get("Authorization");
+
+    const headers: HeadersInit = {
+      Accept: "application/json",
+    };
+
+    // Forward the Authorization header if present
+    if (authHeader) {
+      headers["Authorization"] = authHeader;
+    }
 
     const response = await fetch(
-      `${API_BASE_URL}/transactions/?offset=${offset}&limit=${limit}`,
+      `${API_BASE_URL}/transactions/?${queryParams.toString()}`,
       {
-        headers: {
-          Accept: "application/json",
-        },
-      }
+        headers,
+      },
     );
 
     if (!response.ok) {
@@ -27,7 +49,7 @@ export const GET: APIRoute = async ({ url }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -53,12 +75,22 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
 
+    // Extract Authorization header from the incoming request
+    const authHeader = request.headers.get("Authorization");
+
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
+
+    // Forward the Authorization header if present
+    if (authHeader) {
+      headers["Authorization"] = authHeader;
+    }
+
     const response = await fetch(`${API_BASE_URL}/transactions/`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
+      headers,
       body: JSON.stringify(body),
     });
 
@@ -70,7 +102,7 @@ export const POST: APIRoute = async ({ request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
