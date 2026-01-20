@@ -138,7 +138,7 @@ const PengaturanPage = () => {
 
   const handleUpdateRole = async (
     userId: string,
-    newRole: "user" | "admin"
+    newRole: "user" | "admin",
   ) => {
     try {
       await updateUser(userId, { role: newRole });
@@ -405,7 +405,6 @@ const PengaturanPage = () => {
           {/* Toko Tab */}
           <Tabs.Panel id="toko">
             <div className="flex flex-col gap-4 text-left h-full">
-
               <div className="flex flex-row gap-4 flex-1 min-h-0 overflow-hidden">
                 {/* First Column: Organizations List */}
                 <div className="flex flex-col w-1/3 min-w-0 border-r border-gray-200/50 pr-4">
@@ -438,7 +437,7 @@ const PengaturanPage = () => {
                                 <img
                                   src={org.logo}
                                   alt={org.name}
-                                  className="w-8 h-8 rounded flex-shrink-0"
+                                  className="w-8 h-8 rounded"
                                 />
                               )}
                               <div className="flex flex-col min-w-0 flex-1">
@@ -450,7 +449,7 @@ const PengaturanPage = () => {
                                 </p>
                               </div>
                             </div>
-                            <div className="flex items-center gap-1 flex-shrink-0">
+                            <div className="flex items-center gap-1">
                               <Button
                                 size="sm"
                                 variant="ghost"
@@ -502,11 +501,15 @@ const PengaturanPage = () => {
                       </div>
                       {orgMembersLoading ? (
                         <div className="flex items-center justify-center py-8">
-                          <p className="text-sm text-muted">Memuat anggota...</p>
+                          <p className="text-sm text-muted">
+                            Memuat anggota...
+                          </p>
                         </div>
                       ) : orgMembers.length === 0 ? (
                         <div className="flex items-center justify-center py-8">
-                          <p className="text-sm text-muted">Tidak ada anggota</p>
+                          <p className="text-sm text-muted">
+                            Tidak ada anggota
+                          </p>
                         </div>
                       ) : (
                         <div className="flex flex-col gap-2 overflow-y-auto flex-1">
@@ -520,7 +523,7 @@ const PengaturanPage = () => {
                                   <img
                                     src={member.user.image}
                                     alt={member.user.name}
-                                    className="w-8 h-8 rounded-full flex-shrink-0"
+                                    className="w-8 h-8 rounded-full"
                                   />
                                 )}
                                 <div className="flex flex-col min-w-0 flex-1">
@@ -532,7 +535,7 @@ const PengaturanPage = () => {
                                   </p>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-1.5 flex-shrink-0">
+                              <div className="flex items-center gap-1.5">
                                 {editingMemberId === member.id ? (
                                   <div className="flex items-center gap-1.5">
                                     <Select
@@ -1003,10 +1006,7 @@ const PengaturanPage = () => {
       </Modal.Backdrop>
 
       {/* Create Organization Modal */}
-      <Modal.Backdrop
-        isOpen={isOrgModalOpen}
-        onOpenChange={setIsOrgModalOpen}
-      >
+      <Modal.Backdrop isOpen={isOrgModalOpen} onOpenChange={setIsOrgModalOpen}>
         <Modal.Container>
           <Modal.Dialog className="sm:max-w-md">
             <Modal.CloseTrigger />
@@ -1017,9 +1017,7 @@ const PengaturanPage = () => {
               <div className="flex flex-col gap-4">
                 <TextField
                   value={orgForm.name}
-                  onChange={(value) =>
-                    setOrgForm({ ...orgForm, name: value })
-                  }
+                  onChange={(value) => setOrgForm({ ...orgForm, name: value })}
                 >
                   <Label className="text-xs font-medium">Nama Toko</Label>
                   <InputGroup className="shadow-none border">
@@ -1028,9 +1026,7 @@ const PengaturanPage = () => {
                 </TextField>
                 <TextField
                   value={orgForm.logo || ""}
-                  onChange={(value) =>
-                    setOrgForm({ ...orgForm, logo: value })
-                  }
+                  onChange={(value) => setOrgForm({ ...orgForm, logo: value })}
                 >
                   <Label className="text-xs font-medium">Logo URL</Label>
                   <InputGroup className="shadow-none border">
@@ -1049,10 +1045,7 @@ const PengaturanPage = () => {
               </div>
             </Modal.Body>
             <Modal.Footer>
-              <Button
-                variant="ghost"
-                onPress={() => setIsOrgModalOpen(false)}
-              >
+              <Button variant="ghost" onPress={() => setIsOrgModalOpen(false)}>
                 Batal
               </Button>
               <Button
@@ -1129,7 +1122,9 @@ const PengaturanPage = () => {
               <Button
                 variant="primary"
                 className="bg-accent text-accent-foreground"
-                isDisabled={!editingOrgId || !(editingOrgForm.name || "").trim()}
+                isDisabled={
+                  !editingOrgId || !(editingOrgForm.name || "").trim()
+                }
                 onPress={() => {
                   if (!editingOrgId) return;
                   handleUpdateOrganization(editingOrgId);
