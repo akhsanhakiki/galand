@@ -79,6 +79,7 @@ const PengaturanPage = () => {
   const [orgMembers, setOrgMembers] = useState<OrganizationMember[]>([]);
   const [orgMembersLoading, setOrgMembersLoading] = useState(false);
   const [isOrgModalOpen, setIsOrgModalOpen] = useState(false);
+  const [isEditOrgModalOpen, setIsEditOrgModalOpen] = useState(false);
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
   const [orgForm, setOrgForm] = useState<OrganizationCreate>({
     name: "",
@@ -190,6 +191,27 @@ const PengaturanPage = () => {
     }
   };
 
+  const handleOpenEditOrganization = async (org: Organization) => {
+    setEditingOrgId(org.id);
+    setEditingOrgForm({
+      name: org.name,
+      logo: org.logo || "",
+      metadata: org.metadata || "",
+    });
+    setIsEditOrgModalOpen(true);
+
+    try {
+      const latest = await getOrganization(org.id);
+      setEditingOrgForm({
+        name: latest.name,
+        logo: latest.logo || "",
+        metadata: latest.metadata || "",
+      });
+    } catch (error) {
+      // Error handling
+    }
+  };
+
   const handleCreateOrganization = async () => {
     if (!orgForm.name) {
       return;
@@ -209,6 +231,7 @@ const PengaturanPage = () => {
       await updateOrganization(orgId, editingOrgForm);
       setEditingOrgId(null);
       setEditingOrgForm({});
+      setIsEditOrgModalOpen(false);
       fetchOrganizations();
     } catch (error) {
       // Error handling
@@ -428,74 +451,24 @@ const PengaturanPage = () => {
                               </div>
                             </div>
                             <div className="flex items-center gap-1 flex-shrink-0">
-                              {editingOrgId === org.id ? (
-                                <div className="flex items-center gap-1.5">
-                                  <TextField
-                                    value={editingOrgForm.name || org.name}
-                                    onChange={(value) =>
-                                      setEditingOrgForm({
-                                        ...editingOrgForm,
-                                        name: value,
-                                      })
-                                    }
-                                    className="w-28"
-                                    onPress={(e) => e.stopPropagation()}
-                                  >
-                                    <InputGroup className="h-7 text-xs">
-                                      <InputGroup.Input />
-                                    </InputGroup>
-                                  </TextField>
-                                  <Button
-                                    size="sm"
-                                    variant="primary"
-                                    className="bg-accent text-accent-foreground h-7 text-xs px-2"
-                                    onPress={(e) => {
-                                      e.stopPropagation();
-                                      handleUpdateOrganization(org.id);
-                                    }}
-                                  >
-                                    Simpan
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="h-7 text-xs px-2"
-                                    onPress={(e) => {
-                                      e.stopPropagation();
-                                      setEditingOrgId(null);
-                                      setEditingOrgForm({});
-                                    }}
-                                  >
-                                    Batal
-                                  </Button>
-                                </div>
-                              ) : (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="h-7 w-7 min-w-7 p-0"
-                                    onPress={(e) => {
-                                      e.stopPropagation();
-                                      setEditingOrgId(org.id);
-                                      setEditingOrgForm({ name: org.name });
-                                    }}
-                                  >
-                                    <LuPencil className="w-3 h-3" />
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="text-danger h-7 w-7 min-w-7 p-0"
-                                    onPress={(e) => {
-                                      e.stopPropagation();
-                                      handleDeleteOrganization(org.id);
-                                    }}
-                                  >
-                                    <LuTrash2 className="w-3 h-3" />
-                                  </Button>
-                                </>
-                              )}
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 w-7 min-w-7 p-0"
+                                onClick={(e) => e.stopPropagation()}
+                                onPress={() => handleOpenEditOrganization(org)}
+                              >
+                                <LuPencil className="w-3 h-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-danger h-7 w-7 min-w-7 p-0"
+                                onClick={(e) => e.stopPropagation()}
+                                onPress={() => handleDeleteOrganization(org.id)}
+                              >
+                                <LuTrash2 className="w-3 h-3" />
+                              </Button>
                             </div>
                           </div>
                           {org.metadata && (
@@ -1094,6 +1067,81 @@ const PengaturanPage = () => {
         </Modal.Container>
       </Modal.Backdrop>
 
+      {/* Edit Organization Modal */}
+      <Modal.Backdrop
+        isOpen={isEditOrgModalOpen}
+        onOpenChange={(open) => {
+          setIsEditOrgModalOpen(open);
+          if (!open) {
+            setEditingOrgId(null);
+            setEditingOrgForm({});
+          }
+        }}
+      >
+        <Modal.Container>
+          <Modal.Dialog className="sm:max-w-md">
+            <Modal.CloseTrigger />
+            <Modal.Header>
+              <Modal.Heading>Edit Toko</Modal.Heading>
+            </Modal.Header>
+            <Modal.Body>
+              <div className="flex flex-col gap-4">
+                <TextField
+                  value={editingOrgForm.name || ""}
+                  onChange={(value) =>
+                    setEditingOrgForm({ ...editingOrgForm, name: value })
+                  }
+                >
+                  <Label className="text-xs font-medium">Nama Toko</Label>
+                  <InputGroup className="shadow-none border">
+                    <InputGroup.Input />
+                  </InputGroup>
+                </TextField>
+                <TextField
+                  value={(editingOrgForm.logo as string) || ""}
+                  onChange={(value) =>
+                    setEditingOrgForm({ ...editingOrgForm, logo: value })
+                  }
+                >
+                  <Label className="text-xs font-medium">Logo URL</Label>
+                  <InputGroup className="shadow-none border">
+                    <InputGroup.Input />
+                  </InputGroup>
+                </TextField>
+                <TextField
+                  value={(editingOrgForm.metadata as string) || ""}
+                  onChange={(value) =>
+                    setEditingOrgForm({ ...editingOrgForm, metadata: value })
+                  }
+                >
+                  <Label className="text-xs font-medium">Metadata</Label>
+                  <TextArea rows={3} className="shadow-none border" />
+                </TextField>
+              </div>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                variant="ghost"
+                onPress={() => setIsEditOrgModalOpen(false)}
+              >
+                Batal
+              </Button>
+              <Button
+                variant="primary"
+                className="bg-accent text-accent-foreground"
+                isDisabled={!editingOrgId || !(editingOrgForm.name || "").trim()}
+                onPress={() => {
+                  if (!editingOrgId) return;
+                  handleUpdateOrganization(editingOrgId);
+                }}
+              >
+                Simpan
+              </Button>
+            </Modal.Footer>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
+
       {/* Add Member Modal */}
       <Modal.Backdrop
         isOpen={isMemberModalOpen}
@@ -1108,6 +1156,7 @@ const PengaturanPage = () => {
             <Modal.Body>
               <div className="flex flex-col gap-4">
                 <Select
+                  placeholder="Pilih pengguna"
                   selectedKey={memberForm.userId}
                   onSelectionChange={(key) => {
                     setMemberForm({
@@ -1118,7 +1167,7 @@ const PengaturanPage = () => {
                 >
                   <Label className="text-xs font-medium">Pengguna</Label>
                   <Select.Trigger>
-                    <Select.Value placeholder="Pilih pengguna" />
+                    <Select.Value />
                     <Select.Indicator />
                   </Select.Trigger>
                   <Select.Popover>
