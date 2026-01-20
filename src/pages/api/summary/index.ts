@@ -5,7 +5,7 @@ export const prerender = false;
 
 const API_BASE_URL = getApiBaseUrl();
 
-export const GET: APIRoute = async ({ url }) => {
+export const GET: APIRoute = async ({ url, request }) => {
   try {
     const startDate = url.searchParams.get("start_date");
     const endDate = url.searchParams.get("end_date");
@@ -24,10 +24,20 @@ export const GET: APIRoute = async ({ url }) => {
       ? `${API_BASE_URL}/summary/?${queryString}`
       : `${API_BASE_URL}/summary/`;
 
+    // Extract Authorization header from the incoming request
+    const authHeader = request.headers.get("Authorization");
+
+    const headers: HeadersInit = {
+      Accept: "application/json",
+    };
+
+    // Forward the Authorization header if present
+    if (authHeader) {
+      headers["Authorization"] = authHeader;
+    }
+
     const response = await fetch(apiUrl, {
-      headers: {
-        Accept: "application/json",
-      },
+      headers,
     });
 
     if (!response.ok) {

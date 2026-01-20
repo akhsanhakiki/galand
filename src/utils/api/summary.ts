@@ -1,4 +1,5 @@
 import type { SummaryResponse } from "./types";
+import { getBearerAuthHeaders } from "./session";
 
 const API_BASE = "/api/summary";
 
@@ -18,10 +19,12 @@ export async function getSummary(
     ? `${API_BASE}?${queryParams.toString()}`
     : API_BASE;
 
+  const headers = await getBearerAuthHeaders({
+    Accept: "application/json",
+  });
+
   const response = await fetch(url, {
-    headers: {
-      Accept: "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {

@@ -1,4 +1,5 @@
 import type { Discount, DiscountCreate, DiscountUpdate } from "./types";
+import { getBearerAuthHeaders } from "./session";
 
 const API_BASE = "/api/discounts";
 
@@ -12,10 +13,12 @@ export async function getDiscounts(
     queryParams.set("search", search);
   }
 
+  const headers = await getBearerAuthHeaders({
+    Accept: "application/json",
+  });
+
   const response = await fetch(`${API_BASE}?${queryParams.toString()}`, {
-    headers: {
-      Accept: "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -26,10 +29,12 @@ export async function getDiscounts(
 }
 
 export async function getDiscount(id: number): Promise<Discount> {
+  const headers = await getBearerAuthHeaders({
+    Accept: "application/json",
+  });
+
   const response = await fetch(`${API_BASE}/${id}`, {
-    headers: {
-      Accept: "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -41,10 +46,12 @@ export async function getDiscount(id: number): Promise<Discount> {
 
 export async function getDiscountByCode(code: string): Promise<Discount> {
   const encodedCode = encodeURIComponent(code);
+  const headers = await getBearerAuthHeaders({
+    Accept: "application/json",
+  });
+
   const response = await fetch(`${API_BASE}/code/${encodedCode}`, {
-    headers: {
-      Accept: "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -57,12 +64,14 @@ export async function getDiscountByCode(code: string): Promise<Discount> {
 export async function createDiscount(
   discount: DiscountCreate
 ): Promise<Discount> {
+  const headers = await getBearerAuthHeaders({
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  });
+
   const response = await fetch(API_BASE, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
+    headers,
     body: JSON.stringify(discount),
   });
 
@@ -77,12 +86,14 @@ export async function updateDiscount(
   id: number,
   discount: DiscountUpdate
 ): Promise<Discount> {
+  const headers = await getBearerAuthHeaders({
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  });
+
   const response = await fetch(`${API_BASE}/${id}`, {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
+    headers,
     body: JSON.stringify(discount),
   });
 
@@ -94,11 +105,13 @@ export async function updateDiscount(
 }
 
 export async function deleteDiscount(id: number): Promise<void> {
+  const headers = await getBearerAuthHeaders({
+    Accept: "application/json",
+  });
+
   const response = await fetch(`${API_BASE}/${id}`, {
     method: "DELETE",
-    headers: {
-      Accept: "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {

@@ -5,7 +5,7 @@ export const prerender = false;
 
 const API_BASE_URL = getApiBaseUrl();
 
-export const GET: APIRoute = async ({ params }) => {
+export const GET: APIRoute = async ({ params, request }) => {
   try {
     const code = params.code;
 
@@ -24,11 +24,25 @@ export const GET: APIRoute = async ({ params }) => {
     // Astro already decodes the URL parameter, so we use it directly
     // but encode it again for the backend API call
     const encodedCode = encodeURIComponent(code);
-    const response = await fetch(`${API_BASE_URL}/discounts/code/${encodedCode}`, {
-      headers: {
-        Accept: "application/json",
-      },
-    });
+
+    // Extract Authorization header from the incoming request
+    const authHeader = request.headers.get("Authorization");
+
+    const headers: HeadersInit = {
+      Accept: "application/json",
+    };
+
+    // Forward the Authorization header if present
+    if (authHeader) {
+      headers["Authorization"] = authHeader;
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/discounts/code/${encodedCode}`,
+      {
+        headers,
+      }
+    );
 
     if (!response.ok) {
       return new Response(

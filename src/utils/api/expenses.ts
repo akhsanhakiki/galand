@@ -1,4 +1,5 @@
 import type { Expense, ExpenseCreate, ExpenseUpdate } from "./types";
+import { getBearerAuthHeaders } from "./session";
 
 const API_BASE = "/api/expenses";
 
@@ -22,10 +23,12 @@ export async function getExpenses(
     queryParams.set("end_date", endDate);
   }
 
+  const headers = await getBearerAuthHeaders({
+    Accept: "application/json",
+  });
+
   const response = await fetch(`${API_BASE}?${queryParams.toString()}`, {
-    headers: {
-      Accept: "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -36,10 +39,12 @@ export async function getExpenses(
 }
 
 export async function getExpense(id: number): Promise<Expense> {
+  const headers = await getBearerAuthHeaders({
+    Accept: "application/json",
+  });
+
   const response = await fetch(`${API_BASE}/${id}`, {
-    headers: {
-      Accept: "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -52,12 +57,14 @@ export async function getExpense(id: number): Promise<Expense> {
 export async function createExpense(
   expense: ExpenseCreate
 ): Promise<Expense> {
+  const headers = await getBearerAuthHeaders({
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  });
+
   const response = await fetch(API_BASE, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
+    headers,
     body: JSON.stringify(expense),
   });
 
@@ -72,12 +79,14 @@ export async function updateExpense(
   id: number,
   expense: ExpenseUpdate
 ): Promise<Expense> {
+  const headers = await getBearerAuthHeaders({
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  });
+
   const response = await fetch(`${API_BASE}/${id}`, {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
+    headers,
     body: JSON.stringify(expense),
   });
 
@@ -89,11 +98,13 @@ export async function updateExpense(
 }
 
 export async function deleteExpense(id: number): Promise<void> {
+  const headers = await getBearerAuthHeaders({
+    Accept: "application/json",
+  });
+
   const response = await fetch(`${API_BASE}/${id}`, {
     method: "DELETE",
-    headers: {
-      Accept: "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {

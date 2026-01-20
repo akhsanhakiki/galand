@@ -39,28 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const result = await authClient.getSession();
-      
-      // Debug: Log the full result to see what's available
-      console.log('=== Neon Auth getSession() Result ===');
-      console.log('Full result object:', result);
-      console.log('Result.data:', result.data);
-      console.log('Result.data?.session:', result.data?.session);
-      console.log('Result.data?.user:', result.data?.user);
-      console.log('Session keys:', result.data?.session ? Object.keys(result.data.session) : 'No session');
-      console.log('All result.data keys:', result.data ? Object.keys(result.data) : 'No data');
-      
-      // Check for token in various possible locations
-      if (result.data?.session) {
-        console.log('Session.token:', result.data.session.token);
-        console.log('Session.accessToken:', result.data.session.accessToken);
-        console.log('Session.sessionToken:', result.data.session.sessionToken);
-      }
-      if (result.data) {
-        console.log('result.data.token:', result.data.token);
-        console.log('result.data.accessToken:', result.data.accessToken);
-      }
-      console.log('=====================================');
-      
+
       // Check if we have a valid session
       if (result.data?.session && result.data?.user) {
         setSession(result.data.session);
