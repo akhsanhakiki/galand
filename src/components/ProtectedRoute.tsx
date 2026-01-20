@@ -8,9 +8,8 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, loading, refreshSession } = useAuth();
+  const { user, loading } = useAuth();
   const hasRedirected = useRef(false);
-  const retryAttempted = useRef(false);
 
   useEffect(() => {
     // Don't do anything while still loading
@@ -20,31 +19,17 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
     // If we have a user, we're good
     if (user) {
-      retryAttempted.current = false;
+      hasRedirected.current = false;
       return;
     }
 
-    // If no user and we haven't retried yet, try refreshing once
-    if (!user && !retryAttempted.current && !hasRedirected.current) {
-      retryAttempted.current = true;
-      refreshSession();
-      // Give the refresh time to complete - the effect will re-run
-      return;
+    // No user after loading finished -> redirect to login.
+    // Guard against redirect loops (in case this component is ever mounted on /login).
+    if (!hasRedirected.current && window.location.pathname !== "/login") {
+      hasRedirected.current = true;
+      window.location.replace("/login");
     }
-
-    // If we've retried and still no user, redirect to login
-    if (!user && retryAttempted.current && !hasRedirected.current) {
-      // Add a small delay to ensure we're not in a race condition
-      const timeoutId = setTimeout(() => {
-        if (!hasRedirected.current) {
-          hasRedirected.current = true;
-          window.location.href = "/login";
-        }
-      }, 500);
-      
-      return () => clearTimeout(timeoutId);
-    }
-  }, [user, loading, refreshSession]);
+  }, [user, loading]);
 
   if (loading) {
     return (

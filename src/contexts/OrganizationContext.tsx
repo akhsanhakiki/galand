@@ -57,12 +57,7 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
 
       // Fetch all organizations the user belongs to
       const { data: orgsList, error: orgsError } = await authClient.organization.list();
-      
-      console.log('=== Neon Auth Organization.list() Result ===');
-      console.log('Organizations list:', orgsList);
-      console.log('Organizations error:', orgsError);
-      console.log('============================================');
-      
+
       if (orgsError) {
         setOrganizations([]);
         setCurrentOrganizationState(null);
@@ -79,16 +74,6 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
           membersLimit: 100,
         },
       });
-      
-      console.log('=== Neon Auth getFullOrganization() Result ===');
-      console.log('Active organization:', activeOrg);
-      console.log('Active organization error:', activeError);
-      if (activeOrg) {
-        console.log('Active org keys:', Object.keys(activeOrg));
-        console.log('Active org ID:', activeOrg.id);
-        console.log('Active org name:', activeOrg.name);
-      }
-      console.log('==============================================');
 
       if (activeError || !activeOrg) {
         // If no active org, use first organization if available

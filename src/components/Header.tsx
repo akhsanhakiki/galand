@@ -38,7 +38,7 @@ export default function Header({
 
   const handleLogout = async () => {
     await signOut();
-    window.location.href = "/login";
+    window.location.replace("/login");
   };
 
   // Get user initials for avatar fallback

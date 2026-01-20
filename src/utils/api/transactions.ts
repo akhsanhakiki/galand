@@ -1,5 +1,5 @@
 import type { Transaction, TransactionCreate } from "./types";
-import { getNeonAuthUrl } from "../env";
+import { getBearerAuthHeaders } from "./session";
 
 const API_BASE = "/api/transactions";
 
@@ -19,34 +19,7 @@ export async function getTransactions(
     queryParams.set("end_date", endDate);
   }
 
-  // Fetch get-session endpoint directly to get the raw session token
-  // The response structure is: { session: { token: "..." }, user: {...} }
-  const neonAuthUrl = getNeonAuthUrl();
-  const sessionResponse = await fetch(`${neonAuthUrl}/get-session`, {
-    method: "GET",
-    credentials: "include", // Include cookies for authentication
-    headers: {
-      Accept: "application/json",
-    },
-  });
-
-  if (!sessionResponse.ok) {
-    throw new Error("Failed to get session. Please log in again.");
-  }
-
-  const sessionData = await sessionResponse.json();
-  
-  // Extract token from the direct API response: { session: { token: "..." } }
-  const token = sessionData?.session?.token;
-
-  if (!token) {
-    throw new Error("No session token available. Please log in again.");
-  }
-
-  const headers: HeadersInit = {
-    Accept: "*/*",
-    Authorization: `Bearer ${token}`,
-  };
+  const headers = await getBearerAuthHeaders();
 
   const response = await fetch(`${API_BASE}?${queryParams.toString()}`, {
     headers,
@@ -60,10 +33,11 @@ export async function getTransactions(
 }
 
 export async function getTransaction(id: number): Promise<Transaction> {
+  const headers = await getBearerAuthHeaders({
+    Accept: "application/json",
+  });
   const response = await fetch(`${API_BASE}/${id}`, {
-    headers: {
-      Accept: "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -76,12 +50,13 @@ export async function getTransaction(id: number): Promise<Transaction> {
 export async function createTransaction(
   transaction: TransactionCreate
 ): Promise<Transaction> {
+  const headers = await getBearerAuthHeaders({
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  });
   const response = await fetch(API_BASE, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
+    headers,
     body: JSON.stringify(transaction),
   });
 
