@@ -6,13 +6,14 @@ import type {
   OrganizationMemberCreate,
   OrganizationMemberUpdate,
 } from "./types";
+import { getBearerAuthHeaders } from "./session";
 
 const API_BASE = "/api/organizations";
 
 export async function getOrganizations(
   offset = 0,
   limit = 10,
-  search?: string
+  search?: string,
 ): Promise<Organization[]> {
   const queryParams = new URLSearchParams();
   queryParams.set("offset", offset.toString());
@@ -21,10 +22,12 @@ export async function getOrganizations(
     queryParams.set("search", search);
   }
 
+  const headers = await getBearerAuthHeaders({
+    Accept: "application/json",
+  });
+
   const response = await fetch(`${API_BASE}?${queryParams.toString()}`, {
-    headers: {
-      Accept: "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -35,10 +38,12 @@ export async function getOrganizations(
 }
 
 export async function getOrganization(id: string): Promise<Organization> {
+  const headers = await getBearerAuthHeaders({
+    Accept: "application/json",
+  });
+
   const response = await fetch(`${API_BASE}/${id}`, {
-    headers: {
-      Accept: "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -49,14 +54,16 @@ export async function getOrganization(id: string): Promise<Organization> {
 }
 
 export async function createOrganization(
-  organization: OrganizationCreate
+  organization: OrganizationCreate,
 ): Promise<Organization> {
+  const headers = await getBearerAuthHeaders({
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  });
+
   const response = await fetch(API_BASE, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
+    headers,
     body: JSON.stringify(organization),
   });
 
@@ -69,14 +76,16 @@ export async function createOrganization(
 
 export async function updateOrganization(
   id: string,
-  organization: OrganizationUpdate
+  organization: OrganizationUpdate,
 ): Promise<Organization> {
+  const headers = await getBearerAuthHeaders({
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  });
+
   const response = await fetch(`${API_BASE}/${id}`, {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
+    headers,
     body: JSON.stringify(organization),
   });
 
@@ -88,11 +97,13 @@ export async function updateOrganization(
 }
 
 export async function deleteOrganization(id: string): Promise<void> {
+  const headers = await getBearerAuthHeaders({
+    Accept: "application/json",
+  });
+
   const response = await fetch(`${API_BASE}/${id}`, {
     method: "DELETE",
-    headers: {
-      Accept: "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -102,12 +113,14 @@ export async function deleteOrganization(id: string): Promise<void> {
 
 // Member operations
 export async function getOrganizationMembers(
-  organizationId: string
+  organizationId: string,
 ): Promise<OrganizationMember[]> {
+  const headers = await getBearerAuthHeaders({
+    Accept: "application/json",
+  });
+
   const response = await fetch(`${API_BASE}/${organizationId}/members`, {
-    headers: {
-      Accept: "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -119,14 +132,16 @@ export async function getOrganizationMembers(
 
 export async function addOrganizationMember(
   organizationId: string,
-  member: OrganizationMemberCreate
+  member: OrganizationMemberCreate,
 ): Promise<OrganizationMember> {
+  const headers = await getBearerAuthHeaders({
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  });
+
   const response = await fetch(`${API_BASE}/${organizationId}/members`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
+    headers,
     body: JSON.stringify(member),
   });
 
@@ -140,18 +155,20 @@ export async function addOrganizationMember(
 export async function updateOrganizationMember(
   organizationId: string,
   memberId: string,
-  member: OrganizationMemberUpdate
+  member: OrganizationMemberUpdate,
 ): Promise<OrganizationMember> {
+  const headers = await getBearerAuthHeaders({
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  });
+
   const response = await fetch(
     `${API_BASE}/${organizationId}/members/${memberId}`,
     {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
+      headers,
       body: JSON.stringify(member),
-    }
+    },
   );
 
   if (!response.ok) {
@@ -163,16 +180,18 @@ export async function updateOrganizationMember(
 
 export async function removeOrganizationMember(
   organizationId: string,
-  memberId: string
+  memberId: string,
 ): Promise<void> {
+  const headers = await getBearerAuthHeaders({
+    Accept: "application/json",
+  });
+
   const response = await fetch(
     `${API_BASE}/${organizationId}/members/${memberId}`,
     {
       method: "DELETE",
-      headers: {
-        Accept: "application/json",
-      },
-    }
+      headers,
+    },
   );
 
   if (!response.ok) {

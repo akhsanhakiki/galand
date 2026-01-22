@@ -1,19 +1,19 @@
 import type { User, UserCreate, UserUpdate } from "./types";
+import { getBearerAuthHeaders } from "./session";
 
 const API_BASE = "/api/users";
 
-export async function getUsers(
-  offset = 0,
-  limit = 10
-): Promise<User[]> {
+export async function getUsers(offset = 0, limit = 10): Promise<User[]> {
   const queryParams = new URLSearchParams();
   queryParams.set("offset", offset.toString());
   queryParams.set("limit", limit.toString());
 
+  const headers = await getBearerAuthHeaders({
+    Accept: "application/json",
+  });
+
   const response = await fetch(`${API_BASE}?${queryParams.toString()}`, {
-    headers: {
-      Accept: "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -24,12 +24,14 @@ export async function getUsers(
 }
 
 export async function createUser(user: UserCreate): Promise<User> {
+  const headers = await getBearerAuthHeaders({
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  });
+
   const response = await fetch(API_BASE, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
+    headers,
     body: JSON.stringify(user),
   });
 
@@ -40,16 +42,15 @@ export async function createUser(user: UserCreate): Promise<User> {
   return response.json();
 }
 
-export async function updateUser(
-  id: string,
-  user: UserUpdate
-): Promise<User> {
+export async function updateUser(id: string, user: UserUpdate): Promise<User> {
+  const headers = await getBearerAuthHeaders({
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  });
+
   const response = await fetch(`${API_BASE}/${id}`, {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
+    headers,
     body: JSON.stringify(user),
   });
 
@@ -61,11 +62,13 @@ export async function updateUser(
 }
 
 export async function deleteUser(id: string): Promise<void> {
+  const headers = await getBearerAuthHeaders({
+    Accept: "application/json",
+  });
+
   const response = await fetch(`${API_BASE}/${id}`, {
     method: "DELETE",
-    headers: {
-      Accept: "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {

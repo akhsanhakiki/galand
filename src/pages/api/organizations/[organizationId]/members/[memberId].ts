@@ -33,14 +33,24 @@ export const PATCH: APIRoute = async ({ params, request }) => {
 
     const body = await request.json();
 
+    // Extract Authorization header from the incoming request
+    const authHeader = request.headers.get("Authorization");
+
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
+
+    // Forward the Authorization header if present
+    if (authHeader) {
+      headers["Authorization"] = authHeader;
+    }
+
     const response = await fetch(
       `${API_BASE_URL}/organizations/${organizationId}/members/${memberId}`,
       {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
+        headers,
         body: JSON.stringify(body),
       }
     );
@@ -75,7 +85,7 @@ export const PATCH: APIRoute = async ({ params, request }) => {
   }
 };
 
-export const DELETE: APIRoute = async ({ params }) => {
+export const DELETE: APIRoute = async ({ params, request }) => {
   try {
     const organizationId = params.organizationId;
     const memberId = params.memberId;
@@ -101,13 +111,23 @@ export const DELETE: APIRoute = async ({ params }) => {
       });
     }
 
+    // Extract Authorization header from the incoming request
+    const authHeader = request.headers.get("Authorization");
+
+    const headers: HeadersInit = {
+      Accept: "application/json",
+    };
+
+    // Forward the Authorization header if present
+    if (authHeader) {
+      headers["Authorization"] = authHeader;
+    }
+
     const response = await fetch(
       `${API_BASE_URL}/organizations/${organizationId}/members/${memberId}`,
       {
         method: "DELETE",
-        headers: {
-          Accept: "application/json",
-        },
+        headers,
       }
     );
 

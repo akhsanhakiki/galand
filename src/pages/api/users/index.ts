@@ -5,7 +5,7 @@ export const prerender = false;
 
 const API_BASE_URL = getApiBaseUrl();
 
-export const GET: APIRoute = async ({ url }) => {
+export const GET: APIRoute = async ({ url, request }) => {
   try {
     const offset = url.searchParams.get("offset") || "0";
     const limit = url.searchParams.get("limit") || "10";
@@ -14,12 +14,22 @@ export const GET: APIRoute = async ({ url }) => {
     queryParams.set("offset", offset);
     queryParams.set("limit", limit);
 
+    // Extract Authorization header from the incoming request
+    const authHeader = request.headers.get("Authorization");
+
+    const headers: HeadersInit = {
+      Accept: "application/json",
+    };
+
+    // Forward the Authorization header if present
+    if (authHeader) {
+      headers["Authorization"] = authHeader;
+    }
+
     const response = await fetch(
       `${API_BASE_URL}/users/?${queryParams.toString()}`,
       {
-        headers: {
-          Accept: "application/json",
-        },
+        headers,
       }
     );
 
@@ -57,12 +67,22 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
 
+    // Extract Authorization header from the incoming request
+    const authHeader = request.headers.get("Authorization");
+
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
+
+    // Forward the Authorization header if present
+    if (authHeader) {
+      headers["Authorization"] = authHeader;
+    }
+
     const response = await fetch(`${API_BASE_URL}/users/`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
+      headers,
       body: JSON.stringify(body),
     });
 

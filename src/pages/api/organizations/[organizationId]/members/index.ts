@@ -5,7 +5,7 @@ export const prerender = false;
 
 const API_BASE_URL = getApiBaseUrl();
 
-export const GET: APIRoute = async ({ params }) => {
+export const GET: APIRoute = async ({ params, request }) => {
   try {
     const organizationId = params.organizationId;
 
@@ -21,12 +21,22 @@ export const GET: APIRoute = async ({ params }) => {
       );
     }
 
+    // Extract Authorization header from the incoming request
+    const authHeader = request.headers.get("Authorization");
+
+    const headers: HeadersInit = {
+      Accept: "application/json",
+    };
+
+    // Forward the Authorization header if present
+    if (authHeader) {
+      headers["Authorization"] = authHeader;
+    }
+
     const response = await fetch(
       `${API_BASE_URL}/organizations/${organizationId}/members`,
       {
-        headers: {
-          Accept: "application/json",
-        },
+        headers,
       }
     );
 
@@ -78,14 +88,24 @@ export const POST: APIRoute = async ({ params, request }) => {
 
     const body = await request.json();
 
+    // Extract Authorization header from the incoming request
+    const authHeader = request.headers.get("Authorization");
+
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
+
+    // Forward the Authorization header if present
+    if (authHeader) {
+      headers["Authorization"] = authHeader;
+    }
+
     const response = await fetch(
       `${API_BASE_URL}/organizations/${organizationId}/members`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
+        headers,
         body: JSON.stringify(body),
       }
     );

@@ -46,7 +46,7 @@ const MenuControl = ({
 }: MenuControlProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [currentPage, setCurrentPage] = useState<string>(
-    propCurrentPage || getCurrentPageFromUrl()
+    propCurrentPage || getCurrentPageFromUrl(),
   );
   const [isOrgDropdownOpen, setIsOrgDropdownOpen] = useState(false);
   const {
@@ -56,7 +56,9 @@ const MenuControl = ({
     setCurrentOrganization,
   } = useOrganization();
 
-  const handleOrganizationSelect = async (org: NonNullable<typeof currentOrganization>) => {
+  const handleOrganizationSelect = async (
+    org: NonNullable<typeof currentOrganization>,
+  ) => {
     try {
       await setCurrentOrganization(org);
       setIsOrgDropdownOpen(false);
@@ -82,7 +84,7 @@ const MenuControl = ({
 
     // Dispatch popstate event to trigger route updates in DesktopView/MobileView
     window.dispatchEvent(
-      new PopStateEvent("popstate", { state: { page: menuKey } })
+      new PopStateEvent("popstate", { state: { page: menuKey } }),
     );
 
     // Update local state
@@ -249,7 +251,7 @@ const MenuControl = ({
                           <p className="text-sm font-medium text-foreground truncate text-left">
                             {currentOrganization.name}
                           </p>
-                          <p className="text-[10px] text-muted truncate text-left">
+                          <p className="text-[10px] text-muted truncate text-start">
                             {currentOrganization.slug}
                           </p>
                         </div>
@@ -268,7 +270,9 @@ const MenuControl = ({
                     )}
                   </div>
                   <Disclosure.Indicator>
-                    <LuChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOrgDropdownOpen ? 'rotate-180' : ''}`} />
+                    <LuChevronDown
+                      className={`w-4 h-4 transition-transform duration-200 ${isOrgDropdownOpen ? "rotate-180" : ""}`}
+                    />
                   </Disclosure.Indicator>
                 </Button>
               </Disclosure.Heading>
@@ -301,7 +305,7 @@ const MenuControl = ({
                           <p className="text-xs font-medium text-foreground truncate text-left">
                             {org.name}
                           </p>
-                          <p className="text-[10px] text-muted truncate">
+                          <p className="text-[10px] text-muted truncate text-start">
                             {org.slug}
                           </p>
                         </div>
