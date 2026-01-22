@@ -29,7 +29,6 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useTheme } from "next-themes";
 import type {
   User,
-  UserCreate,
   Organization,
   OrganizationCreate,
   OrganizationUpdate,
@@ -39,9 +38,6 @@ import type {
 } from "../../utils/api/types";
 import {
   getUsers,
-  createUser,
-  updateUser,
-  deleteUser,
   getOrganizations,
   getOrganization,
   createOrganization,
@@ -60,17 +56,8 @@ const PengaturanPage = () => {
   const { theme, setTheme, systemTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // User management state
+  // User management state (used for organization member selection)
   const [users, setUsers] = useState<User[]>([]);
-  const [usersLoading, setUsersLoading] = useState(false);
-  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
-  const [inviteForm, setInviteForm] = useState<UserCreate>({
-    email: "",
-    name: "",
-    role: "user",
-  });
-  const [editingUserId, setEditingUserId] = useState<string | null>(null);
-  const [editingRole, setEditingRole] = useState<"user" | "admin">("user");
 
   // Organization management state
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -100,14 +87,11 @@ const PengaturanPage = () => {
   }, []);
 
   const fetchUsers = async () => {
-    setUsersLoading(true);
     try {
       const data = await getUsers(0, 10);
       setUsers(data);
     } catch (error) {
       // Error handling
-    } finally {
-      setUsersLoading(false);
     }
   };
 
@@ -121,45 +105,6 @@ const PengaturanPage = () => {
       fetchOrganizationMembers(selectedOrgId);
     }
   }, [selectedOrgId]);
-
-  const handleInviteUser = async () => {
-    if (!inviteForm.email || !inviteForm.name) {
-      return;
-    }
-    try {
-      await createUser(inviteForm);
-      setIsInviteModalOpen(false);
-      setInviteForm({ email: "", name: "", role: "user" });
-      fetchUsers();
-    } catch (error) {
-      // Error handling
-    }
-  };
-
-  const handleUpdateRole = async (
-    userId: string,
-    newRole: "user" | "admin",
-  ) => {
-    try {
-      await updateUser(userId, { role: newRole });
-      setEditingUserId(null);
-      fetchUsers();
-    } catch (error) {
-      // Error handling
-    }
-  };
-
-  const handleDeleteUser = async (userId: string) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus pengguna ini?")) {
-      return;
-    }
-    try {
-      await deleteUser(userId);
-      fetchUsers();
-    } catch (error) {
-      // Error handling
-    }
-  };
 
   // Organization functions
   const fetchOrganizations = async () => {
@@ -321,48 +266,33 @@ const PengaturanPage = () => {
           defaultSelectedKey="profil"
           className="w-full gap-4 flex-1 flex flex-col"
         >
-          <div className="flex items-center justify-between w-full">
-            <Tabs.ListContainer>
-              <Tabs.List
-                aria-label="Pengaturan"
-                className="w-fit *:h-7 *:w-fit *:px-3 *:text-xs *:font-normal"
-              >
-                <Tabs.Tab id="profil">
-                  Profil
-                  <Tabs.Indicator />
-                </Tabs.Tab>
-                <Tabs.Tab id="toko">
-                  Toko
-                  <Tabs.Indicator />
-                </Tabs.Tab>
-                <Tabs.Tab id="tema">
-                  Tema
-                  <Tabs.Indicator />
-                </Tabs.Tab>
-                <Tabs.Tab id="notifikasi">
-                  Notifikasi
-                  <Tabs.Indicator />
-                </Tabs.Tab>
-                <Tabs.Tab id="umum">
-                  Umum
-                  <Tabs.Indicator />
-                </Tabs.Tab>
-                <Tabs.Tab id="pengguna">
-                  Pengguna
-                  <Tabs.Indicator />
-                </Tabs.Tab>
-              </Tabs.List>
-            </Tabs.ListContainer>
-            <Button
-              variant="primary"
-              className="bg-accent text-accent-foreground"
-              onPress={() => setIsOrgModalOpen(true)}
-              size="sm"
+          <Tabs.ListContainer>
+            <Tabs.List
+              aria-label="Pengaturan"
+              className="w-fit *:h-7 *:w-fit *:px-3 *:text-xs *:font-normal"
             >
-              <LuUserPlus className="w-3.5 h-3.5" />
-              <span className="text-xs">Tambah Toko</span>
-            </Button>
-          </div>
+              <Tabs.Tab id="profil">
+                Profil
+                <Tabs.Indicator />
+              </Tabs.Tab>
+              <Tabs.Tab id="toko">
+                Toko
+                <Tabs.Indicator />
+              </Tabs.Tab>
+              <Tabs.Tab id="tema">
+                Tema
+                <Tabs.Indicator />
+              </Tabs.Tab>
+              <Tabs.Tab id="notifikasi">
+                Notifikasi
+                <Tabs.Indicator />
+              </Tabs.Tab>
+              <Tabs.Tab id="umum">
+                Umum
+                <Tabs.Indicator />
+              </Tabs.Tab>
+            </Tabs.List>
+          </Tabs.ListContainer>
 
           {/* Profil Tab */}
           <Tabs.Panel id="profil">
@@ -408,9 +338,20 @@ const PengaturanPage = () => {
               <div className="flex flex-row gap-4 flex-1 min-h-0 overflow-hidden">
                 {/* First Column: Organizations List */}
                 <div className="flex flex-col w-1/3 min-w-0 border-r border-gray-200/50 pr-4">
-                  <p className="text-xs font-medium text-foreground mb-2">
-                    Toko
-                  </p>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-medium text-foreground">
+                      Toko
+                    </p>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 text-xs px-2"
+                      onPress={() => setIsOrgModalOpen(true)}
+                    >
+                      <LuUserPlus className="w-3 h-3" />
+                      <span className="text-[10px]">Tambah Toko</span>
+                    </Button>
+                  </div>
                   {organizationsLoading ? (
                     <div className="flex items-center justify-center py-8">
                       <p className="text-sm text-muted">Memuat...</p>
@@ -768,242 +709,8 @@ const PengaturanPage = () => {
               </div>
             </div>
           </Tabs.Panel>
-
-          {/* Pengguna Tab */}
-          <Tabs.Panel id="pengguna">
-            <div className="flex flex-col gap-4 text-left h-full">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    Daftar Pengguna
-                  </p>
-                  <p className="text-xs text-muted">
-                    Kelola pengguna dan peran mereka
-                  </p>
-                </div>
-                <Button
-                  variant="primary"
-                  className="bg-accent text-accent-foreground"
-                  onPress={() => setIsInviteModalOpen(true)}
-                  size="sm"
-                >
-                  <LuUserPlus className="w-3.5 h-3.5" />
-                  <span className="text-xs">Undang Pengguna</span>
-                </Button>
-              </div>
-
-              <Separator />
-
-              {usersLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <p className="text-sm text-muted">Memuat...</p>
-                </div>
-              ) : users.length === 0 ? (
-                <div className="flex items-center justify-center py-8">
-                  <p className="text-sm text-muted">Tidak ada pengguna</p>
-                </div>
-              ) : (
-                <div className="flex flex-col overflow-y-auto flex-1">
-                  {users.map((u, index) => (
-                    <div
-                      key={u.id}
-                      className={`flex items-center justify-between p-2 ${
-                        index !== users.length - 1
-                          ? "border-b border-gray-200/50"
-                          : ""
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        {u.image && (
-                          <img
-                            src={u.image}
-                            alt={u.name}
-                            className="w-8 h-8 rounded-full"
-                          />
-                        )}
-                        <div className="flex flex-col min-w-0 flex-1">
-                          <p className="text-xs font-medium text-foreground truncate">
-                            {u.name}
-                          </p>
-                          <p className="text-[10px] text-muted truncate">
-                            {u.email}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        {editingUserId === u.id ? (
-                          <div className="flex items-center gap-1.5">
-                            <Select
-                              selectedKey={editingRole}
-                              onSelectionChange={(key) => {
-                                setEditingRole(key as "user" | "admin");
-                              }}
-                              className="w-28"
-                            >
-                              <Label className="text-[10px]">Peran</Label>
-                              <Select.Trigger className="h-7 text-xs">
-                                <Select.Value />
-                                <Select.Indicator />
-                              </Select.Trigger>
-                              <Select.Popover>
-                                <ListBox>
-                                  <ListBox.Item
-                                    key="user"
-                                    id="user"
-                                    textValue="user"
-                                  >
-                                    User
-                                    <ListBox.ItemIndicator />
-                                  </ListBox.Item>
-                                  <ListBox.Item
-                                    key="admin"
-                                    id="admin"
-                                    textValue="admin"
-                                  >
-                                    Admin
-                                    <ListBox.ItemIndicator />
-                                  </ListBox.Item>
-                                </ListBox>
-                              </Select.Popover>
-                            </Select>
-                            <Button
-                              size="sm"
-                              variant="primary"
-                              className="bg-accent text-accent-foreground h-7 text-xs px-2"
-                              onPress={() =>
-                                handleUpdateRole(u.id, editingRole)
-                              }
-                            >
-                              Simpan
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-7 text-xs px-2"
-                              onPress={() => setEditingUserId(null)}
-                            >
-                              Batal
-                            </Button>
-                          </div>
-                        ) : (
-                          <>
-                            <div className="px-2 py-0.5 rounded-full bg-accent/10 text-accent text-[10px] font-medium">
-                              {u.role === "admin" ? "Admin" : "User"}
-                            </div>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-7 w-7 min-w-7 p-0"
-                              onPress={() => {
-                                setEditingUserId(u.id);
-                                setEditingRole(u.role);
-                              }}
-                            >
-                              <LuPencil className="w-3 h-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="text-danger h-7 w-7 min-w-7 p-0"
-                              onPress={() => handleDeleteUser(u.id)}
-                            >
-                              <LuTrash2 className="w-3 h-3" />
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </Tabs.Panel>
         </Tabs>
       </div>
-
-      {/* Invite User Modal */}
-      <Modal.Backdrop
-        isOpen={isInviteModalOpen}
-        onOpenChange={setIsInviteModalOpen}
-      >
-        <Modal.Container>
-          <Modal.Dialog className="sm:max-w-md">
-            <Modal.CloseTrigger />
-            <Modal.Header>
-              <Modal.Heading>Undang Pengguna Baru</Modal.Heading>
-            </Modal.Header>
-            <Modal.Body>
-              <div className="flex flex-col gap-4">
-                <TextField
-                  value={inviteForm.name}
-                  onChange={(value) =>
-                    setInviteForm({ ...inviteForm, name: value })
-                  }
-                >
-                  <Label className="text-xs font-medium">Nama</Label>
-                  <InputGroup className="shadow-none border">
-                    <InputGroup.Input />
-                  </InputGroup>
-                </TextField>
-                <TextField
-                  type="email"
-                  value={inviteForm.email}
-                  onChange={(value) =>
-                    setInviteForm({ ...inviteForm, email: value })
-                  }
-                >
-                  <Label className="text-xs font-medium">Email</Label>
-                  <InputGroup className="shadow-none border">
-                    <InputGroup.Input />
-                  </InputGroup>
-                </TextField>
-                <Select
-                  selectedKey={inviteForm.role}
-                  onSelectionChange={(key) => {
-                    setInviteForm({
-                      ...inviteForm,
-                      role: key as "user" | "admin",
-                    });
-                  }}
-                >
-                  <Label className="text-xs font-medium">Peran</Label>
-                  <Select.Trigger>
-                    <Select.Value />
-                    <Select.Indicator />
-                  </Select.Trigger>
-                  <Select.Popover>
-                    <ListBox>
-                      <ListBox.Item key="user" id="user" textValue="user">
-                        User
-                        <ListBox.ItemIndicator />
-                      </ListBox.Item>
-                      <ListBox.Item key="admin" id="admin" textValue="admin">
-                        Admin
-                        <ListBox.ItemIndicator />
-                      </ListBox.Item>
-                    </ListBox>
-                  </Select.Popover>
-                </Select>
-              </div>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button
-                variant="ghost"
-                onPress={() => setIsInviteModalOpen(false)}
-              >
-                Batal
-              </Button>
-              <Button
-                variant="primary"
-                className="bg-accent text-accent-foreground"
-                onPress={handleInviteUser}
-              >
-                Undang
-              </Button>
-            </Modal.Footer>
-          </Modal.Dialog>
-        </Modal.Container>
-      </Modal.Backdrop>
 
       {/* Create Organization Modal */}
       <Modal.Backdrop isOpen={isOrgModalOpen} onOpenChange={setIsOrgModalOpen}>
