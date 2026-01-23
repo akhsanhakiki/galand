@@ -42,8 +42,12 @@ import {
 import { ResizableCell } from "../../components/ResizableCell";
 import { useOrganization } from "../../contexts/OrganizationContext";
 
+import { useAuth } from "../../contexts/AuthContext";
+
 const GudangPage = () => {
   const { organizationChangeKey } = useOrganization();
+  const { user } = useAuth();
+  const isReadOnly = user?.role !== "admin";
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -82,7 +86,7 @@ const GudangPage = () => {
         initial[col.id] = col.defaultWidth;
       });
       return initial;
-    }
+    },
   );
 
   const handleResize = useCallback(
@@ -91,7 +95,7 @@ const GudangPage = () => {
       if (column) {
         const clampedWidth = Math.max(
           column.minWidth,
-          Math.min(column.maxWidth, width)
+          Math.min(column.maxWidth, width),
         );
         setColumnWidths((prev) => ({
           ...prev,
@@ -99,7 +103,7 @@ const GudangPage = () => {
         }));
       }
     },
-    [columnConfigs]
+    [columnConfigs],
   );
 
   useEffect(() => {
@@ -189,7 +193,7 @@ const GudangPage = () => {
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) =>
-      product.name.toLowerCase().includes(searchQuery.toLowerCase())
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [products, searchQuery]);
 
@@ -273,7 +277,7 @@ const GudangPage = () => {
       `}</style>
       <div className="flex flex-col w-full gap-5 h-full">
         <div className="flex flex-col gap-1">
-          <h1 className="text-xl font-bold text-foreground">Gudang</h1>
+          <h1 className="text-xl font-bold text-foreground">Produk</h1>
           <p className="text-muted text-sm">Kelola inventori dan stok produk</p>
         </div>
 
@@ -376,15 +380,17 @@ const GudangPage = () => {
                   </Dropdown.Menu>
                 </Dropdown.Popover>
               </Dropdown>
-              <Button
-                variant="primary"
-                className="bg-accent text-accent-foreground"
-                onPress={handleCreate}
-                size="sm"
-              >
-                <LuPlus className="w-3.5 h-3.5" />
-                <span className="text-xs">Tambah Produk</span>
-              </Button>
+              {!isReadOnly && (
+                <Button
+                  variant="primary"
+                  className="bg-accent text-accent-foreground"
+                  onPress={handleCreate}
+                  size="sm"
+                >
+                  <LuPlus className="w-3.5 h-3.5" />
+                  <span className="text-xs">Tambah Produk</span>
+                </Button>
+              )}
             </div>
           </div>
           <div className="flex flex-col h-full overflow-hidden gap-1">
@@ -682,7 +688,7 @@ const GudangPage = () => {
                                   <div className="flex items-center h-full overflow-hidden">
                                     Rp{" "}
                                     {(product.cogs ?? 0).toLocaleString(
-                                      "id-ID"
+                                      "id-ID",
                                     )}
                                   </div>
                                 </td>
@@ -721,7 +727,7 @@ const GudangPage = () => {
                                   <div className="flex items-center h-full overflow-hidden">
                                     Rp{" "}
                                     {(product.bundle_price ?? 0).toLocaleString(
-                                      "id-ID"
+                                      "id-ID",
                                     )}
                                   </div>
                                 </td>
@@ -754,24 +760,28 @@ const GudangPage = () => {
                                   }}
                                 >
                                   <div className="flex items-center gap-3 h-full overflow-hidden">
-                                    <p
-                                      onClick={() => handleEdit(product)}
-                                      className="text-xs text-primary font-medium cursor-pointer hover:text-primary-700 transition-colors"
-                                    >
-                                      Edit
-                                    </p>
-                                    <button
-                                      onClick={() => handleDelete(product.id)}
-                                      disabled={deletingId === product.id}
-                                      className="text-xs text-danger hover:text-danger-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                      title="Hapus"
-                                    >
-                                      {deletingId === product.id ? (
-                                        <Spinner size="sm" />
-                                      ) : (
-                                        <LuTrash2 className="w-3.5 h-3.5" />
-                                      )}
-                                    </button>
+                                    {!isReadOnly && (
+                                      <>
+                                        <p
+                                          onClick={() => handleEdit(product)}
+                                          className="text-xs text-primary font-medium cursor-pointer hover:text-primary-700 transition-colors"
+                                        >
+                                          Edit
+                                        </p>
+                                        <button
+                                          onClick={() => handleDelete(product.id)}
+                                          disabled={deletingId === product.id}
+                                          className="text-xs text-danger hover:text-danger-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                          title="Hapus"
+                                        >
+                                          {deletingId === product.id ? (
+                                            <Spinner size="sm" />
+                                          ) : (
+                                            <LuTrash2 className="w-3.5 h-3.5" />
+                                          )}
+                                        </button>
+                                      </>
+                                    )}
                                   </div>
                                 </td>
                               </tr>
@@ -841,7 +851,7 @@ const GudangPage = () => {
                       <div className="flex items-center gap-1">
                         {Array.from(
                           { length: totalPages },
-                          (_, i) => i + 1
+                          (_, i) => i + 1,
                         ).map((page) => (
                           <Button
                             key={page}
@@ -861,7 +871,7 @@ const GudangPage = () => {
                         variant="ghost"
                         onPress={() =>
                           setCurrentPage((prev) =>
-                            Math.min(totalPages, prev + 1)
+                            Math.min(totalPages, prev + 1),
                           )
                         }
                         isDisabled={currentPage === totalPages}
@@ -876,7 +886,7 @@ const GudangPage = () => {
                       {(currentPage - 1) * itemsPerPage + 1} -{" "}
                       {Math.min(
                         currentPage * itemsPerPage,
-                        filteredProducts.length
+                        filteredProducts.length,
                       )}{" "}
                       data dari {filteredProducts.length} produk
                     </div>

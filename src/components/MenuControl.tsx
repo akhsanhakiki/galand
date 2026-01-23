@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   LuChartPie,
   LuBanknote,
@@ -10,19 +10,21 @@ import {
   LuChevronRight,
   LuReceipt,
   LuChevronDown,
+  LuPackage,
 } from "react-icons/lu";
 import { Card, Button, Surface, Disclosure } from "@heroui/react";
 import Header from "./Header";
 import { useOrganization } from "../contexts/OrganizationContext";
+import { useAuth } from "../contexts/AuthContext";
 
-const menuItems = [
-  { title: "Ringkasan", icon: LuChartPie, key: "ringkasan" },
-  { title: "Kasir", icon: LuShoppingCart, key: "kasir" },
-  { title: "Transaksi", icon: LuBanknote, key: "transaksi" },
-  { title: "Diskon", icon: LuTag, key: "diskon" },
-  { title: "Gudang", icon: LuStore, key: "gudang" },
-  { title: "Pengeluaran", icon: LuReceipt, key: "pengeluaran" },
-  { title: "Pengaturan", icon: LuSettings, key: "pengaturan" },
+const allMenuItems = [
+  { title: "Ringkasan", icon: LuChartPie, key: "ringkasan", roles: ["admin"] },
+  { title: "Kasir", icon: LuShoppingCart, key: "kasir", roles: ["admin", "user"] },
+  { title: "Transaksi", icon: LuBanknote, key: "transaksi", roles: ["admin"] },
+  { title: "Diskon", icon: LuTag, key: "diskon", roles: ["admin", "user"] },
+  { title: "Produk", icon: LuPackage, key: "gudang", roles: ["admin", "user"] },
+  { title: "Pengeluaran", icon: LuReceipt, key: "pengeluaran", roles: ["admin", "user"] },
+  { title: "Pengaturan", icon: LuSettings, key: "pengaturan", roles: ["admin", "user"] },
 ];
 
 interface MenuControlProps {
@@ -55,6 +57,13 @@ const MenuControl = ({
     loading: orgLoading,
     setCurrentOrganization,
   } = useOrganization();
+  const { user } = useAuth();
+
+  const menuItems = useMemo(() => {
+    if (!user) return [];
+    const role = user.role || "user"; // Default to user if no role
+    return allMenuItems.filter((item) => item.roles.includes(role));
+  }, [user]);
 
   const handleOrganizationSelect = async (
     org: NonNullable<typeof currentOrganization>,

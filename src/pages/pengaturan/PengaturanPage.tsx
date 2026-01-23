@@ -275,10 +275,12 @@ const PengaturanPage = () => {
                 Profil
                 <Tabs.Indicator />
               </Tabs.Tab>
-              <Tabs.Tab id="toko">
-                Toko
-                <Tabs.Indicator />
-              </Tabs.Tab>
+              {user?.role === "admin" && (
+                <Tabs.Tab id="toko">
+                  Toko
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+              )}
               <Tabs.Tab id="tema">
                 Tema
                 <Tabs.Indicator />
@@ -333,15 +335,14 @@ const PengaturanPage = () => {
           </Tabs.Panel>
 
           {/* Toko Tab */}
-          <Tabs.Panel id="toko">
-            <div className="flex flex-col gap-4 text-left h-full">
+          {user?.role === "admin" && (
+            <Tabs.Panel id="toko">
+              <div className="flex flex-col gap-4 text-left h-full">
               <div className="flex flex-row gap-4 flex-1 min-h-0 overflow-hidden">
                 {/* First Column: Organizations List */}
                 <div className="flex flex-col w-1/3 min-w-0 border-r border-gray-200/50 pr-4">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs font-medium text-foreground">
-                      Toko
-                    </p>
+                    <p className="text-xs font-medium text-foreground">Toko</p>
                     <Button
                       size="sm"
                       variant="ghost"
@@ -577,7 +578,8 @@ const PengaturanPage = () => {
                 </div>
               </div>
             </div>
-          </Tabs.Panel>
+            </Tabs.Panel>
+          )}
 
           {/* Tema Tab */}
           <Tabs.Panel id="tema">

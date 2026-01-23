@@ -15,8 +15,12 @@ import { getDiscounts, deleteDiscount } from "../../utils/api";
 import DiscountForm from "../../components/DiscountForm";
 import { useOrganization } from "../../contexts/OrganizationContext";
 
+import { useAuth } from "../../contexts/AuthContext";
+
 const DiskonPage = () => {
   const { organizationChangeKey } = useOrganization();
+  const { user } = useAuth();
+  const isReadOnly = user?.role !== "admin";
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -170,15 +174,17 @@ const DiskonPage = () => {
                     <SearchField.ClearButton />
                   </SearchField.Group>
                 </SearchField>
-                <Button
-                  variant="primary"
-                  className="bg-accent text-accent-foreground"
-                  onPress={handleCreate}
-                  size="sm"
-                >
-                  <LuPlus className="w-3.5 h-3.5" />
-                  <span className="text-xs">Tambah Diskon</span>
-                </Button>
+                {!isReadOnly && (
+                  <Button
+                    variant="primary"
+                    className="bg-accent text-accent-foreground"
+                    onPress={handleCreate}
+                    size="sm"
+                  >
+                    <LuPlus className="w-3.5 h-3.5" />
+                    <span className="text-xs">Tambah Diskon</span>
+                  </Button>
+                )}
               </div>
               <div className="flex flex-col h-full overflow-hidden gap-1">
                 {loading ? (
@@ -238,31 +244,33 @@ const DiskonPage = () => {
                               <div className="flex items-center text-xs px-3 text-success bg-success/10 rounded-xl">
                                 {getTypeLabel(discount.type)}
                               </div>
-                              <span className="flex flex-row gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onPress={() => handleEdit(discount)}
-                                  className="text-xs"
-                                  isIconOnly
-                                >
-                                  <LuPencil className="w-3.5 h-3.5" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onPress={() => handleDelete(discount.id)}
-                                  isDisabled={deletingId === discount.id}
-                                  className="text-xs hover:text-danger hover:bg-danger/10"
-                                  isIconOnly
-                                >
-                                  {deletingId === discount.id ? (
-                                    <Spinner size="sm" />
-                                  ) : (
-                                    <LuTrash2 className="w-3.5 h-3.5 " />
-                                  )}
-                                </Button>
-                              </span>
+                              {!isReadOnly && (
+                                <span className="flex flex-row gap-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onPress={() => handleEdit(discount)}
+                                    className="text-xs"
+                                    isIconOnly
+                                  >
+                                    <LuPencil className="w-3.5 h-3.5" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onPress={() => handleDelete(discount.id)}
+                                    isDisabled={deletingId === discount.id}
+                                    className="text-xs hover:text-danger hover:bg-danger/10"
+                                    isIconOnly
+                                  >
+                                    {deletingId === discount.id ? (
+                                      <Spinner size="sm" />
+                                    ) : (
+                                      <LuTrash2 className="w-3.5 h-3.5 " />
+                                    )}
+                                  </Button>
+                                </span>
+                              )}
                             </div>
                           </div>
                         ))}

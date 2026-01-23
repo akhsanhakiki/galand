@@ -7,6 +7,7 @@ import GudangPage from "../pages/gudang/GudangPage";
 import KasirPage from "../pages/kasir/KasirPage";
 import PengeluaranPage from "../pages/pengeluaran/PengeluaranPage";
 import PengaturanPage from "../pages/pengaturan/PengaturanPage";
+import { useAuth } from "../contexts/AuthContext";
 
 const pageComponents: Record<string, React.ComponentType> = {
   ringkasan: RingkasanPage,
@@ -34,9 +35,21 @@ const getCurrentPageFromUrl = (): string => {
 };
 
 const DesktopView = () => {
+  const { user } = useAuth();
   const [currentPage, setCurrentPage] = useState<string>(
-    getCurrentPageFromUrl()
+    getCurrentPageFromUrl(),
   );
+
+  const role = user?.role || "user";
+  const restrictedPages = role === "user" ? ["ringkasan", "transaksi"] : [];
+
+  // Redirect if trying to access restricted page
+  useEffect(() => {
+    if (restrictedPages.includes(currentPage)) {
+      window.history.pushState({ page: "kasir" }, "", "/kasir");
+      setCurrentPage("kasir");
+    }
+  }, [currentPage, role]);
 
   // Redirect to /ringkasan on desktop when visiting root route
   useEffect(() => {
@@ -48,13 +61,14 @@ const DesktopView = () => {
       const isRootPath = window.location.pathname === "/";
 
       if (isDesktop && isRootPath) {
-        window.history.pushState({ page: "ringkasan" }, "", "/ringkasan");
-        setCurrentPage("ringkasan");
+        const defaultPage = role === "admin" ? "ringkasan" : "kasir";
+        window.history.pushState({ page: defaultPage }, "", `/${defaultPage}`);
+        setCurrentPage(defaultPage);
       }
     };
 
     checkAndRedirect();
-  }, []);
+  }, [role]);
 
   // Update current page when URL changes
   useEffect(() => {
