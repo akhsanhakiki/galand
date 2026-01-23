@@ -57,11 +57,13 @@ const LoginPage = () => {
       const completeOAuthFlow = async (attempt = 0) => {
         try {
           // Wait a bit for any cookies to be set by the SDK
-          await new Promise((resolve) => setTimeout(resolve, 500 + attempt * 300));
-          
+          await new Promise((resolve) =>
+            setTimeout(resolve, 500 + attempt * 300),
+          );
+
           // Try to get the session - the SDK should have completed the OAuth flow
           const result = await authClient.getSession();
-          
+
           if (result.data?.session && result.data?.user) {
             setSession(result.data.session);
             setUser(result.data.user);
@@ -84,7 +86,9 @@ const LoginPage = () => {
             completeOAuthFlow(attempt + 1);
           } else {
             setError(
-              err instanceof Error ? err.message : "Autentikasi gagal. Silakan coba lagi."
+              err instanceof Error
+                ? err.message
+                : "Autentikasi gagal. Silakan coba lagi.",
             );
             setLoading(false);
             // Clean up URL
@@ -92,7 +96,7 @@ const LoginPage = () => {
           }
         }
       };
-      
+
       completeOAuthFlow();
       return;
     }
@@ -133,7 +137,9 @@ const LoginPage = () => {
         : await authClient.signIn.email({ email, password });
 
       if (result.error) {
-        setError(result.error.message || "Terjadi kesalahan yang tidak terduga");
+        setError(
+          result.error.message || "Terjadi kesalahan yang tidak terduga",
+        );
         setSubmitting(false);
         return;
       }
@@ -164,7 +170,9 @@ const LoginPage = () => {
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Terjadi kesalahan yang tidak terduga"
+        err instanceof Error
+          ? err.message
+          : "Terjadi kesalahan yang tidak terduga",
       );
     } finally {
       setSubmitting(false);
@@ -186,7 +194,10 @@ const LoginPage = () => {
     try {
       const origin = window.location.origin;
       const callbackUrlPrimary = new URL("/auth/callback", origin).toString();
-      const callbackUrlLegacy = new URL("/api/auth/callback", origin).toString();
+      const callbackUrlLegacy = new URL(
+        "/api/auth/callback",
+        origin,
+      ).toString();
 
       try {
         // Prefer the dedicated callback page (commonly what Neon/Google allowlists expect).
@@ -217,7 +228,7 @@ const LoginPage = () => {
       // The redirect will happen automatically, so we don't need to do anything else
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Gagal masuk dengan Google"
+        err instanceof Error ? err.message : "Gagal masuk dengan Google",
       );
       setOauthLoading(false);
     }
@@ -298,27 +309,30 @@ const LoginPage = () => {
               <div>
                 <h1 className="text-3xl font-bold text-accent mb-2">kadara</h1>
               </div>
-              
+
               {/* Tagline */}
               <div>
                 <h1 className="text-4xl font-light leading-tight text-foreground md:text-5xl lg:text-6xl">
                   {isSignUp ? (
                     <>
-                      Kelola bisnis Anda dengan <span className="text-accent">mudah</span>
+                      Kelola bisnis Anda dengan{" "}
+                      <span className="text-accent">mudah</span>
                     </>
                   ) : (
                     <>
-                      Sistem kasir yang <span className="text-accent">efisien</span>
+                      Sistem kasir yang{" "}
+                      <span className="text-accent">efisien</span>
                     </>
                   )}
                 </h1>
               </div>
-              
+
               {/* Description */}
               <div className="space-y-3">
                 <p className="text-base text-muted leading-relaxed">
-                  Solusi lengkap untuk mengelola toko Anda. Mulai dari manajemen produk, 
-                  transaksi penjualan, hingga laporan keuangan - semuanya dalam satu platform.
+                  Solusi lengkap untuk mengelola toko Anda. Mulai dari manajemen
+                  produk, transaksi penjualan, hingga laporan keuangan -
+                  semuanya dalam satu platform.
                 </p>
                 <div className="flex flex-wrap gap-4 pt-2">
                   <div className="flex items-center gap-2">
@@ -327,7 +341,9 @@ const LoginPage = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-accent"></div>
-                    <span className="text-sm text-muted">Transaksi Real-time</span>
+                    <span className="text-sm text-muted">
+                      Transaksi Real-time
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-accent"></div>

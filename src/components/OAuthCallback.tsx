@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { authClient } from "../utils/auth";
 
 export default function OAuthCallback() {
-  const [status, setStatus] = useState<"processing" | "success" | "error">("processing");
+  const [status, setStatus] = useState<"processing" | "success" | "error">(
+    "processing",
+  );
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -20,7 +22,8 @@ export default function OAuthCallback() {
           setError(errorParam);
           setStatus("error");
           setTimeout(() => {
-            window.location.href = "/login?error=" + encodeURIComponent(errorParam);
+            window.location.href =
+              "/login?error=" + encodeURIComponent(errorParam);
           }, 2000);
           return;
         }
@@ -28,7 +31,7 @@ export default function OAuthCallback() {
         // If we have code or token, the Neon Auth SDK needs to complete the OAuth flow
         // The SDK should automatically handle this when getSession() is called
         // But we need to wait for the SDK to process the callback
-        
+
         // Wait a bit longer for the SDK to process the OAuth callback
         // The SDK might need to exchange the code/token for a session
         await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -39,8 +42,13 @@ export default function OAuthCallback() {
 
         // Retry up to 6 times with increasing delays
         // OAuth flow might take time to complete
-        while ((!sessionResult.data?.session || !sessionResult.data?.user) && attempts < 6) {
-          await new Promise((resolve) => setTimeout(resolve, 800 + attempts * 400));
+        while (
+          (!sessionResult.data?.session || !sessionResult.data?.user) &&
+          attempts < 6
+        ) {
+          await new Promise((resolve) =>
+            setTimeout(resolve, 800 + attempts * 400),
+          );
           sessionResult = await authClient.getSession();
           attempts++;
         }
@@ -57,20 +65,30 @@ export default function OAuthCallback() {
           // If we still don't have a session, there might be an issue
           // Check if we have the callback parameters
           if (!code && !token) {
-            setError("Missing OAuth callback parameters. Please try logging in again.");
+            setError(
+              "Missing OAuth callback parameters. Please try logging in again.",
+            );
           } else {
-            setError("Failed to establish session. The authentication may have expired. Please try logging in again.");
+            setError(
+              "Failed to establish session. The authentication may have expired. Please try logging in again.",
+            );
           }
           setStatus("error");
           setTimeout(() => {
-            window.location.href = "/login?error=" + encodeURIComponent("Authentication failed");
+            window.location.href =
+              "/login?error=" + encodeURIComponent("Authentication failed");
           }, 3000);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred during authentication");
+        setError(
+          err instanceof Error
+            ? err.message
+            : "An error occurred during authentication",
+        );
         setStatus("error");
         setTimeout(() => {
-          window.location.href = "/login?error=" + encodeURIComponent("Authentication failed");
+          window.location.href =
+            "/login?error=" + encodeURIComponent("Authentication failed");
         }, 2000);
       }
     };
@@ -94,7 +112,9 @@ export default function OAuthCallback() {
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <div className="h-8 w-8 rounded-full bg-success" />
-          <p className="text-foreground">Authentication successful! Redirecting...</p>
+          <p className="text-foreground">
+            Authentication successful! Redirecting...
+          </p>
         </div>
       </div>
     );

@@ -42,12 +42,8 @@ import {
 import { ResizableCell } from "../../components/ResizableCell";
 import { useOrganization } from "../../contexts/OrganizationContext";
 
-import { useAuth } from "../../contexts/AuthContext";
-
 const GudangPage = () => {
   const { organizationChangeKey } = useOrganization();
-  const { user } = useAuth();
-  const isReadOnly = user?.role !== "admin";
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -380,17 +376,15 @@ const GudangPage = () => {
                   </Dropdown.Menu>
                 </Dropdown.Popover>
               </Dropdown>
-              {!isReadOnly && (
-                <Button
-                  variant="primary"
-                  className="bg-accent text-accent-foreground"
-                  onPress={handleCreate}
-                  size="sm"
-                >
-                  <LuPlus className="w-3.5 h-3.5" />
-                  <span className="text-xs">Tambah Produk</span>
-                </Button>
-              )}
+              <Button
+                variant="primary"
+                className="bg-accent text-accent-foreground"
+                onPress={handleCreate}
+                size="sm"
+              >
+                <LuPlus className="w-3.5 h-3.5" />
+                <span className="text-xs">Tambah Produk</span>
+              </Button>
             </div>
           </div>
           <div className="flex flex-col h-full overflow-hidden gap-1">
@@ -760,28 +754,24 @@ const GudangPage = () => {
                                   }}
                                 >
                                   <div className="flex items-center gap-3 h-full overflow-hidden">
-                                    {!isReadOnly && (
-                                      <>
-                                        <p
-                                          onClick={() => handleEdit(product)}
-                                          className="text-xs text-primary font-medium cursor-pointer hover:text-primary-700 transition-colors"
-                                        >
-                                          Edit
-                                        </p>
-                                        <button
-                                          onClick={() => handleDelete(product.id)}
-                                          disabled={deletingId === product.id}
-                                          className="text-xs text-danger hover:text-danger-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                          title="Hapus"
-                                        >
-                                          {deletingId === product.id ? (
-                                            <Spinner size="sm" />
-                                          ) : (
-                                            <LuTrash2 className="w-3.5 h-3.5" />
-                                          )}
-                                        </button>
-                                      </>
-                                    )}
+                                    <p
+                                      onClick={() => handleEdit(product)}
+                                      className="text-xs text-primary font-medium cursor-pointer hover:text-primary-700 transition-colors"
+                                    >
+                                      Edit
+                                    </p>
+                                    <button
+                                      onClick={() => handleDelete(product.id)}
+                                      disabled={deletingId === product.id}
+                                      className="text-xs text-danger hover:text-danger-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                      title="Hapus"
+                                    >
+                                      {deletingId === product.id ? (
+                                        <Spinner size="sm" />
+                                      ) : (
+                                        <LuTrash2 className="w-3.5 h-3.5" />
+                                      )}
+                                    </button>
                                   </div>
                                 </td>
                               </tr>

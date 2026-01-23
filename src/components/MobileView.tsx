@@ -10,7 +10,6 @@ import PengaturanPage from "../pages/pengaturan/PengaturanPage";
 import Header from "./Header";
 import { LuArrowLeft } from "react-icons/lu";
 import { Button } from "@heroui/react";
-import { useAuth } from "../contexts/AuthContext";
 
 const pageComponents: Record<string, React.ComponentType> = {
   ringkasan: RingkasanPage,
@@ -31,22 +30,9 @@ const getCurrentPageFromUrl = (): string | null => {
 };
 
 const MobileView = () => {
-  const { user } = useAuth();
   const [currentPage, setCurrentPage] = useState<string | null>(
     getCurrentPageFromUrl(),
   );
-
-  const role = user?.role || "user";
-  const restrictedPages = role === "user" ? ["ringkasan", "transaksi"] : [];
-
-  // Redirect if trying to access restricted page
-  useEffect(() => {
-    if (currentPage && restrictedPages.includes(currentPage)) {
-      // Redirect to root (menu list) or a default allowed page
-      window.history.pushState({ page: "" }, "", "/");
-      setCurrentPage(null);
-    }
-  }, [currentPage, role]);
 
   // Update current page when URL changes
   useEffect(() => {
