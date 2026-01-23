@@ -10,17 +10,19 @@ import {
   LuChevronRight,
   LuReceipt,
   LuChevronDown,
+  LuPackage,
 } from "react-icons/lu";
 import { Card, Button, Surface, Disclosure } from "@heroui/react";
 import Header from "./Header";
 import { useOrganization } from "../contexts/OrganizationContext";
+import { useAuth } from "../contexts/AuthContext";
 
 const menuItems = [
   { title: "Ringkasan", icon: LuChartPie, key: "ringkasan" },
   { title: "Kasir", icon: LuShoppingCart, key: "kasir" },
   { title: "Transaksi", icon: LuBanknote, key: "transaksi" },
   { title: "Diskon", icon: LuTag, key: "diskon" },
-  { title: "Gudang", icon: LuStore, key: "gudang" },
+  { title: "Produk", icon: LuPackage, key: "gudang" },
   { title: "Pengeluaran", icon: LuReceipt, key: "pengeluaran" },
   { title: "Pengaturan", icon: LuSettings, key: "pengaturan" },
 ];
@@ -49,12 +51,34 @@ const MenuControl = ({
     propCurrentPage || getCurrentPageFromUrl(),
   );
   const [isOrgDropdownOpen, setIsOrgDropdownOpen] = useState(false);
+  const { user } = useAuth();
   const {
     currentOrganization,
     organizations,
     loading: orgLoading,
     setCurrentOrganization,
   } = useOrganization();
+
+  // Filter menu items based on user role
+  const getFilteredMenuItems = () => {
+    const userRole = user?.role;
+    
+    // Admin can access all
+    if (userRole === "admin") {
+      return menuItems;
+    }
+    
+    // User can only access: kasir, diskon, gudang, pengeluaran, pengaturan
+    const allowedKeys = ["kasir", "diskon", "gudang", "pengeluaran", "pengaturan"];
+    return menuItems.filter((item) => allowedKeys.includes(item.key));
+  };
+
+  const filteredMenuItems = getFilteredMenuItems();
+
+  // Calculate dynamic height based on number of menu items
+  // Formula: (items * 2.5rem) + ((items - 1) * 0.25rem) + 2rem (padding)
+  const menuItemsCount = filteredMenuItems.length;
+  const menuSurfaceHeight = `calc(${menuItemsCount} * 2.5rem + ${menuItemsCount > 0 ? (menuItemsCount - 1) * 0.25 : 0}rem + 2rem)`;
 
   const handleOrganizationSelect = async (
     org: NonNullable<typeof currentOrganization>,
@@ -100,7 +124,7 @@ const MenuControl = ({
       {/* ---------------------------- Mobile View ---------------------------- */}
       <div className="flex flex-col gap-4 md:gap-6 items-center justify-center p-4 md:hidden">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 w-full">
-          {menuItems.map(({ title, icon: Icon, key }) => (
+          {filteredMenuItems.map(({ title, icon: Icon, key }) => (
             <div
               key={key}
               onClick={() => handleClick(key)}
@@ -154,14 +178,17 @@ const MenuControl = ({
 
         {/* Menu Items Surface */}
         <Surface
-          className={`flex flex-col gap-1 rounded-3xl transition-all duration-300 h-[calc(6*2.5rem+5*0.25rem+2rem)] ${
+          className={`flex flex-col gap-1 rounded-3xl transition-all duration-300 ${
             isCollapsed
               ? "w-[64px] min-w-[64px] p-2.5"
               : "w-[240px] min-w-[240px] p-4"
           }`}
+          style={{
+            height: menuSurfaceHeight,
+          }}
           variant="default"
         >
-          {menuItems.map(({ title, icon: Icon, key }) => (
+          {filteredMenuItems.map(({ title, icon: Icon, key }) => (
             <Button
               key={key}
               variant="ghost"

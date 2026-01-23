@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import {
   Button,
-  Switch,
   Separator,
   Tabs,
   RadioGroup,
@@ -275,20 +274,18 @@ const PengaturanPage = () => {
                 Profil
                 <Tabs.Indicator />
               </Tabs.Tab>
-              <Tabs.Tab id="toko">
-                Toko
-                <Tabs.Indicator />
-              </Tabs.Tab>
+              {user?.role === "admin" && (
+                <Tabs.Tab id="toko">
+                  Toko
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+              )}
               <Tabs.Tab id="tema">
                 Tema
                 <Tabs.Indicator />
               </Tabs.Tab>
               <Tabs.Tab id="notifikasi">
-                Notifikasi
-                <Tabs.Indicator />
-              </Tabs.Tab>
-              <Tabs.Tab id="umum">
-                Umum
+                Lainnya
                 <Tabs.Indicator />
               </Tabs.Tab>
             </Tabs.List>
@@ -333,15 +330,14 @@ const PengaturanPage = () => {
           </Tabs.Panel>
 
           {/* Toko Tab */}
-          <Tabs.Panel id="toko">
+          {user?.role === "admin" && (
+            <Tabs.Panel id="toko">
             <div className="flex flex-col gap-4 text-left h-full">
               <div className="flex flex-row gap-4 flex-1 min-h-0 overflow-hidden">
                 {/* First Column: Organizations List */}
                 <div className="flex flex-col w-1/3 min-w-0 border-r border-gray-200/50 pr-4">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs font-medium text-foreground">
-                      Toko
-                    </p>
+                    <p className="text-xs font-medium text-foreground">Toko</p>
                     <Button
                       size="sm"
                       variant="ghost"
@@ -578,6 +574,7 @@ const PengaturanPage = () => {
               </div>
             </div>
           </Tabs.Panel>
+          )}
 
           {/* Tema Tab */}
           <Tabs.Panel id="tema">
@@ -650,49 +647,8 @@ const PengaturanPage = () => {
             </div>
           </Tabs.Panel>
 
-          {/* Notifikasi Tab */}
+          {/* Lainnya Tab */}
           <Tabs.Panel id="notifikasi">
-            <div className="flex flex-col gap-4 text-left">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    Notifikasi Email
-                  </p>
-                  <p className="text-xs text-muted">
-                    Terima notifikasi melalui email
-                  </p>
-                </div>
-                <Switch defaultSelected />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    Notifikasi Stok Menipis
-                  </p>
-                  <p className="text-xs text-muted">
-                    Dapatkan peringatan saat stok produk menipis
-                  </p>
-                </div>
-                <Switch defaultSelected />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    Notifikasi Transaksi
-                  </p>
-                  <p className="text-xs text-muted">
-                    Terima notifikasi untuk setiap transaksi baru
-                  </p>
-                </div>
-                <Switch />
-              </div>
-            </div>
-          </Tabs.Panel>
-
-          {/* Umum Tab */}
-          <Tabs.Panel id="umum">
             <div className="flex flex-col gap-4 text-left">
               <div>
                 <p className="text-xs text-muted">Versi Aplikasi</p>

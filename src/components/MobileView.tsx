@@ -31,7 +31,7 @@ const getCurrentPageFromUrl = (): string | null => {
 
 const MobileView = () => {
   const [currentPage, setCurrentPage] = useState<string | null>(
-    getCurrentPageFromUrl()
+    getCurrentPageFromUrl(),
   );
 
   // Update current page when URL changes
@@ -50,7 +50,7 @@ const MobileView = () => {
 
     // Dispatch popstate event to trigger route updates
     window.dispatchEvent(
-      new PopStateEvent("popstate", { state: { page: "" } })
+      new PopStateEvent("popstate", { state: { page: "" } }),
     );
 
     // Update local state

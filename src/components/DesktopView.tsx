@@ -35,7 +35,7 @@ const getCurrentPageFromUrl = (): string => {
 
 const DesktopView = () => {
   const [currentPage, setCurrentPage] = useState<string>(
-    getCurrentPageFromUrl()
+    getCurrentPageFromUrl(),
   );
 
   // Redirect to /ringkasan on desktop when visiting root route
