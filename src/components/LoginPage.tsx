@@ -382,7 +382,7 @@ const LoginPage = () => {
                   </Alert>
                 )}
 
-                <div className="space-y-6">
+                <div className="flex flex-col gap-6">
                   <TextField
                     isRequired
                     name="email"
@@ -390,7 +390,6 @@ const LoginPage = () => {
                     value={email}
                     onChange={setEmail}
                     isDisabled={submitting}
-                    className="login-form-field"
                   >
                     <Label>Email</Label>
                     <Input placeholder="Alamat email" />
@@ -410,7 +409,6 @@ const LoginPage = () => {
                       }
                       return null;
                     }}
-                    className="login-form-field"
                   >
                     <Label>Kata Sandi</Label>
                     <Input placeholder="Kata sandi" />
@@ -450,7 +448,7 @@ const LoginPage = () => {
                   onPress={handleGoogleSignIn}
                   isPending={oauthLoading}
                   isDisabled={submitting || oauthLoading}
-                  className="font-normal rounded-lg border border-border hover:bg-surface"
+                  className="font-normal rounded-lg bg-surface hover:scale-102 transition-all duration-300"
                 >
                   <FcGoogle className="mr-2 text-xl" />
                   Lanjutkan dengan Google
