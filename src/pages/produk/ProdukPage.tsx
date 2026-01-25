@@ -42,7 +42,7 @@ import {
 import { ResizableCell } from "../../components/ResizableCell";
 import { useOrganization } from "../../contexts/OrganizationContext";
 
-const GudangPage = () => {
+const ProdukPage = () => {
   const { organizationChangeKey } = useOrganization();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -335,7 +335,7 @@ const GudangPage = () => {
           </div>
         </div>
 
-        <div className="p-6 bg-surface rounded-3xl flex flex-col h-full min-h-[500px]">
+        <div className="p-4 bg-surface rounded-3xl flex flex-col h-full min-h-[500px]">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4">
             <SearchField
               value={searchQuery}
@@ -901,4 +901,4 @@ const GudangPage = () => {
   );
 };
 
-export default GudangPage;
+export default ProdukPage;

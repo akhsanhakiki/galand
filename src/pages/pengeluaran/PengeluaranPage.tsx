@@ -94,7 +94,7 @@ const PengeluaranPage = () => {
         initial[col.id] = col.defaultWidth;
       });
       return initial;
-    }
+    },
   );
 
   const handleResize = useCallback(
@@ -103,7 +103,7 @@ const PengeluaranPage = () => {
       if (column) {
         const clampedWidth = Math.max(
           column.minWidth,
-          Math.min(column.maxWidth, width)
+          Math.min(column.maxWidth, width),
         );
         setColumnWidths((prev) => ({
           ...prev,
@@ -111,7 +111,7 @@ const PengeluaranPage = () => {
         }));
       }
     },
-    [columnConfigs]
+    [columnConfigs],
   );
 
   useEffect(() => {
@@ -195,7 +195,7 @@ const PengeluaranPage = () => {
         100,
         searchQuery || undefined,
         startDate,
-        endDate
+        endDate,
       );
       setExpenses(data);
     } catch (error) {
@@ -246,7 +246,7 @@ const PengeluaranPage = () => {
       (expense) =>
         expense.description.toLowerCase().includes(query) ||
         expense.category.toLowerCase().includes(query) ||
-        expense.payment_method.toLowerCase().includes(query)
+        expense.payment_method.toLowerCase().includes(query),
     );
   }, [expenses, searchQuery]);
 
@@ -336,7 +336,7 @@ const PengeluaranPage = () => {
     const periodExpenses = expenses; // Already filtered by date range in loadExpenses
     const periodTotalAmount = periodExpenses.reduce(
       (sum, expense) => sum + expense.amount,
-      0
+      0,
     );
 
     return {
@@ -535,7 +535,7 @@ const PengeluaranPage = () => {
           </div>
         </div>
 
-        <div className="p-6 bg-surface rounded-3xl flex flex-col h-full min-h-[500px]">
+        <div className="p-4 bg-surface rounded-3xl flex flex-col h-full min-h-[500px]">
           <style>{`
             .table-header-separator {
               box-shadow: 0 1px 0 0 var(--separator) !important;
@@ -847,7 +847,7 @@ const PengeluaranPage = () => {
                       <div className="flex items-center gap-1">
                         {Array.from(
                           { length: totalPages },
-                          (_, i) => i + 1
+                          (_, i) => i + 1,
                         ).map((page) => (
                           <Button
                             key={page}
@@ -867,7 +867,7 @@ const PengeluaranPage = () => {
                         variant="ghost"
                         onPress={() =>
                           setCurrentPage((prev) =>
-                            Math.min(totalPages, prev + 1)
+                            Math.min(totalPages, prev + 1),
                           )
                         }
                         isDisabled={currentPage === totalPages}
@@ -882,7 +882,7 @@ const PengeluaranPage = () => {
                       {(currentPage - 1) * itemsPerPage + 1} -{" "}
                       {Math.min(
                         currentPage * itemsPerPage,
-                        filteredExpenses.length
+                        filteredExpenses.length,
                       )}{" "}
                       data dari {filteredExpenses.length} pengeluaran
                     </div>

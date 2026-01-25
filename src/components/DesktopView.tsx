@@ -3,16 +3,18 @@ import MenuControl from "./MenuControl";
 import RingkasanPage from "../pages/ringkasan/RingkasanPage";
 import TransaksiPage from "../pages/transaksi/TransaksiPage";
 import DiskonPage from "../pages/diskon/DiskonPage";
-import GudangPage from "../pages/gudang/GudangPage";
+import ProdukPage from "../pages/produk/ProdukPage";
 import KasirPage from "../pages/kasir/KasirPage";
 import PengeluaranPage from "../pages/pengeluaran/PengeluaranPage";
 import PengaturanPage from "../pages/pengaturan/PengaturanPage";
+import OnboardingPage from "../pages/onboarding/OnboardingPage";
+import { useOnboarding } from "../hooks/useOnboarding";
 
 const pageComponents: Record<string, React.ComponentType> = {
   ringkasan: RingkasanPage,
   transaksi: TransaksiPage,
   diskon: DiskonPage,
-  gudang: GudangPage,
+  produk: ProdukPage,
   kasir: KasirPage,
   pengeluaran: PengeluaranPage,
   pengaturan: PengaturanPage,
@@ -37,6 +39,7 @@ const DesktopView = () => {
   const [currentPage, setCurrentPage] = useState<string>(
     getCurrentPageFromUrl(),
   );
+  const { shouldShowOnboarding, isChecking } = useOnboarding();
 
   // Redirect to /ringkasan on desktop when visiting root route
   useEffect(() => {
@@ -66,13 +69,26 @@ const DesktopView = () => {
     return () => window.removeEventListener("popstate", updateCurrentPage);
   }, []);
 
-  const CurrentPageComponent = pageComponents[currentPage];
+  // Don't render anything while checking onboarding status
+  if (isChecking) {
+    return (
+      <div className="hidden md:flex flex-row gap-4 md:gap-4 p-4 md:p-4 h-full">
+        <MenuControl isMobile={false} currentPage={currentPage} />
+        <div className="flex-1 min-w-0" />
+      </div>
+    );
+  }
+
+  // Show onboarding page if needed (overrides current page)
+  const CurrentPageComponent = shouldShowOnboarding 
+    ? OnboardingPage 
+    : pageComponents[currentPage];
 
   return (
     <div className="hidden md:flex flex-row gap-4 md:gap-4 p-4 md:p-4 h-full">
       <MenuControl isMobile={false} currentPage={currentPage} />
       <div className="flex-1 min-w-0">
-        {CurrentPageComponent && <CurrentPageComponent key={currentPage} />}
+        {CurrentPageComponent && <CurrentPageComponent key={shouldShowOnboarding ? "onboarding" : currentPage} />}
       </div>
     </div>
   );
