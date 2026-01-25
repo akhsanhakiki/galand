@@ -86,9 +86,9 @@ const MobileView = () => {
   const CurrentPageComponent = currentPage ? pageComponents[currentPage] : null;
 
   return (
-    <div className="md:hidden flex flex-col h-full">
+    <div className="md:hidden flex flex-col h-full w-full">
       <Header isMobile={true} />
-      <div className="flex flex-col w-full px-4 pb-20 flex-1 overflow-y-auto">
+      <div className="flex flex-col w-full px-4 pb-20  overflow-y-auto">
         {CurrentPageComponent && <CurrentPageComponent key={currentPage} />}
       </div>
       <MobileBottomNav currentPage={currentPage} onNavigate={handleNavigate} />

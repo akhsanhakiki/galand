@@ -1,6 +1,14 @@
 "use client";
 
-import { Avatar, Button, Surface, Disclosure, Modal, Switch, Label } from "@heroui/react";
+import {
+  Avatar,
+  Button,
+  Surface,
+  Disclosure,
+  Modal,
+  Switch,
+  Label,
+} from "@heroui/react";
 import {
   LuUser,
   LuSun,
@@ -87,7 +95,10 @@ export default function Header({
                 onClick={() => setIsProfileModalOpen(true)}
                 className="cursor-pointer"
               >
-                <Avatar size="sm" className="bg-primary text-primary-foreground">
+                <Avatar
+                  size="sm"
+                  className="bg-primary text-primary-foreground"
+                >
                   {user?.image ? (
                     <Avatar.Image src={user.image} alt={displayName} />
                   ) : null}
@@ -120,7 +131,10 @@ export default function Header({
             </div>
             <div className="flex-1 overflow-y-auto p-4">
               <div className="flex flex-col items-center gap-4 mb-6">
-                <Avatar size="lg" className="bg-primary text-primary-foreground w-20 h-20">
+                <Avatar
+                  size="lg"
+                  className="bg-primary text-primary-foreground w-20 h-20"
+                >
                   {user?.image ? (
                     <Avatar.Image src={user.image} alt={displayName} />
                   ) : null}
@@ -154,8 +168,8 @@ export default function Header({
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between w-full py-2">
+              <div className="flex flex-col gap-2 pt-4">
+                <div className="flex items-center justify-between w-full py-2 px-3">
                   <div className="flex items-center gap-3">
                     {mounted && theme === "dark" ? (
                       <LuMoon className="w-5 h-5 text-default-500" />
@@ -163,12 +177,14 @@ export default function Header({
                       <LuSun className="w-5 h-5 text-default-500" />
                     )}
                     <Label className="text-base font-medium text-foreground">
-                      {mounted && theme === "dark" ? "Mode Gelap" : "Mode Terang"}
+                      {mounted && theme === "dark" ? "Dark Mode" : "Light Mode"}
                     </Label>
                   </div>
                   <Switch
                     isSelected={mounted && theme === "dark"}
-                    onChange={(isSelected) => setTheme(isSelected ? "dark" : "light")}
+                    onChange={(isSelected) =>
+                      setTheme(isSelected ? "dark" : "light")
+                    }
                     size="md"
                   >
                     <Switch.Control>
@@ -181,7 +197,7 @@ export default function Header({
                   variant="ghost"
                   onPress={handleLogout}
                 >
-                  <LuLogOut className="w-5 h-5 mr-3 shrink-0" />
+                  <LuLogOut className="w-5 h-5 mr-1 shrink-0" />
                   <span className="text-base font-medium">Logout</span>
                 </Button>
               </div>
