@@ -22,7 +22,7 @@ const menuItems = [
   { title: "Kasir", icon: LuShoppingCart, key: "kasir" },
   { title: "Transaksi", icon: LuBanknote, key: "transaksi" },
   { title: "Diskon", icon: LuTag, key: "diskon" },
-  { title: "Produk", icon: LuPackage, key: "gudang" },
+  { title: "Produk", icon: LuPackage, key: "produk" },
   { title: "Pengeluaran", icon: LuReceipt, key: "pengeluaran" },
   { title: "Pengaturan", icon: LuSettings, key: "pengaturan" },
 ];
@@ -62,14 +62,20 @@ const MenuControl = ({
   // Filter menu items based on user role
   const getFilteredMenuItems = () => {
     const userRole = user?.role;
-    
+
     // Admin can access all
     if (userRole === "admin") {
       return menuItems;
     }
-    
-    // User can only access: kasir, diskon, gudang, pengeluaran, pengaturan
-    const allowedKeys = ["kasir", "diskon", "gudang", "pengeluaran", "pengaturan"];
+
+    // User can only access: kasir, diskon, produk, pengeluaran, pengaturan
+    const allowedKeys = [
+      "kasir",
+      "diskon",
+      "produk",
+      "pengeluaran",
+      "pengaturan",
+    ];
     return menuItems.filter((item) => allowedKeys.includes(item.key));
   };
 

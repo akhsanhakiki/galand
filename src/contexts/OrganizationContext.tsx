@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { authClient } from "../utils/auth";
 import { useAuth } from "./AuthContext";
+import { getOrganizations } from "../utils/api/organizations";
+import type { Organization as APIOrganization } from "../utils/api/types";
 
 // Type for Neon Auth Organization (based on the documentation)
 interface NeonOrganization {
@@ -43,6 +45,29 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
   const [loading, setLoading] = useState(true);
   const [organizationChangeKey, setOrganizationChangeKey] = useState(0);
 
+  // Helper function to convert API Organization to NeonOrganization
+  const convertToNeonOrganization = (apiOrg: APIOrganization): NeonOrganization => {
+    let metadata: Record<string, any> | null = null;
+    try {
+      if (apiOrg.metadata) {
+        metadata = typeof apiOrg.metadata === 'string' 
+          ? JSON.parse(apiOrg.metadata) 
+          : apiOrg.metadata;
+      }
+    } catch {
+      metadata = null;
+    }
+
+    return {
+      id: apiOrg.id,
+      name: apiOrg.name,
+      slug: apiOrg.slug,
+      logo: apiOrg.logo,
+      metadata,
+      createdAt: apiOrg.createdAt,
+    };
+  };
+
   // Fetch organizations and active organization
   const refreshOrganizations = useCallback(async () => {
     if (!user) {
@@ -55,20 +80,12 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
     try {
       setLoading(true);
 
-      // Fetch all organizations the user belongs to
-      const { data: orgsList, error: orgsError } = await authClient.organization.list();
-
-      if (orgsError) {
-        setOrganizations([]);
-        setCurrentOrganizationState(null);
-        setLoading(false);
-        return;
-      }
-
-      const orgs = orgsList || [];
+      // Fetch all organizations the user belongs to via API
+      const apiOrgs = await getOrganizations(0, 100);
+      const orgs = apiOrgs.map(convertToNeonOrganization);
       setOrganizations(orgs);
 
-      // Fetch active organization details
+      // Fetch active organization details from Neon Auth
       const { data: activeOrg, error: activeError } = await authClient.organization.getFullOrganization({
         query: {
           membersLimit: 100,
@@ -81,7 +98,13 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
           const firstOrg = orgs[0];
           // Set first org as active if none is active
           await authClient.organization.setActive({ organizationId: firstOrg.id });
-          setCurrentOrganizationState(firstOrg);
+          // Get full details after setting active
+          const { data: fullOrg } = await authClient.organization.getFullOrganization({
+            query: {
+              membersLimit: 100,
+            },
+          });
+          setCurrentOrganizationState(fullOrg || firstOrg);
         } else {
           setCurrentOrganizationState(null);
         }

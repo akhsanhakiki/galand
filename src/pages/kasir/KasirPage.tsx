@@ -68,7 +68,7 @@ const KasirPage = () => {
   const [itemsPerPage, setItemsPerPage] = useState<number>(12);
   const [discountCode, setDiscountCode] = useState("");
   const [validatedDiscount, setValidatedDiscount] = useState<Discount | null>(
-    null
+    null,
   );
   const [discountError, setDiscountError] = useState<string>("");
   const [isValidatingDiscount, setIsValidatingDiscount] = useState(false);
@@ -97,7 +97,7 @@ const KasirPage = () => {
   const subtotal = useMemo(() => {
     return cart.reduce(
       (sum, item) => sum + calculateItemTotal(item.product, item.quantity),
-      0
+      0,
     );
   }, [cart]);
 
@@ -108,11 +108,11 @@ const KasirPage = () => {
       return (subtotal * validatedDiscount.percentage) / 100;
     } else if (validatedDiscount.type === "individual_item") {
       const applicableItems = cart.filter(
-        (item) => item.product_id === validatedDiscount.product_id
+        (item) => item.product_id === validatedDiscount.product_id,
       );
       const applicableSubtotal = applicableItems.reduce(
         (sum, item) => sum + calculateItemTotal(item.product, item.quantity),
-        0
+        0,
       );
       return (applicableSubtotal * validatedDiscount.percentage) / 100;
     }
@@ -128,7 +128,7 @@ const KasirPage = () => {
     return products.filter(
       (p) =>
         p.name.toLowerCase().includes(query) ||
-        p.id.toString().toLowerCase().includes(query)
+        p.id.toString().toLowerCase().includes(query),
     );
   }, [products, searchQuery]);
 
@@ -294,7 +294,7 @@ const KasirPage = () => {
               <Spinner size="lg" />
             </div>
           ) : (
-            <div className="flex flex-col gap-4 bg-surface rounded-2xl p-4 h-full">
+            <div className="flex flex-col gap-4 bg-surface rounded-3xl p-4 h-full">
               <div className="flex flex-row justify-between items-center">
                 <div className="flex flex-col gap-1">
                   <h2 className="text-md font-bold text-foreground">
@@ -414,7 +414,7 @@ const KasirPage = () => {
                       <div className="flex items-center gap-1">
                         {Array.from(
                           { length: totalPages },
-                          (_, i) => i + 1
+                          (_, i) => i + 1,
                         ).map((page) => (
                           <Button
                             key={page}
@@ -434,7 +434,7 @@ const KasirPage = () => {
                         variant="ghost"
                         onPress={() =>
                           setCurrentPage((prev) =>
-                            Math.min(totalPages, prev + 1)
+                            Math.min(totalPages, prev + 1),
                           )
                         }
                         isDisabled={currentPage === totalPages}
@@ -448,7 +448,7 @@ const KasirPage = () => {
                         {(currentPage - 1) * itemsPerPage + 1} -{" "}
                         {Math.min(
                           currentPage * itemsPerPage,
-                          filteredProducts.length
+                          filteredProducts.length,
                         )}{" "}
                         dari {filteredProducts.length} produk
                       </div>
@@ -472,7 +472,7 @@ const KasirPage = () => {
           >
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-8 bg-accent/0 group-hover:bg-accent/30 rounded-full transition-colors" />
           </div>
-          <div className="p-4 sticky top-4 bg-surface rounded-2xl h-full flex flex-col">
+          <div className="p-4 sticky top-4 bg-surface rounded-3xl h-full flex flex-col">
             <div className="pb-3 flex flex-col gap-1">
               <h2 className="text-md font-bold text-foreground">Keranjang</h2>
               <p className="text-xs text-muted">
@@ -514,7 +514,7 @@ const KasirPage = () => {
                           {cart.map((item) => {
                             const itemTotal = calculateItemTotal(
                               item.product,
-                              item.quantity
+                              item.quantity,
                             );
                             const hasBundle =
                               item.product.bundle_quantity > 0 &&
@@ -522,7 +522,7 @@ const KasirPage = () => {
                               item.quantity >= item.product.bundle_quantity;
                             const bundles = hasBundle
                               ? Math.floor(
-                                  item.quantity / item.product.bundle_quantity
+                                  item.quantity / item.product.bundle_quantity,
                                 )
                               : 0;
                             const remaining = hasBundle
@@ -668,7 +668,9 @@ const KasirPage = () => {
                                 }
                               }}
                             >
-                              <Label className="text-xs">Metode Pembayaran</Label>
+                              <Label className="text-xs">
+                                Metode Pembayaran
+                              </Label>
                               <Select.Trigger className="shadow-none border">
                                 <Select.Value />
                                 <Select.Indicator />
@@ -683,7 +685,10 @@ const KasirPage = () => {
                                     Qris
                                     <ListBox.ItemIndicator />
                                   </ListBox.Item>
-                                  <ListBox.Item id="transfer_bank" textValue="Transfer Bank">
+                                  <ListBox.Item
+                                    id="transfer_bank"
+                                    textValue="Transfer Bank"
+                                  >
                                     Transfer Bank
                                     <ListBox.ItemIndicator />
                                   </ListBox.Item>

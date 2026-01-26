@@ -1,3 +1,5 @@
+"use client";
+
 import { Providers } from "./Providers";
 import { ProtectedRoute } from "./ProtectedRoute";
 import Header from "./Header";

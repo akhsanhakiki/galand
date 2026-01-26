@@ -157,7 +157,7 @@ const DiskonPage = () => {
 
         <div className="flex flex-row gap-4 flex-1 min-h-0 items-stretch">
           <div className="w-full h-full">
-            <div className="flex flex-col gap-4 bg-surface rounded-2xl p-4 h-full min-h-[500px]">
+            <div className="flex flex-col gap-4 bg-surface rounded-3xl p-4 h-full min-h-[500px]">
               <div className="flex flex-row justify-between items-center">
                 <SearchField
                   value={searchQuery}
@@ -186,10 +186,13 @@ const DiskonPage = () => {
                     <Spinner size="lg" />
                   </div>
                 ) : discounts.length === 0 ? (
-                  <div className="text-center py-8 text-muted">
-                    {searchQuery
-                      ? "Tidak ada diskon yang ditemukan"
-                      : "Belum ada diskon"}
+                  <div className="flex flex-col items-center justify-center h-full py-8 gap-3">
+                    <LuTag className="w-12 h-12 text-muted opacity-50" />
+                    <p className="text-muted text-sm">
+                      {searchQuery
+                        ? "Tidak ada diskon yang ditemukan"
+                        : "Belum ada diskon"}
+                    </p>
                   </div>
                 ) : (
                   <div className="flex-1 overflow-hidden flex flex-col min-h-0">

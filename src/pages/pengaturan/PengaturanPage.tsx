@@ -260,7 +260,7 @@ const PengaturanPage = () => {
         </p>
       </div>
 
-      <div className="bg-surface rounded-3xl p-6 flex-1 flex flex-col min-h-0">
+      <div className="bg-surface rounded-3xl p-4 flex-1 flex flex-col min-h-0">
         <Tabs
           defaultSelectedKey="profil"
           className="w-full gap-4 flex-1 flex flex-col"
@@ -332,248 +332,254 @@ const PengaturanPage = () => {
           {/* Toko Tab */}
           {user?.role === "admin" && (
             <Tabs.Panel id="toko">
-            <div className="flex flex-col gap-4 text-left h-full">
-              <div className="flex flex-row gap-4 flex-1 min-h-0 overflow-hidden">
-                {/* First Column: Organizations List */}
-                <div className="flex flex-col w-1/3 min-w-0 border-r border-gray-200/50 pr-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs font-medium text-foreground">Toko</p>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-6 text-xs px-2"
-                      onPress={() => setIsOrgModalOpen(true)}
-                    >
-                      <LuUserPlus className="w-3 h-3" />
-                      <span className="text-[10px]">Tambah Toko</span>
-                    </Button>
-                  </div>
-                  {organizationsLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <p className="text-sm text-muted">Memuat...</p>
+              <div className="flex flex-col gap-4 text-left h-full">
+                <div className="flex flex-row gap-4 flex-1 min-h-0 overflow-hidden">
+                  {/* First Column: Organizations List */}
+                  <div className="flex flex-col w-1/3 min-w-0 border-r border-gray-200/50 pr-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs font-medium text-foreground">
+                        Toko
+                      </p>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-6 text-xs px-2"
+                        onPress={() => setIsOrgModalOpen(true)}
+                      >
+                        <LuUserPlus className="w-3 h-3" />
+                        <span className="text-[10px]">Tambah Toko</span>
+                      </Button>
                     </div>
-                  ) : organizations.length === 0 ? (
-                    <div className="flex items-center justify-center py-8">
-                      <p className="text-sm text-muted">Tidak ada toko</p>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-2 overflow-y-auto flex-1">
-                      {organizations.map((org) => (
-                        <div
-                          key={org.id}
-                          className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                            selectedOrgId === org.id
-                              ? "border-accent bg-accent/10"
-                              : "border-gray-200/50 bg-surface hover:bg-default/50"
-                          }`}
-                          onClick={() => setSelectedOrgId(org.id)}
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                              {org.logo && (
-                                <img
-                                  src={org.logo}
-                                  alt={org.name}
-                                  className="w-8 h-8 rounded"
-                                />
-                              )}
-                              <div className="flex flex-col min-w-0 flex-1">
-                                <p className="text-sm font-medium text-foreground truncate">
-                                  {org.name}
-                                </p>
-                                <p className="text-[10px] text-muted truncate">
-                                  {org.slug}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-7 w-7 min-w-7 p-0"
-                                onClick={(e) => e.stopPropagation()}
-                                onPress={() => handleOpenEditOrganization(org)}
-                              >
-                                <LuPencil className="w-3 h-3" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="text-danger h-7 w-7 min-w-7 p-0"
-                                onClick={(e) => e.stopPropagation()}
-                                onPress={() => handleDeleteOrganization(org.id)}
-                              >
-                                <LuTrash2 className="w-3 h-3" />
-                              </Button>
-                            </div>
-                          </div>
-                          {org.metadata && (
-                            <p className="text-[10px] text-muted mt-2 truncate">
-                              {org.metadata}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Second Column: Members List */}
-                <div className="flex flex-col flex-1 min-w-0">
-                  {selectedOrgId ? (
-                    <>
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-xs font-medium text-foreground">
-                          Anggota
-                        </p>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 text-xs px-2"
-                          onPress={() => setIsMemberModalOpen(true)}
-                        >
-                          <LuUserPlus className="w-3 h-3" />
-                          <span className="text-[10px]">Tambah Anggota</span>
-                        </Button>
+                    {organizationsLoading ? (
+                      <div className="flex items-center justify-center py-8">
+                        <p className="text-sm text-muted">Memuat...</p>
                       </div>
-                      {orgMembersLoading ? (
-                        <div className="flex items-center justify-center py-8">
-                          <p className="text-sm text-muted">
-                            Memuat anggota...
-                          </p>
-                        </div>
-                      ) : orgMembers.length === 0 ? (
-                        <div className="flex items-center justify-center py-8">
-                          <p className="text-sm text-muted">
-                            Tidak ada anggota
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col gap-2 overflow-y-auto flex-1">
-                          {orgMembers.map((member) => (
-                            <div
-                              key={member.id}
-                              className="flex items-center justify-between p-3 rounded-lg border border-gray-200/50 bg-surface"
-                            >
+                    ) : organizations.length === 0 ? (
+                      <div className="flex items-center justify-center py-8">
+                        <p className="text-sm text-muted">Tidak ada toko</p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-2 overflow-y-auto flex-1">
+                        {organizations.map((org) => (
+                          <div
+                            key={org.id}
+                            className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                              selectedOrgId === org.id
+                                ? "border-accent bg-accent/10"
+                                : "border-gray-200/50 bg-surface hover:bg-default/50"
+                            }`}
+                            onClick={() => setSelectedOrgId(org.id)}
+                          >
+                            <div className="flex items-start justify-between gap-2">
                               <div className="flex items-center gap-2 flex-1 min-w-0">
-                                {member.user.image && (
+                                {org.logo && (
                                   <img
-                                    src={member.user.image}
-                                    alt={member.user.name}
-                                    className="w-8 h-8 rounded-full"
+                                    src={org.logo}
+                                    alt={org.name}
+                                    className="w-8 h-8 rounded"
                                   />
                                 )}
                                 <div className="flex flex-col min-w-0 flex-1">
                                   <p className="text-sm font-medium text-foreground truncate">
-                                    {member.user.name}
+                                    {org.name}
                                   </p>
                                   <p className="text-[10px] text-muted truncate">
-                                    {member.user.email}
+                                    {org.slug}
                                   </p>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-1.5">
-                                {editingMemberId === member.id ? (
-                                  <div className="flex items-center gap-1.5">
-                                    <Select
-                                      selectedKey={editingMemberRole}
-                                      onSelectionChange={(key) => {
-                                        setEditingMemberRole(key as string);
-                                      }}
-                                      className="w-24"
-                                    >
-                                      <Select.Trigger className="h-7 text-xs">
-                                        <Select.Value />
-                                        <Select.Indicator />
-                                      </Select.Trigger>
-                                      <Select.Popover>
-                                        <ListBox>
-                                          <ListBox.Item
-                                            key="admin"
-                                            id="admin"
-                                            textValue="admin"
-                                          >
-                                            Admin
-                                            <ListBox.ItemIndicator />
-                                          </ListBox.Item>
-                                          <ListBox.Item
-                                            key="user"
-                                            id="user"
-                                            textValue="user"
-                                          >
-                                            User
-                                            <ListBox.ItemIndicator />
-                                          </ListBox.Item>
-                                        </ListBox>
-                                      </Select.Popover>
-                                    </Select>
-                                    <Button
-                                      size="sm"
-                                      variant="primary"
-                                      className="bg-accent text-accent-foreground h-7 text-xs px-2"
-                                      onPress={() =>
-                                        handleUpdateMember(member.id)
-                                      }
-                                    >
-                                      Simpan
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      className="h-7 text-xs px-2"
-                                      onPress={() => {
-                                        setEditingMemberId(null);
-                                        setEditingMemberRole("admin");
-                                      }}
-                                    >
-                                      Batal
-                                    </Button>
-                                  </div>
-                                ) : (
-                                  <>
-                                    <div className="px-2 py-0.5 rounded-full bg-accent/10 text-accent text-[10px] font-medium">
-                                      {member.role}
-                                    </div>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      className="h-7 w-7 min-w-7 p-0"
-                                      onPress={() => {
-                                        setEditingMemberId(member.id);
-                                        setEditingMemberRole(member.role);
-                                      }}
-                                    >
-                                      <LuPencil className="w-3 h-3" />
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      className="text-danger h-7 w-7 min-w-7 p-0"
-                                      onPress={() =>
-                                        handleRemoveMember(member.id)
-                                      }
-                                    >
-                                      <LuTrash2 className="w-3 h-3" />
-                                    </Button>
-                                  </>
-                                )}
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-7 w-7 min-w-7 p-0"
+                                  onClick={(e) => e.stopPropagation()}
+                                  onPress={() =>
+                                    handleOpenEditOrganization(org)
+                                  }
+                                >
+                                  <LuPencil className="w-3 h-3" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="text-danger h-7 w-7 min-w-7 p-0"
+                                  onClick={(e) => e.stopPropagation()}
+                                  onPress={() =>
+                                    handleDeleteOrganization(org.id)
+                                  }
+                                >
+                                  <LuTrash2 className="w-3 h-3" />
+                                </Button>
                               </div>
                             </div>
-                          ))}
+                            {org.metadata && (
+                              <p className="text-[10px] text-muted mt-2 truncate">
+                                {org.metadata}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Second Column: Members List */}
+                  <div className="flex flex-col flex-1 min-w-0">
+                    {selectedOrgId ? (
+                      <>
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-xs font-medium text-foreground">
+                            Anggota
+                          </p>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 text-xs px-2"
+                            onPress={() => setIsMemberModalOpen(true)}
+                          >
+                            <LuUserPlus className="w-3 h-3" />
+                            <span className="text-[10px]">Tambah Anggota</span>
+                          </Button>
                         </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="flex items-center justify-center h-full">
-                      <p className="text-sm text-muted">
-                        Pilih toko untuk melihat anggota
-                      </p>
-                    </div>
-                  )}
+                        {orgMembersLoading ? (
+                          <div className="flex items-center justify-center py-8">
+                            <p className="text-sm text-muted">
+                              Memuat anggota...
+                            </p>
+                          </div>
+                        ) : orgMembers.length === 0 ? (
+                          <div className="flex items-center justify-center py-8">
+                            <p className="text-sm text-muted">
+                              Tidak ada anggota
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-2 overflow-y-auto flex-1">
+                            {orgMembers.map((member) => (
+                              <div
+                                key={member.id}
+                                className="flex items-center justify-between p-3 rounded-lg border border-gray-200/50 bg-surface"
+                              >
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  {member.user.image && (
+                                    <img
+                                      src={member.user.image}
+                                      alt={member.user.name}
+                                      className="w-8 h-8 rounded-full"
+                                    />
+                                  )}
+                                  <div className="flex flex-col min-w-0 flex-1">
+                                    <p className="text-sm font-medium text-foreground truncate">
+                                      {member.user.name}
+                                    </p>
+                                    <p className="text-[10px] text-muted truncate">
+                                      {member.user.email}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  {editingMemberId === member.id ? (
+                                    <div className="flex items-center gap-1.5">
+                                      <Select
+                                        selectedKey={editingMemberRole}
+                                        onSelectionChange={(key) => {
+                                          setEditingMemberRole(key as string);
+                                        }}
+                                        className="w-24"
+                                      >
+                                        <Select.Trigger className="h-7 text-xs">
+                                          <Select.Value />
+                                          <Select.Indicator />
+                                        </Select.Trigger>
+                                        <Select.Popover>
+                                          <ListBox>
+                                            <ListBox.Item
+                                              key="admin"
+                                              id="admin"
+                                              textValue="admin"
+                                            >
+                                              Admin
+                                              <ListBox.ItemIndicator />
+                                            </ListBox.Item>
+                                            <ListBox.Item
+                                              key="user"
+                                              id="user"
+                                              textValue="user"
+                                            >
+                                              User
+                                              <ListBox.ItemIndicator />
+                                            </ListBox.Item>
+                                          </ListBox>
+                                        </Select.Popover>
+                                      </Select>
+                                      <Button
+                                        size="sm"
+                                        variant="primary"
+                                        className="bg-accent text-accent-foreground h-7 text-xs px-2"
+                                        onPress={() =>
+                                          handleUpdateMember(member.id)
+                                        }
+                                      >
+                                        Simpan
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-7 text-xs px-2"
+                                        onPress={() => {
+                                          setEditingMemberId(null);
+                                          setEditingMemberRole("admin");
+                                        }}
+                                      >
+                                        Batal
+                                      </Button>
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <div className="px-2 py-0.5 rounded-full bg-accent/10 text-accent text-[10px] font-medium">
+                                        {member.role}
+                                      </div>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-7 w-7 min-w-7 p-0"
+                                        onPress={() => {
+                                          setEditingMemberId(member.id);
+                                          setEditingMemberRole(member.role);
+                                        }}
+                                      >
+                                        <LuPencil className="w-3 h-3" />
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="text-danger h-7 w-7 min-w-7 p-0"
+                                        onPress={() =>
+                                          handleRemoveMember(member.id)
+                                        }
+                                      >
+                                        <LuTrash2 className="w-3 h-3" />
+                                      </Button>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="flex items-center justify-center h-full">
+                        <p className="text-sm text-muted">
+                          Pilih toko untuk melihat anggota
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          </Tabs.Panel>
+            </Tabs.Panel>
           )}
 
           {/* Tema Tab */}
