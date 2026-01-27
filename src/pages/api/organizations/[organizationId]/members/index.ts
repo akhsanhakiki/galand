@@ -3,10 +3,9 @@ import { getApiBaseUrl } from "../../../../../utils/env";
 
 export const prerender = false;
 
-const API_BASE_URL = getApiBaseUrl();
-
 export const GET: APIRoute = async ({ params, request }) => {
   try {
+    const API_BASE_URL = getApiBaseUrl();
     const organizationId = params.organizationId;
 
     if (!organizationId) {
@@ -72,6 +71,7 @@ export const GET: APIRoute = async ({ params, request }) => {
 
 export const POST: APIRoute = async ({ params, request }) => {
   try {
+    const API_BASE_URL = getApiBaseUrl();
     const organizationId = params.organizationId;
 
     if (!organizationId) {
