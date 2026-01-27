@@ -22,7 +22,9 @@ export function getApiBaseUrl(): string {
 /**
  * Get the Neon Auth URL from environment variables
  *
- * Requires PUBLIC_NEON_AUTH_URL to be set in .env.local
+ * Requires PUBLIC_NEON_AUTH_URL to be set in environment variables.
+ * For local development, set it in .env.local
+ * For production (Netlify), set it in the Netlify dashboard under Site settings > Environment variables
  * Note: Uses PUBLIC_ prefix because auth client is used in client components
  */
 export function getNeonAuthUrl(): string {
@@ -31,7 +33,8 @@ export function getNeonAuthUrl(): string {
   if (!authUrl) {
     throw new Error(
       "PUBLIC_NEON_AUTH_URL environment variable is required. " +
-        "Please set it in your .env.local file.",
+        "Please set it in your environment variables. " +
+        "For Netlify: Site settings > Environment variables"
     );
   }
 
