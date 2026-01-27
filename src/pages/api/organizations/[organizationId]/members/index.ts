@@ -3,9 +3,10 @@ import { getApiBaseUrl } from "../../../../../utils/env";
 
 export const prerender = false;
 
+const API_BASE_URL = getApiBaseUrl();
+
 export const GET: APIRoute = async ({ params, request }) => {
   try {
-    const API_BASE_URL = getApiBaseUrl();
     const organizationId = params.organizationId;
 
     if (!organizationId) {
@@ -16,7 +17,7 @@ export const GET: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        },
+        }
       );
     }
 
@@ -36,7 +37,7 @@ export const GET: APIRoute = async ({ params, request }) => {
       `${API_BASE_URL}/organizations/${organizationId}/members`,
       {
         headers,
-      },
+      }
     );
 
     if (!response.ok) {
@@ -47,7 +48,7 @@ export const GET: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        },
+        }
       );
     }
 
@@ -71,7 +72,6 @@ export const GET: APIRoute = async ({ params, request }) => {
 
 export const POST: APIRoute = async ({ params, request }) => {
   try {
-    const API_BASE_URL = getApiBaseUrl();
     const organizationId = params.organizationId;
 
     if (!organizationId) {
@@ -82,7 +82,7 @@ export const POST: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        },
+        }
       );
     }
 
@@ -107,7 +107,7 @@ export const POST: APIRoute = async ({ params, request }) => {
         method: "POST",
         headers,
         body: JSON.stringify(body),
-      },
+      }
     );
 
     if (!response.ok) {
@@ -118,7 +118,7 @@ export const POST: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        },
+        }
       );
     }
 
