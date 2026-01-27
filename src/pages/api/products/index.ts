@@ -34,7 +34,7 @@ export const GET: APIRoute = async ({ url, request }) => {
       `${API_BASE_URL}/products/?${queryParams.toString()}`,
       {
         headers,
-      }
+      },
     );
 
     if (!response.ok) {
@@ -45,7 +45,7 @@ export const GET: APIRoute = async ({ url, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -99,7 +99,7 @@ export const POST: APIRoute = async ({ request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 

@@ -29,19 +29,16 @@ export const GET: APIRoute = async ({ url, request }) => {
       `${API_BASE_URL}/users/?${queryParams.toString()}`,
       {
         headers,
-      }
+      },
     );
 
     if (!response.ok) {
-      return new Response(
-        JSON.stringify({ error: "Failed to fetch users" }),
-        {
-          status: response.status,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      return new Response(JSON.stringify({ error: "Failed to fetch users" }), {
+        status: response.status,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
     }
 
     const data = await response.json();
@@ -87,15 +84,12 @@ export const POST: APIRoute = async ({ request }) => {
     });
 
     if (!response.ok) {
-      return new Response(
-        JSON.stringify({ error: "Failed to create user" }),
-        {
-          status: response.status,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      return new Response(JSON.stringify({ error: "Failed to create user" }), {
+        status: response.status,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
     }
 
     const data = await response.json();

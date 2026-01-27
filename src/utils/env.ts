@@ -12,7 +12,7 @@ export function getApiBaseUrl(): string {
     throw new Error(
       "SIMPLE_CASHIER_BASE_URL environment variable is required. " +
         "Please set it in your environment variables. " +
-        "For Netlify: Site settings > Environment variables"
+        "For Netlify: Site settings > Environment variables",
     );
   }
 
@@ -31,7 +31,7 @@ export function getNeonAuthUrl(): string {
   if (!authUrl) {
     throw new Error(
       "PUBLIC_NEON_AUTH_URL environment variable is required. " +
-        "Please set it in your .env.local file."
+        "Please set it in your .env.local file.",
     );
   }
 

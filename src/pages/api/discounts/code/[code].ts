@@ -16,7 +16,7 @@ export const GET: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -40,7 +40,7 @@ export const GET: APIRoute = async ({ params, request }) => {
       `${API_BASE_URL}/discounts/code/${encodedCode}`,
       {
         headers,
-      }
+      },
     );
 
     if (!response.ok) {
@@ -51,7 +51,7 @@ export const GET: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 

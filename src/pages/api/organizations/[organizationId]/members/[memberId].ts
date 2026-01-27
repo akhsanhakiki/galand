@@ -17,7 +17,7 @@ export const PATCH: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -51,7 +51,7 @@ export const PATCH: APIRoute = async ({ params, request }) => {
         method: "PATCH",
         headers,
         body: JSON.stringify(body),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -62,7 +62,7 @@ export const PATCH: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -98,7 +98,7 @@ export const DELETE: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -128,7 +128,7 @@ export const DELETE: APIRoute = async ({ params, request }) => {
       {
         method: "DELETE",
         headers,
-      }
+      },
     );
 
     if (!response.ok) {
@@ -139,7 +139,7 @@ export const DELETE: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 

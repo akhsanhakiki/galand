@@ -16,7 +16,7 @@ export const GET: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -36,7 +36,7 @@ export const GET: APIRoute = async ({ params, request }) => {
       `${API_BASE_URL}/organizations/${organizationId}/members`,
       {
         headers,
-      }
+      },
     );
 
     if (!response.ok) {
@@ -47,7 +47,7 @@ export const GET: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -82,7 +82,7 @@ export const POST: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -107,7 +107,7 @@ export const POST: APIRoute = async ({ params, request }) => {
         method: "POST",
         headers,
         body: JSON.stringify(body),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -118,7 +118,7 @@ export const POST: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
