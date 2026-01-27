@@ -3,9 +3,10 @@ import { getApiBaseUrl } from "../../../utils/env";
 
 export const prerender = false;
 
+const API_BASE_URL = getApiBaseUrl();
+
 export const PATCH: APIRoute = async ({ params, request }) => {
   try {
-    const API_BASE_URL = getApiBaseUrl();
     const id = params.id;
 
     if (!id) {
@@ -39,12 +40,15 @@ export const PATCH: APIRoute = async ({ params, request }) => {
     });
 
     if (!response.ok) {
-      return new Response(JSON.stringify({ error: "Failed to update user" }), {
-        status: response.status,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      return new Response(
+        JSON.stringify({ error: "Failed to update user" }),
+        {
+          status: response.status,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
     }
 
     const data = await response.json();
@@ -67,7 +71,6 @@ export const PATCH: APIRoute = async ({ params, request }) => {
 
 export const DELETE: APIRoute = async ({ params, request }) => {
   try {
-    const API_BASE_URL = getApiBaseUrl();
     const id = params.id;
 
     if (!id) {
@@ -97,12 +100,15 @@ export const DELETE: APIRoute = async ({ params, request }) => {
     });
 
     if (!response.ok) {
-      return new Response(JSON.stringify({ error: "Failed to delete user" }), {
-        status: response.status,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      return new Response(
+        JSON.stringify({ error: "Failed to delete user" }),
+        {
+          status: response.status,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
     }
 
     return new Response(null, {

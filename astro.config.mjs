@@ -12,5 +12,11 @@ export default defineConfig({
   integrations: [react()],
   vite: {
     plugins: [tailwindcss()],
+    ssr: {
+      noExternal: ["react-aria-components", "@heroui/react"],
+    },
+    optimizeDeps: {
+      include: ["react-aria-components"],
+    },
   },
 });

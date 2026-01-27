@@ -3,9 +3,10 @@ import { getApiBaseUrl } from "../../../utils/env";
 
 export const prerender = false;
 
+const API_BASE_URL = getApiBaseUrl();
+
 export const GET: APIRoute = async ({ url, request }) => {
   try {
-    const API_BASE_URL = getApiBaseUrl();
     const startDate = url.searchParams.get("start_date");
     const endDate = url.searchParams.get("end_date");
 
@@ -47,7 +48,7 @@ export const GET: APIRoute = async ({ url, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        },
+        }
       );
     }
 
