@@ -3,10 +3,9 @@ import { getApiBaseUrl } from "../../../../../utils/env";
 
 export const prerender = false;
 
-const API_BASE_URL = getApiBaseUrl();
-
 export const PATCH: APIRoute = async ({ params, request }) => {
   try {
+    const API_BASE_URL = getApiBaseUrl();
     const organizationId = params.organizationId;
     const memberId = params.memberId;
 
@@ -18,7 +17,7 @@ export const PATCH: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -52,7 +51,7 @@ export const PATCH: APIRoute = async ({ params, request }) => {
         method: "PATCH",
         headers,
         body: JSON.stringify(body),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -63,7 +62,7 @@ export const PATCH: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -87,6 +86,7 @@ export const PATCH: APIRoute = async ({ params, request }) => {
 
 export const DELETE: APIRoute = async ({ params, request }) => {
   try {
+    const API_BASE_URL = getApiBaseUrl();
     const organizationId = params.organizationId;
     const memberId = params.memberId;
 
@@ -98,7 +98,7 @@ export const DELETE: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -128,7 +128,7 @@ export const DELETE: APIRoute = async ({ params, request }) => {
       {
         method: "DELETE",
         headers,
-      }
+      },
     );
 
     if (!response.ok) {
@@ -139,7 +139,7 @@ export const DELETE: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 

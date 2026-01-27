@@ -1,7 +1,9 @@
 /**
  * Get the API base URL from environment variables
  *
- * Requires SIMPLE_CASHIER_BASE_URL to be set in .env.local
+ * Requires SIMPLE_CASHIER_BASE_URL to be set in environment variables.
+ * For local development, set it in .env.local
+ * For production (Netlify), set it in the Netlify dashboard under Site settings > Environment variables
  */
 export function getApiBaseUrl(): string {
   const baseUrl = import.meta.env.SIMPLE_CASHIER_BASE_URL;
@@ -9,7 +11,8 @@ export function getApiBaseUrl(): string {
   if (!baseUrl) {
     throw new Error(
       "SIMPLE_CASHIER_BASE_URL environment variable is required. " +
-        "Please set it in your .env.local file."
+        "Please set it in your environment variables. " +
+        "For Netlify: Site settings > Environment variables",
     );
   }
 
@@ -28,7 +31,7 @@ export function getNeonAuthUrl(): string {
   if (!authUrl) {
     throw new Error(
       "PUBLIC_NEON_AUTH_URL environment variable is required. " +
-        "Please set it in your .env.local file."
+        "Please set it in your .env.local file.",
     );
   }
 

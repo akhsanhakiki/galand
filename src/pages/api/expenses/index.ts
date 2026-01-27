@@ -3,10 +3,9 @@ import { getApiBaseUrl } from "../../../utils/env";
 
 export const prerender = false;
 
-const API_BASE_URL = getApiBaseUrl();
-
 export const GET: APIRoute = async ({ url, request }) => {
   try {
+    const API_BASE_URL = getApiBaseUrl();
     const offset = url.searchParams.get("offset") || "0";
     const limit = url.searchParams.get("limit") || "100";
     const search = url.searchParams.get("search");
@@ -43,7 +42,7 @@ export const GET: APIRoute = async ({ url, request }) => {
       `${API_BASE_URL}/expenses/?${queryParams.toString()}`,
       {
         headers,
-      }
+      },
     );
 
     if (!response.ok) {
@@ -54,7 +53,7 @@ export const GET: APIRoute = async ({ url, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -78,6 +77,7 @@ export const GET: APIRoute = async ({ url, request }) => {
 
 export const POST: APIRoute = async ({ request }) => {
   try {
+    const API_BASE_URL = getApiBaseUrl();
     const body = await request.json();
 
     // Extract Authorization header from the incoming request
@@ -107,7 +107,7 @@ export const POST: APIRoute = async ({ request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 

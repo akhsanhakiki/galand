@@ -3,10 +3,9 @@ import { getApiBaseUrl } from "../../../../utils/env";
 
 export const prerender = false;
 
-const API_BASE_URL = getApiBaseUrl();
-
 export const GET: APIRoute = async ({ params, request }) => {
   try {
+    const API_BASE_URL = getApiBaseUrl();
     const code = params.code;
 
     if (!code) {
@@ -17,7 +16,7 @@ export const GET: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -41,7 +40,7 @@ export const GET: APIRoute = async ({ params, request }) => {
       `${API_BASE_URL}/discounts/code/${encodedCode}`,
       {
         headers,
-      }
+      },
     );
 
     if (!response.ok) {
@@ -52,7 +51,7 @@ export const GET: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 

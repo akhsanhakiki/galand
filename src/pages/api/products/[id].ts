@@ -3,10 +3,9 @@ import { getApiBaseUrl } from "../../../utils/env";
 
 export const prerender = false;
 
-const API_BASE_URL = getApiBaseUrl();
-
 export const GET: APIRoute = async ({ params, request }) => {
   try {
+    const API_BASE_URL = getApiBaseUrl();
     const id = params.id;
 
     if (!id) {
@@ -42,7 +41,7 @@ export const GET: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -66,6 +65,7 @@ export const GET: APIRoute = async ({ params, request }) => {
 
 export const PATCH: APIRoute = async ({ params, request }) => {
   try {
+    const API_BASE_URL = getApiBaseUrl();
     const id = params.id;
 
     if (!id) {
@@ -106,7 +106,7 @@ export const PATCH: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -130,6 +130,7 @@ export const PATCH: APIRoute = async ({ params, request }) => {
 
 export const DELETE: APIRoute = async ({ params, request }) => {
   try {
+    const API_BASE_URL = getApiBaseUrl();
     const id = params.id;
 
     if (!id) {
@@ -166,7 +167,7 @@ export const DELETE: APIRoute = async ({ params, request }) => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
