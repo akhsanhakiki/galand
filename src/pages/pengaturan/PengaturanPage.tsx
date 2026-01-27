@@ -656,17 +656,17 @@ const PengaturanPage = () => {
           {/* Lainnya Tab */}
           <Tabs.Panel id="notifikasi">
             <div className="flex flex-col gap-4 text-left">
-              <div>
+              <div className="flex flex-col gap-1">
                 <p className="text-xs text-muted">Versi Aplikasi</p>
                 <p className="text-sm font-medium text-foreground">
                   v{APP_VERSION}
                 </p>
               </div>
               <Separator />
-              <div>
+              <div className="flex flex-col gap-1">
                 <p className="text-xs text-muted">Terakhir Diupdate</p>
                 <p className="text-sm font-medium text-foreground">
-                  17 Apr 2026
+                  25 Januari 2026
                 </p>
               </div>
             </div>
