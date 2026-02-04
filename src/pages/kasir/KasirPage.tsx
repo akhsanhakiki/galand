@@ -76,7 +76,17 @@ const KasirPage = () => {
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
   const [cartPanelWidth, setCartPanelWidth] = useState(33.33); // Percentage (4/12 = 33.33%)
   const [isResizing, setIsResizing] = useState(false);
+  const [mobileCartOpen, setMobileCartOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const set = () => setIsDesktop(mq.matches);
+    set();
+    mq.addEventListener("change", set);
+    return () => mq.removeEventListener("change", set);
+  }, []);
 
   useEffect(() => {
     fetchProducts();
@@ -268,6 +278,7 @@ const KasirPage = () => {
       setDiscountError("");
       setTransactionDateTime("");
       setPaymentMethod(null);
+      setMobileCartOpen(false);
     } catch (error) {
       // Error handling
     } finally {
@@ -286,17 +297,20 @@ const KasirPage = () => {
 
       <div
         ref={containerRef}
-        className="flex flex-row gap-4 flex-1 min-h-0 items-stretch"
+        className="flex flex-row gap-4 flex-1 min-h-0 items-stretch w-full"
       >
-        <div className="h-full" style={{ width: `${100 - cartPanelWidth}%` }}>
+        <div
+          className="h-full w-full min-w-0 flex-1 md:flex-initial"
+          style={isDesktop ? { width: `${100 - cartPanelWidth}%` } : undefined}
+        >
           {loading ? (
             <div className="flex items-center justify-center p-8">
               <Spinner size="lg" />
             </div>
           ) : (
-            <div className="flex flex-col gap-4 bg-surface rounded-3xl p-4 h-full">
-              <div className="flex flex-row justify-between items-center">
-                <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-4 bg-surface rounded-3xl p-4 h-full w-full min-w-0">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 w-full min-w-0">
+                <div className="flex flex-col gap-1 min-w-0">
                   <h2 className="text-md font-bold text-foreground">
                     Daftar Produk
                   </h2>
@@ -307,7 +321,7 @@ const KasirPage = () => {
                 <SearchField
                   value={searchQuery}
                   onChange={setSearchQuery}
-                  className="w-1/3"
+                  className="w-full sm:w-1/3 min-w-0"
                 >
                   <SearchField.Group className="shadow-none border">
                     <SearchField.SearchIcon />
@@ -316,10 +330,10 @@ const KasirPage = () => {
                   </SearchField.Group>
                 </SearchField>
               </div>
-              <div className="flex flex-col h-full overflow-hidden gap-1">
-                <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-                  <div className="overflow-y-auto overflow-x-auto flex-1">
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              <div className="flex flex-col h-full overflow-hidden gap-1 w-full min-w-0">
+                <div className="flex-1 overflow-hidden flex flex-col min-h-0 min-w-0">
+                  <div className="overflow-y-auto overflow-x-auto flex-1 min-w-0">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2 w-full">
                       {paginatedProducts.length === 0 ? (
                         <div className="col-span-full flex items-center justify-center py-12">
                           <p className="text-center text-muted text-sm">
@@ -455,13 +469,29 @@ const KasirPage = () => {
                     )}
                   </div>
                 )}
+                <div className="md:hidden pt-4">
+                  <Button
+                    variant="primary"
+                    className="w-full bg-accent text-accent-foreground"
+                    size="md"
+                    onPress={() => setMobileCartOpen(true)}
+                  >
+                    <LuShoppingCart className="w-4 h-4" />
+                    Lanjut Pembayaran
+                    {cart.length > 0 && (
+                      <span className="ml-1.5 font-semibold">
+                        ({cart.length})
+                      </span>
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
           )}
         </div>
 
         <div
-          className="h-full relative"
+          className="hidden md:block h-full relative"
           style={{ width: `${cartPanelWidth}%` }}
         >
           <div
@@ -478,7 +508,7 @@ const KasirPage = () => {
               <p className="text-xs text-muted">
                 {cart.length > 0
                   ? `${cart.length} item dalam keranjang`
-                  : "Tammbahkan produk ke keranjang"}
+                  : "Tambahkan produk ke keranjang"}
               </p>
             </div>
             <div className="flex flex-col h-full overflow-hidden gap-1">
@@ -766,6 +796,317 @@ const KasirPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Mobile cart overlay - shown when "Lanjut Pembayaran" is tapped */}
+      {mobileCartOpen && (
+        <div className="md:hidden fixed inset-x-0 top-0 bottom-16 z-40 flex flex-col bg-surface">
+          <div className="flex items-center gap-2 p-4 border-b border-separator shrink-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              isIconOnly
+              onPress={() => setMobileCartOpen(false)}
+              aria-label="Tutup keranjang"
+            >
+              <LuChevronLeft className="w-5 h-5" />
+            </Button>
+            <h2 className="text-lg font-bold text-foreground">Keranjang</h2>
+          </div>
+          <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto overflow-x-auto p-4">
+              {cart.length === 0 ? (
+                <div className="flex flex-col items-center justify-center gap-6 py-12">
+                  <LuShoppingBasket className="w-24 h-24 text-accent rotate-45 opacity-50" />
+                  <p className="text-center text-muted text-sm">
+                    Keranjang kosong
+                  </p>
+                  <Button
+                    variant="primary"
+                    className="bg-accent text-accent-foreground"
+                    onPress={() => setMobileCartOpen(false)}
+                  >
+                    Tambah produk
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="sticky top-0 bg-surface z-10">
+                        <tr className="border-b border-separator">
+                          <th className="text-left py-2 px-2 text-xs font-semibold text-muted">
+                            Nama Barang
+                          </th>
+                          <th className="text-left py-2 px-2 text-xs font-semibold text-muted">
+                            Pembelian
+                          </th>
+                          <th className="text-right py-2 px-2 text-xs font-semibold text-muted">
+                            Total Harga
+                          </th>
+                          <th className="text-center py-2 px-2 text-xs font-semibold text-muted w-12">
+                            Aksi
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {cart.map((item) => {
+                          const itemTotal = calculateItemTotal(
+                            item.product,
+                            item.quantity
+                          );
+                          const hasBundle =
+                            item.product.bundle_quantity > 0 &&
+                            item.product.bundle_price > 0 &&
+                            item.quantity >= item.product.bundle_quantity;
+                          const bundles = hasBundle
+                            ? Math.floor(
+                                item.quantity / item.product.bundle_quantity
+                              )
+                            : 0;
+                          const remaining = hasBundle
+                            ? item.quantity % item.product.bundle_quantity
+                            : 0;
+                          return (
+                            <tr
+                              key={item.product_id}
+                              className="hover:bg-surface-secondary/20 transition-colors"
+                            >
+                              <td className="py-2 px-2">
+                                <p className="text-xs font-medium text-foreground">
+                                  {item.product.name}
+                                </p>
+                                {hasBundle && (
+                                  <p className="text-xs text-success mt-0.5">
+                                    Bundle: {bundles}x (
+                                    {item.product.bundle_quantity} pcs){" "}
+                                    {remaining > 0 && `+ ${remaining} pcs`}
+                                  </p>
+                                )}
+                              </td>
+                              <td className="py-2 px-2">
+                                <NumberField
+                                  value={item.quantity}
+                                  onChange={(value) => {
+                                    if (value !== undefined) {
+                                      setQuantity(item.product_id, value);
+                                    }
+                                  }}
+                                  minValue={1}
+                                  maxValue={item.product.stock}
+                                >
+                                  <NumberField.Group className="shadow-none border h-6 text-xs rounded-lg">
+                                    <NumberField.DecrementButton className="w-5 h-5 min-w-5 p-1" />
+                                    <NumberField.Input className="w-[40px] text-xs text-center px-0.5 py-0 h-full" />
+                                    <NumberField.IncrementButton className="w-5 h-5 min-w-5 p-1" />
+                                  </NumberField.Group>
+                                </NumberField>
+                              </td>
+                              <td className="py-2 px-2 text-right">
+                                <p className="text-xs font-medium text-foreground">
+                                  Rp {itemTotal.toLocaleString("id-ID")}
+                                </p>
+                              </td>
+                              <td className="py-2 px-2 text-center w-12">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  isIconOnly
+                                  className="w-5 h-5"
+                                  onPress={() =>
+                                    removeFromCart(item.product_id)
+                                  }
+                                >
+                                  <LuTrash2 className="w-3 h-3" />
+                                </Button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="flex flex-col pt-4 gap-2">
+                    <Accordion className="w-full rounded-2xl overflow-hidden">
+                      <Accordion.Item>
+                        <Accordion.Heading>
+                          <Accordion.Trigger>
+                            <span className="text-xs font-medium text-foreground">
+                              Diskon & Opsi Tambahan
+                            </span>
+                            <Accordion.Indicator />
+                          </Accordion.Trigger>
+                        </Accordion.Heading>
+                        <Accordion.Panel>
+                          <Accordion.Body>
+                            <div className="flex flex-col gap-2">
+                              <div className="flex flex-col gap-1">
+                                <div className="relative">
+                                  <TextField
+                                    value={discountCode}
+                                    onChange={setDiscountCode}
+                                    className="w-full"
+                                  >
+                                    <Label className="text-xs">
+                                      Kode Diskon
+                                    </Label>
+                                    <InputGroup className="shadow-none border">
+                                      <InputGroup.Input
+                                        placeholder="Kode diskon"
+                                        className="text-xs"
+                                        disabled={isValidatingDiscount}
+                                      />
+                                    </InputGroup>
+                                  </TextField>
+                                  {isValidatingDiscount && (
+                                    <div className="absolute right-3 top-8 flex items-center">
+                                      <Spinner size="sm" />
+                                    </div>
+                                  )}
+                                </div>
+                                {discountError && (
+                                  <div className="text-xs text-danger">
+                                    {discountError}
+                                  </div>
+                                )}
+                                {validatedDiscount && !discountError && (
+                                  <div className="text-xs text-success">
+                                    Diskon {validatedDiscount.percentage}%
+                                    diterapkan
+                                    {validatedDiscount.type ===
+                                      "individual_item" &&
+                                      " untuk item tertentu"}
+                                  </div>
+                                )}
+                              </div>
+                              <TextField className="w-full">
+                                <Label className="text-xs">
+                                  Waktu Transaksi
+                                </Label>
+                                <InputGroup className="shadow-none border">
+                                  <input
+                                    type="datetime-local"
+                                    value={transactionDateTime}
+                                    onChange={(e) =>
+                                      setTransactionDateTime(e.target.value)
+                                    }
+                                    className="w-full bg-transparent border-0 outline-none px-3 py-2 text-xs text-foreground placeholder:text-muted focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                                  />
+                                </InputGroup>
+                              </TextField>
+                              <Select
+                                className="w-full"
+                                placeholder="Pilih metode pembayaran"
+                                value={paymentMethod}
+                                onChange={(value) => {
+                                  if (value) {
+                                    setPaymentMethod(value as string);
+                                  } else {
+                                    setPaymentMethod(null);
+                                  }
+                                }}
+                              >
+                                <Label className="text-xs">
+                                  Metode Pembayaran
+                                </Label>
+                                <Select.Trigger className="shadow-none border">
+                                  <Select.Value />
+                                  <Select.Indicator />
+                                </Select.Trigger>
+                                <Select.Popover>
+                                  <ListBox>
+                                    <ListBox.Item id="cash" textValue="Cash">
+                                      Cash
+                                      <ListBox.ItemIndicator />
+                                    </ListBox.Item>
+                                    <ListBox.Item id="qris" textValue="Qris">
+                                      Qris
+                                      <ListBox.ItemIndicator />
+                                    </ListBox.Item>
+                                    <ListBox.Item
+                                      id="transfer_bank"
+                                      textValue="Transfer Bank"
+                                    >
+                                      Transfer Bank
+                                      <ListBox.ItemIndicator />
+                                    </ListBox.Item>
+                                    <ListBox.Item
+                                      id="kredit"
+                                      textValue="Kredit"
+                                    >
+                                      Kredit
+                                      <ListBox.ItemIndicator />
+                                    </ListBox.Item>
+                                  </ListBox>
+                                </Select.Popover>
+                              </Select>
+                            </div>
+                          </Accordion.Body>
+                        </Accordion.Panel>
+                      </Accordion.Item>
+                    </Accordion>
+                    <Separator className="my-3" />
+                    <div className="flex flex-col gap-2 py-4">
+                      <div className="flex items-center justify-between w-full">
+                        <span className="text-sm font-semibold text-foreground">
+                          Subtotal:
+                        </span>
+                        <span className="text-sm font-medium text-foreground">
+                          Rp {subtotal.toLocaleString("id-ID")}
+                        </span>
+                      </div>
+                      {validatedDiscount && discountAmount > 0 && (
+                        <div className="flex items-center justify-between w-full">
+                          <span className="text-sm text-muted">
+                            Diskon ({validatedDiscount.percentage}%):
+                          </span>
+                          <span className="text-sm font-medium text-success">
+                            -Rp {discountAmount.toLocaleString("id-ID")}
+                          </span>
+                        </div>
+                      )}
+                      <Separator />
+                      <div className="flex items-center justify-between w-full">
+                        <span className="text-sm font-semibold text-foreground">
+                          Total:
+                        </span>
+                        <span className="text-md font-bold text-accent">
+                          Rp {total.toLocaleString("id-ID")}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-row gap-2 justify-end pb-4">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onPress={() => {
+                          clearCart();
+                          setDiscountCode("");
+                          setValidatedDiscount(null);
+                          setDiscountError("");
+                          setTransactionDateTime("");
+                          setPaymentMethod(null);
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="primary"
+                        className="bg-accent text-accent-foreground"
+                        size="sm"
+                        isDisabled={cart.length === 0 || isSubmitting}
+                        onPress={handleCheckout}
+                        isPending={isSubmitting}
+                      >
+                        {isSubmitting ? "Memproses..." : "Proses Pembayaran"}
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
