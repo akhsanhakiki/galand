@@ -87,11 +87,11 @@ const Top5Products: React.FC<Top5ProductsProps> = ({
 
   // ECharts option for donut chart
   const donutChartOption = useMemo<EChartsOption>(() => {
-    // Create rich text styles for each color
+    // Create rich text styles for each color (smaller on mobile via container)
     const richStyles: { [key: string]: any } = {};
     chartData.forEach((item, index) => {
       richStyles[`color${index}`] = {
-        fontSize: 20,
+        fontSize: 14,
         fontWeight: 500,
         color: item.color,
       };
@@ -169,7 +169,7 @@ const Top5Products: React.FC<Top5ProductsProps> = ({
               const styleName = `color${index}`;
               return `{${styleName}|${params.percent}%}`;
             },
-            fontSize: 20,
+            fontSize: 14,
             fontWeight: 500,
             rich: richStyles,
           },
@@ -184,7 +184,7 @@ const Top5Products: React.FC<Top5ProductsProps> = ({
               borderWidth: 3,
             },
             label: {
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: 600,
             },
           },
@@ -222,51 +222,53 @@ const Top5Products: React.FC<Top5ProductsProps> = ({
   }, [selectedChartProduct]);
 
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="flex flex-col gap-2 md:gap-4 min-h-0 md:h-full">
       {/* Header with filters */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Surface className="p-2 rounded-lg bg-accent/10">
-            <TbChartDonut className="w-4 h-4 text-accent" />
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 md:gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 md:gap-2 mb-2">
+          <Surface className="p-1.5 md:p-2 rounded-lg bg-accent/10 shrink-0">
+            <TbChartDonut className="w-3.5 h-3.5 md:w-4 md:h-4 text-accent" />
           </Surface>
-          <h2 className="text-lg font-bold text-foreground">Top 5 Produk</h2>
+          <h2 className="text-sm md:text-lg font-bold text-foreground">
+            Top 5 Produk
+          </h2>
         </div>
-        <div className="flex items-center gap-2">
-          <Tabs
-            selectedKey={productViewMode === "profit" ? "revenue" : productViewMode}
-            onSelectionChange={(key) => {
-              const mode = key as ProductViewMode;
-              if (mode !== "profit") {
-                onViewModeChange(mode);
-              }
-            }}
-            className="w-fit"
-          >
-            <Tabs.ListContainer>
-              <Tabs.List
-                aria-label="View Mode"
-                className="w-fit *:h-8 *:w-fit *:px-4 *:text-xs *:font-normal"
-              >
-                <Tabs.Tab id="revenue">
-                  Pendapatan
-                  <Tabs.Indicator />
-                </Tabs.Tab>
-                <Tabs.Tab id="quantity">
-                  Kuantitas
-                  <Tabs.Indicator />
-                </Tabs.Tab>
-              </Tabs.List>
-            </Tabs.ListContainer>
-          </Tabs>
-        </div>
+        <Tabs
+          selectedKey={
+            productViewMode === "profit" ? "revenue" : productViewMode
+          }
+          onSelectionChange={(key) => {
+            const mode = key as ProductViewMode;
+            if (mode !== "profit") {
+              onViewModeChange(mode);
+            }
+          }}
+          className="w-full sm:w-fit min-w-0"
+        >
+          <Tabs.ListContainer className="w-full sm:w-auto min-w-0">
+            <Tabs.List
+              aria-label="View Mode"
+              className="w-full sm:w-fit *:h-6 *:md:h-7 *:flex-1 *:sm:flex-initial *:min-w-0 *:w-fit *:px-2 *:md:px-2.5 *:text-[10px] *:md:text-[11px] *:font-normal *:leading-tight"
+            >
+              <Tabs.Tab id="revenue">
+                Pendapatan
+                <Tabs.Indicator />
+              </Tabs.Tab>
+              <Tabs.Tab id="quantity">
+                Kuantitas
+                <Tabs.Indicator />
+              </Tabs.Tab>
+            </Tabs.List>
+          </Tabs.ListContainer>
+        </Tabs>
       </div>
 
-      {/* Donut Chart with Product List */}
-      <div className="p-4 border border-separator rounded-xl flex-1 min-h-0 flex flex-col">
-        <div className="flex flex-col md:flex-row gap-4 flex-1 min-h-0">
-          {/* Pie Chart - Left Side */}
-          <div className="flex-1 min-w-0">
-            <div className="h-full w-full">
+      {/* Donut Chart with Product List - on mobile content scrolls with tab panel; on desktop split layout with inner scroll */}
+      <div className="p-2 md:p-4 border border-separator rounded-xl flex flex-col flex-none md:flex-1 md:min-h-0">
+        <div className="flex flex-col md:flex-row gap-3 md:gap-4 flex-none md:flex-1 md:min-h-0">
+          {/* Pie Chart - fixed height on mobile so it scrolls with content; flex on desktop */}
+          <div className="h-[220px] md:h-auto md:flex-1 min-w-0 md:max-h-none shrink-0">
+            <div className="h-full w-full min-h-0">
               <ReactECharts
                 option={donutChartOption}
                 style={{ height: "100%", width: "100%" }}
@@ -290,13 +292,13 @@ const Top5Products: React.FC<Top5ProductsProps> = ({
             </div>
           </div>
 
-          {/* Product List - Right Side */}
-          <div className="flex-1 min-w-0">
+          {/* Product List - Right Side; on mobile no inner scroll so tab panel scroll is full-width */}
+          <div className="flex-1 min-w-0 min-h-0 md:min-h-0">
             <div
               ref={(el) => {
                 scrollContainerRef.current = el;
               }}
-              className="flex flex-col gap-3 h-full overflow-y-auto"
+              className="flex flex-col gap-2 md:gap-3 md:h-full md:overflow-y-auto"
             >
               {chartData.map((item) => {
                 const product = products.find((p) => p.id === item.id);
@@ -313,63 +315,63 @@ const Top5Products: React.FC<Top5ProductsProps> = ({
                       }
                       return undefined;
                     }}
-                    className={`flex flex-col gap-2 p-3 rounded-2xl border transition-all ${
+                    className={`flex flex-col gap-1.5 md:gap-2 p-2.5 md:p-3 rounded-xl md:rounded-2xl border transition-all ${
                       selectedChartProduct === item.id
-                        ? "border-accent border-[3px]"
+                        ? "border-accent border-2 md:border-[3px]"
                         : "border-separator border"
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <div
-                        className="w-3 h-3 rounded-full shrink-0"
+                        className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full shrink-0"
                         style={{ backgroundColor: item.color }}
                       />
-                      <div className="flex-1 min-w-0 flex flex-row items-center justify-between">
-                        <p className="text-sm font-semibold text-foreground truncate">
+                      <div className="flex-1 min-w-0 flex flex-row items-center justify-between gap-2">
+                        <p className="text-xs md:text-sm font-semibold text-foreground truncate">
                           {item.name}
                         </p>
                         <p
-                          className="text-lg font-bold"
+                          className="text-sm md:text-lg font-bold shrink-0 tabular-nums"
                           style={{ color: item.color }}
                         >
                           {item.percentage.toFixed(1)}%
                         </p>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 mt-1 text-xs">
-                      <div className="flex justify-between">
-                        <span className="text-muted">Harga:</span>
-                        <span className="font-semibold text-foreground">
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-1 md:gap-2 mt-0.5 md:mt-1 text-[10px] md:text-xs">
+                      <div className="flex justify-between gap-1">
+                        <span className="text-muted shrink-0">Harga:</span>
+                        <span className="font-semibold text-foreground truncate text-right">
                           {formatCurrency(product.price)}
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted">Stok:</span>
-                        <span className="font-semibold text-foreground">
+                      <div className="flex justify-between gap-1">
+                        <span className="text-muted shrink-0">Stok:</span>
+                        <span className="font-semibold text-foreground text-right">
                           {product.stock} unit
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted">Terjual:</span>
-                        <span className="font-semibold text-foreground">
+                      <div className="flex justify-between gap-1">
+                        <span className="text-muted shrink-0">Terjual:</span>
+                        <span className="font-semibold text-foreground text-right">
                           {product.quantitySold} unit
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted">Pendapatan:</span>
-                        <span className="font-semibold text-foreground">
+                      <div className="flex justify-between gap-1">
+                        <span className="text-muted shrink-0">Pendapatan:</span>
+                        <span className="font-semibold text-foreground truncate text-right">
                           {formatCurrency(product.revenue)}
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted">Profit:</span>
-                        <span className="font-semibold text-success">
+                      <div className="flex justify-between gap-1">
+                        <span className="text-muted shrink-0">Profit:</span>
+                        <span className="font-semibold text-success truncate text-right">
                           {formatCurrency(product.profit)}
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted">Margin:</span>
-                        <span className="font-semibold text-foreground">
+                      <div className="flex justify-between gap-1">
+                        <span className="text-muted shrink-0">Margin:</span>
+                        <span className="font-semibold text-foreground text-right">
                           {product.profitMargin}%
                         </span>
                       </div>

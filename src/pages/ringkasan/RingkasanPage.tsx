@@ -64,7 +64,7 @@ const RingkasanPage = () => {
         const dateRange = getDateRangeForPeriod(
           selectedPeriod,
           customStartDate,
-          customEndDate,
+          customEndDate
         );
 
         if (!dateRange) {
@@ -78,7 +78,7 @@ const RingkasanPage = () => {
         setIsInitialLoad(false);
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Failed to fetch summary",
+          err instanceof Error ? err.message : "Failed to fetch summary"
         );
         setSummaryData(null);
         setIsInitialLoad(false);
@@ -102,13 +102,13 @@ const RingkasanPage = () => {
 
     const scrollContainer = tabsScrollRef.current;
     const tabElements = Array.from(
-      scrollContainer.querySelectorAll('[role="tab"]'),
+      scrollContainer.querySelectorAll('[role="tab"]')
     ) as HTMLElement[];
 
     if (tabElements.length === 0) return;
 
     const selectedTab = tabElements.find(
-      (tab) => tab.getAttribute("aria-selected") === "true",
+      (tab) => tab.getAttribute("aria-selected") === "true"
     );
 
     if (!selectedTab) return;
@@ -155,8 +155,8 @@ const RingkasanPage = () => {
           selectedTabIndex === 0
             ? "start"
             : selectedTabIndex === tabElements.length - 1
-              ? "end"
-              : "center",
+            ? "end"
+            : "center",
       });
     }
   }, [selectedPeriod]);
@@ -188,7 +188,7 @@ const RingkasanPage = () => {
 
   // Transform API chart data to TrendData format
   const transformChartData = (
-    chartData: SummaryResponse["chart_data"],
+    chartData: SummaryResponse["chart_data"]
   ): TrendData[] => {
     return chartData.map((item) => {
       const date = new Date(item.date);
@@ -263,7 +263,7 @@ const RingkasanPage = () => {
     let subtitle = "";
     if (selectedPeriod === "custom" && customStartDate && customEndDate) {
       subtitle = `${formatDate(customStartDate)} - ${formatDate(
-        customEndDate,
+        customEndDate
       )}`;
     } else {
       subtitle = timePeriodConfig[selectedPeriod].subtitle;
@@ -288,13 +288,13 @@ const RingkasanPage = () => {
   // Prepare chart data based on view mode
   const chartData = useMemo(
     () => prepareChartData(productViewMode, productSortMode, allProducts),
-    [productViewMode, productSortMode, allProducts],
+    [productViewMode, productSortMode, allProducts]
   );
 
   // Performance analysis
   const performanceAnalysis = useMemo(
     () => calculatePerformanceAnalysis(allProducts),
-    [allProducts],
+    [allProducts]
   );
 
   const topPerformers = performanceAnalysis
@@ -335,7 +335,7 @@ const RingkasanPage = () => {
   }
 
   return (
-    <div className="flex flex-col w-full gap-3 md:gap-5 h-full">
+    <div className="flex flex-col w-full gap-3 md:gap-5 h-full min-h-0 flex-1">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4">
         <div className="flex flex-col gap-0.5 md:gap-1">
           <h1 className="text-lg md:text-xl font-bold text-foreground">
@@ -427,7 +427,7 @@ const RingkasanPage = () => {
                           });
                         };
                         return `${formatDate(customStartDate)} - ${formatDate(
-                          customEndDate,
+                          customEndDate
                         )}`;
                       })()
                     : "Pilih Tanggal"}
@@ -588,10 +588,10 @@ const RingkasanPage = () => {
       </div>
 
       {/* Tabs for Chart and Product Performance */}
-      <div className="flex-1 min-h-0 bg-surface rounded-2xl md:rounded-3xl p-3 md:p-4 overflow-auto">
+      <div className="flex-1 min-h-[280px] md:min-h-0 bg-surface rounded-2xl md:rounded-3xl p-3 md:p-4 overflow-auto flex flex-col">
         <Tabs
           defaultSelectedKey="chart"
-          className="w-full h-full flex flex-col"
+          className="w-full h-full min-h-0 flex flex-col"
         >
           <div className="flex flex-row items-center w-full justify-between gap-2 md:gap-4 mb-2 md:mb-0">
             <Tabs.ListContainer className="overflow-x-auto -mx-3 px-3 md:mx-0 md:px-0">
