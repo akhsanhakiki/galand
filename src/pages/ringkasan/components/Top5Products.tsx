@@ -222,7 +222,7 @@ const Top5Products: React.FC<Top5ProductsProps> = ({
   }, [selectedChartProduct]);
 
   return (
-    <div className="flex flex-col gap-2 md:gap-4 min-h-0 md:h-full md:pt-4">
+    <div className="flex flex-col gap-2 md:gap-4 min-h-0 md:h-full p-2">
       {/* Header with filters */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 md:gap-2 shrink-0">
         <div className="flex items-center gap-1.5 md:gap-2 mb-2">

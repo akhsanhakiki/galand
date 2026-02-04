@@ -78,7 +78,7 @@ const ProductComparison: React.FC<ProductComparisonProps> = ({
               )}
               className="h-full w-full"
             >
-              <BarChart data={chartData} layout="vertical">
+              <BarChart data={chartData} layout="vertical" barCategoryGap={4}>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   horizontal={true}
@@ -121,7 +121,7 @@ const ProductComparison: React.FC<ProductComparisonProps> = ({
                     />
                   }
                 />
-                <Bar dataKey="value" radius={[0, 10, 10, 0]} barCategoryGap={4}>
+                <Bar dataKey="value" radius={[0, 10, 10, 0]}>
                   {chartData.map((entry, index) => {
                     const fillColor =
                       entry.color.includes("hsl") &&
