@@ -1,14 +1,7 @@
 import React from "react";
-import { Surface, Card, Button } from "@heroui/react";
+import { Surface, Card, Tabs } from "@heroui/react";
 import { LuChartBar } from "react-icons/lu";
-import {
-  Cell,
-  BarChart,
-  Bar,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Cell, BarChart, Bar, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
@@ -32,54 +25,46 @@ const ProductComparison: React.FC<ProductComparisonProps> = ({
   onViewModeChange,
 }) => {
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="flex flex-col gap-4 h-full min-h-[420px] md:min-h-0">
       {/* Header with filters */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Surface className="p-2 rounded-lg bg-accent/10">
-            <LuChartBar className="w-4 h-4 text-accent" />
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 md:gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 md:gap-2 mb-2">
+          <Surface className="p-1.5 md:p-2 rounded-lg bg-accent/10 shrink-0">
+            <LuChartBar className="w-3.5 h-3.5 md:w-4 md:h-4 text-accent" />
           </Surface>
-          <h2 className="text-lg font-bold text-foreground">
+          <h2 className="text-sm md:text-lg font-bold text-foreground">
             Perbandingan Produk
           </h2>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 bg-surface rounded-lg p-1">
-            <Button
-              size="sm"
-              variant={productViewMode === "revenue" ? "primary" : "ghost"}
-              onPress={() => onViewModeChange("revenue")}
-              className="h-7 px-3 text-xs"
+        <Tabs
+          selectedKey={productViewMode}
+          onSelectionChange={(key) => onViewModeChange(key as ProductViewMode)}
+          className="w-full sm:w-fit min-w-0"
+        >
+          <Tabs.ListContainer className="w-full sm:w-auto min-w-0">
+            <Tabs.List
+              aria-label="View Mode"
+              className="w-full sm:w-fit *:h-6 *:md:h-7 *:flex-1 *:sm:flex-initial *:min-w-0 *:w-fit *:px-2 *:md:px-2.5 *:text-[10px] *:md:text-[11px] *:font-normal *:leading-tight"
             >
-              Pendapatan
-            </Button>
-            <Button
-              size="sm"
-              variant={productViewMode === "quantity" ? "primary" : "ghost"}
-              onPress={() => onViewModeChange("quantity")}
-              className="h-7 px-3 text-xs"
-            >
-              Kuantitas
-            </Button>
-            <Button
-              size="sm"
-              variant={productViewMode === "profit" ? "primary" : "ghost"}
-              onPress={() => onViewModeChange("profit")}
-              className="h-7 px-3 text-xs"
-            >
-              Profit
-            </Button>
-          </div>
-        </div>
+              <Tabs.Tab id="revenue">
+                Pendapatan
+                <Tabs.Indicator />
+              </Tabs.Tab>
+              <Tabs.Tab id="quantity">
+                Kuantitas
+                <Tabs.Indicator />
+              </Tabs.Tab>
+              <Tabs.Tab id="profit">
+                Profit
+                <Tabs.Indicator />
+              </Tabs.Tab>
+            </Tabs.List>
+          </Tabs.ListContainer>
+        </Tabs>
       </div>
-      <Card className="p-4">
-        <Card.Header>
-          <Card.Title className="text-base font-bold">
-            Perbandingan Produk
-          </Card.Title>
-        </Card.Header>
-        <Card.Content>
-          <div className="h-64">
+      <Card className="p-4 flex-1 flex flex-col min-h-0">
+        <Card.Content className="flex-1 min-h-0 flex flex-col">
+          <div className="min-h-0 flex-1">
             <ChartContainer
               config={chartData.reduce(
                 (acc, item, idx) => ({
@@ -93,7 +78,7 @@ const ProductComparison: React.FC<ProductComparisonProps> = ({
               )}
               className="h-full w-full"
             >
-              <BarChart data={chartData} layout="vertical">
+              <BarChart data={chartData} layout="vertical" barCategoryGap={4}>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   horizontal={true}
@@ -119,7 +104,7 @@ const ProductComparison: React.FC<ProductComparisonProps> = ({
                 <YAxis
                   dataKey="name"
                   type="category"
-                  width={80}
+                  width={100}
                   tick={{ fontSize: 12 }}
                 />
                 <ChartTooltip
@@ -136,10 +121,24 @@ const ProductComparison: React.FC<ProductComparisonProps> = ({
                     />
                   }
                 />
-                <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
+                <Bar dataKey="value" radius={[0, 10, 10, 0]}>
+                  {chartData.map((entry, index) => {
+                    const fillColor =
+                      entry.color.includes("hsl") &&
+                      !entry.color.includes("hsla")
+                        ? entry.color
+                            .replace(")", ", 0.2)")
+                            .replace("hsl", "hsla")
+                        : entry.color;
+                    return (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={fillColor}
+                        stroke={entry.color}
+                        strokeWidth={2.5}
+                      />
+                    );
+                  })}
                 </Bar>
               </BarChart>
             </ChartContainer>

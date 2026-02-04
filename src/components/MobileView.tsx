@@ -58,7 +58,7 @@ const MobileView = () => {
           window.history.replaceState(
             { page: defaultPage },
             "",
-            `/${defaultPage}`,
+            `/${defaultPage}`
           );
           setCurrentPage(defaultPage);
         }
@@ -76,7 +76,7 @@ const MobileView = () => {
 
     // Dispatch popstate event to trigger route updates
     window.dispatchEvent(
-      new PopStateEvent("popstate", { state: { page: menuKey } }),
+      new PopStateEvent("popstate", { state: { page: menuKey } })
     );
 
     // Update local state
@@ -86,9 +86,9 @@ const MobileView = () => {
   const CurrentPageComponent = currentPage ? pageComponents[currentPage] : null;
 
   return (
-    <div className="md:hidden flex flex-col h-full w-full">
+    <div className="md:hidden flex flex-col h-full w-full min-h-0">
       <Header isMobile={true} />
-      <div className="flex flex-col w-full px-4 pb-20  overflow-y-auto">
+      <div className="flex-1 min-h-0 flex flex-col w-full px-4 overflow-y-auto">
         {CurrentPageComponent && <CurrentPageComponent key={currentPage} />}
       </div>
       <MobileBottomNav currentPage={currentPage} onNavigate={handleNavigate} />
