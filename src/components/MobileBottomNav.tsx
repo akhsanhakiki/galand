@@ -68,7 +68,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 md:hidden bg-surface z-50 safe-area-inset-bottom">
+      <nav className="md:hidden bg-surface z-10 shrink-0 safe-area-inset-bottom border-t border-separator">
         <div className="flex items-center justify-around px-1 py-2 overflow-x-auto">
           {bottomNavItems.map(({ title, icon: Icon, key }) => {
             const isActive = currentPage === key;

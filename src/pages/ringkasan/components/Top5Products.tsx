@@ -222,7 +222,7 @@ const Top5Products: React.FC<Top5ProductsProps> = ({
   }, [selectedChartProduct]);
 
   return (
-    <div className="flex flex-col gap-2 md:gap-4 min-h-0 md:h-full">
+    <div className="flex flex-col gap-2 md:gap-4 min-h-0 md:h-full md:pt-4">
       {/* Header with filters */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 md:gap-2 shrink-0">
         <div className="flex items-center gap-1.5 md:gap-2 mb-2">
@@ -264,7 +264,7 @@ const Top5Products: React.FC<Top5ProductsProps> = ({
       </div>
 
       {/* Donut Chart with Product List - on mobile content scrolls with tab panel; on desktop split layout with inner scroll */}
-      <div className="p-2 md:p-4 border border-separator rounded-xl flex flex-col flex-none md:flex-1 md:min-h-0">
+      <div className="md:p-4 rounded-xl flex flex-col flex-none md:flex-1 md:min-h-0">
         <div className="flex flex-col md:flex-row gap-3 md:gap-4 flex-none md:flex-1 md:min-h-0">
           {/* Pie Chart - fixed height on mobile so it scrolls with content; flex on desktop */}
           <div className="h-[220px] md:h-auto md:flex-1 min-w-0 md:max-h-none shrink-0">

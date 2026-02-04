@@ -335,7 +335,7 @@ const RingkasanPage = () => {
   }
 
   return (
-    <div className="flex flex-col w-full gap-3 md:gap-5 h-full min-h-0 flex-1">
+    <div className="flex flex-col w-full gap-3 md:gap-5 flex-1 min-h-min md:h-full md:min-h-0">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4">
         <div className="flex flex-col gap-0.5 md:gap-1">
           <h1 className="text-lg md:text-xl font-bold text-foreground">
@@ -365,7 +365,7 @@ const RingkasanPage = () => {
           >
             <Tabs.ListContainer
               ref={tabsScrollRef}
-              className="rounded-3xl p-1.5 md:p-1 w-full overflow-x-auto scroll-smooth [&::-webkit-scrollbar]:hidden"
+              className="rounded-2xl md:rounded-3xl p-1 md:p-1 w-full overflow-x-auto scroll-smooth [&::-webkit-scrollbar]:hidden"
               style={{
                 scrollSnapType: "x mandatory",
                 WebkitOverflowScrolling: "touch",
@@ -375,7 +375,7 @@ const RingkasanPage = () => {
             >
               <Tabs.List
                 aria-label="Periode Waktu"
-                className="bg-background-secondary flex *:h-8 *:md:h-6 *:flex-1 *:min-w-[80px] *:md:min-w-[60px] *:px-3 *:md:px-2 *:text-xs *:md:text-[11px] *:font-normal *:rounded-none *:bg-transparent *:data-[selected=true]:bg-transparent *:data-[selected=true]:text-foreground *:data-[hover=true]:bg-transparent"
+                className="bg-background-secondary flex *:h-6 *:md:h-6 *:flex-1 *:min-w-[56px] *:md:min-w-[60px] *:px-2 *:md:px-2 *:text-[11px] *:md:text-[11px] *:font-normal *:rounded-none *:bg-transparent *:data-[selected=true]:bg-transparent *:data-[selected=true]:text-foreground *:data-[hover=true]:bg-transparent"
                 style={{ minWidth: "100%", width: "max-content" }}
               >
                 <Tabs.Tab id="semua" style={{ scrollSnapAlign: "start" }}>
@@ -587,11 +587,11 @@ const RingkasanPage = () => {
         </div>
       </div>
 
-      {/* Tabs for Chart and Product Performance */}
-      <div className="flex-1 min-h-[280px] md:min-h-0 bg-surface rounded-2xl md:rounded-3xl p-3 md:p-4 overflow-auto flex flex-col">
+      {/* Tabs for Chart and Product Performance - on mobile grow with content so page scrolls; on desktop flex-1 and scroll inside */}
+      <div className="md:flex-1 min-h-0 bg-surface rounded-2xl md:rounded-3xl p-3 md:p-4 overflow-visible md:overflow-auto flex flex-col">
         <Tabs
           defaultSelectedKey="chart"
-          className="w-full h-full min-h-0 flex flex-col"
+          className="w-full min-h-0 flex flex-col md:h-full"
         >
           <div className="flex flex-row items-center w-full justify-between gap-2 md:gap-4 mb-2 md:mb-0">
             <Tabs.ListContainer className="overflow-x-auto -mx-3 px-3 md:mx-0 md:px-0">
@@ -624,12 +624,15 @@ const RingkasanPage = () => {
           </div>
 
           {/* Chart Tab */}
-          <Tabs.Panel id="chart" className="flex-1 min-h-0">
+          <Tabs.Panel id="chart" className="flex-1 min-h-min md:min-h-0">
             <RevenueProfitChart currentPeriodData={currentPeriodData} />
           </Tabs.Panel>
 
-          {/* Top 5 Produk Tab */}
-          <Tabs.Panel id="top5" className="flex-1 min-h-0 overflow-auto">
+          {/* Top 5 Produk Tab - on mobile grow with content so parent scrolls; on desktop panel scrolls */}
+          <Tabs.Panel
+            id="top5"
+            className="p-0 flex-1 min-h-min md:min-h-0 overflow-visible md:overflow-auto"
+          >
             <Top5Products
               products={top5Products}
               productViewMode={productViewMode}
@@ -639,7 +642,10 @@ const RingkasanPage = () => {
           </Tabs.Panel>
 
           {/* Perbandingan Produk Tab */}
-          <Tabs.Panel id="comparison" className="flex-1 min-h-0 overflow-auto">
+          <Tabs.Panel
+            id="comparison"
+            className="flex-1 min-h-min md:min-h-0 overflow-visible md:overflow-auto"
+          >
             <ProductComparison
               chartData={chartData}
               productViewMode={productViewMode}
@@ -648,12 +654,18 @@ const RingkasanPage = () => {
           </Tabs.Panel>
 
           {/* Produk Berkinerja Terbaik Tab */}
-          <Tabs.Panel id="best" className="flex-1 min-h-0 overflow-auto">
+          <Tabs.Panel
+            id="best"
+            className="flex-1 min-h-min md:min-h-0 overflow-visible md:overflow-auto"
+          >
             <BestPerformingProducts topPerformers={topPerformers} />
           </Tabs.Panel>
 
           {/* Produk Perlu Perhatian Tab */}
-          <Tabs.Panel id="attention" className="flex-1 min-h-0 overflow-auto">
+          <Tabs.Panel
+            id="attention"
+            className="flex-1 min-h-min md:min-h-0 overflow-visible md:overflow-auto"
+          >
             <ProductsNeedingAttention poorPerformers={poorPerformers} />
           </Tabs.Panel>
         </Tabs>

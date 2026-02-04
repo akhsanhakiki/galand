@@ -1,10 +1,7 @@
 import React from "react";
 import { Surface, Card } from "@heroui/react";
 import { LuArrowDown, LuArrowUp } from "react-icons/lu";
-import {
-  type ProductWithScore,
-  formatCurrency,
-} from "../shared";
+import { type ProductWithScore, formatCurrency } from "../shared";
 
 interface ProductsNeedingAttentionProps {
   poorPerformers: ProductWithScore[];
