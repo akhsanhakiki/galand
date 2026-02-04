@@ -477,12 +477,19 @@ const TransaksiPage = () => {
                   setIsPopoverOpen(false);
                 }
               }}
-              className="w-fit"
             >
-              <Tabs.ListContainer className="bg-surface rounded-3xl p-1">
+              <Tabs.ListContainer
+                className="rounded-2xl md:rounded-3xl p-1 md:p-1 w-full overflow-x-auto scroll-smooth [&::-webkit-scrollbar]:hidden"
+                style={{
+                  scrollSnapType: "x mandatory",
+                  WebkitOverflowScrolling: "touch",
+                  scrollbarWidth: "none",
+                  msOverflowStyle: "none",
+                }}
+              >
                 <Tabs.List
                   aria-label="Periode Waktu"
-                  className="w-fit *:h-6 *:w-fit *:px-2 *:text-[11px] *:font-normal *:rounded-none *:bg-transparent *:data-[selected=true]:bg-transparent *:data-[selected=true]:text-foreground *:data-[hover=true]:bg-transparent"
+                  className="bg-background-secondary flex *:h-6 *:w-fit *:px-2 *:text-[11px] *:font-normal *:rounded-none *:bg-transparent *:data-[selected=true]:bg-transparent *:data-[selected=true]:text-foreground *:data-[hover=true]:bg-transparent"
                 >
                   <Tabs.Tab id="semua">
                     Semua
