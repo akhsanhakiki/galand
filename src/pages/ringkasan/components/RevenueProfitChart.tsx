@@ -463,8 +463,8 @@ const RevenueProfitChart: React.FC<RevenueProfitChartProps> = React.memo(
             ))}
           </div>
         </div>
-        <div className="flex-1 min-h-[200px] md:min-h-0" ref={chartRef}>
-          <div className="h-full w-full min-h-[200px] md:min-h-0">
+        <div className="flex-1 min-h-[320px] md:min-h-0" ref={chartRef}>
+          <div className="h-full w-full min-h-[320px] md:min-h-0">
             <ReactECharts
               option={areaChartOption}
               style={{ height: "100%", width: "100%" }}
