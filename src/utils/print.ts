@@ -53,8 +53,8 @@ export const printTransaction = (transaction: Transaction) => {
             padding: 2mm 1mm;
             color: #000;
             background: #fff;
-            font-size: 8px; /* Smaller font for 58mm */
-            line-height: 1.1;
+            font-size: 10px;
+            line-height: 1.25;
             overflow: visible;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
@@ -66,17 +66,17 @@ export const printTransaction = (transaction: Transaction) => {
             border-bottom: 1px solid #000;
           }
           .header h1 {
-            font-size: 10px;
+            font-size: 12px;
             font-weight: bold;
-            margin-bottom: 1px;
+            margin-bottom: 2px;
             text-transform: uppercase;
           }
           .header p {
-            font-size: 8px;
+            font-size: 10px;
           }
           .transaction-info {
-            margin-bottom: 3px;
-            font-size: 7px;
+            margin-bottom: 4px;
+            font-size: 9px;
           }
           .transaction-info-row {
             display: flex;
@@ -93,23 +93,23 @@ export const printTransaction = (transaction: Transaction) => {
           table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 3px;
-            font-size: 7px;
+            margin-bottom: 4px;
+            font-size: 9px;
           }
           th {
             text-align: left;
-            padding: 1px 0;
+            padding: 2px 0;
             font-weight: bold;
             border-bottom: 1px solid #000;
-            font-size: 7px;
+            font-size: 9px;
           }
           th:last-child {
             text-align: right;
           }
           td {
-            padding: 1px 0;
+            padding: 2px 0;
             border-bottom: 1px dotted #000;
-            font-size: 7px;
+            font-size: 9px;
           }
           tbody tr:last-child td {
             border-bottom: none;
@@ -138,16 +138,16 @@ export const printTransaction = (transaction: Transaction) => {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 9px;
+            font-size: 11px;
             font-weight: bold;
-            margin-top: 1px;
+            margin-top: 2px;
           }
           .footer {
-            margin-top: 4px;
+            margin-top: 6px;
             text-align: center;
-            font-size: 7px;
+            font-size: 9px;
             border-top: 1px dashed #000;
-            padding-top: 3px;
+            padding-top: 4px;
           }
           @media print {
             html, body {
@@ -197,7 +197,7 @@ export const printTransaction = (transaction: Transaction) => {
                     )}</td>
                   </tr>
                   <tr>
-                    <td colspan="3" style="font-size: 6px; padding-left: 0;">
+                    <td colspan="3" style="font-size: 8px; padding-left: 0;">
                       ${item.quantity}x Rp${item.price.toLocaleString("id-ID")}
                     </td>
                   </tr>
