@@ -4,6 +4,11 @@ export const printTransaction = (transaction: Transaction) => {
   const printWindow = window.open("", "_blank");
   if (!printWindow) return;
 
+  // Set up print handlers before writing content
+  printWindow.onafterprint = () => {
+    printWindow.close();
+  };
+
   const formatDate = (dateString?: string) => {
     if (!dateString) return "-";
     const date = new Date(dateString);
@@ -17,14 +22,14 @@ export const printTransaction = (transaction: Transaction) => {
     });
   };
 
-  // Receipt paper: 80mm width (≈302px at 96dpi). Fixed viewport so preview matches paper.
+  // Receipt paper: 58mm width (≈219px at 96dpi). Fixed viewport so preview matches paper.
   const printContent = `
     <!DOCTYPE html>
     <html>
       <head>
         <meta charset="utf-8">
         <title>Struk #${transaction.id}</title>
-        <meta name="viewport" content="width=302, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="viewport" content="width=219, initial-scale=1">
         <style>
           * {
             margin: 0;
@@ -32,26 +37,27 @@ export const printTransaction = (transaction: Transaction) => {
             box-sizing: border-box;
           }
           html {
-            width: 80mm;
-            max-width: 80mm;
-            margin: 0 auto;
+            width: 100%;
             background: #fff;
+            overflow: visible;
           }
           @page {
-            size: 80mm 297mm;
-            margin: 2mm;
+            size: 58mm auto;
+            margin: 0;
           }
           body {
             font-family: 'Courier New', Courier, monospace;
-            width: 80mm;
-            max-width: 80mm;
-            min-width: 80mm;
+            width: 48mm; /* Standard printable width for 58mm paper */
+            max-width: 100%;
             margin: 0 auto;
-            padding: 3mm 2mm;
+            padding: 2mm 1mm;
             color: #000;
             background: #fff;
-            font-size: 9px;
-            line-height: 1.2;
+            font-size: 8px; /* Smaller font for 58mm */
+            line-height: 1.1;
+            overflow: visible;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
           .header {
             text-align: center;
@@ -60,42 +66,42 @@ export const printTransaction = (transaction: Transaction) => {
             border-bottom: 1px solid #000;
           }
           .header h1 {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: bold;
-            margin-bottom: 2px;
+            margin-bottom: 1px;
             text-transform: uppercase;
           }
           .header p {
-            font-size: 9px;
+            font-size: 8px;
           }
           .transaction-info {
-            margin-bottom: 4px;
-            font-size: 8px;
+            margin-bottom: 3px;
+            font-size: 7px;
           }
           .transaction-info-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 2px;
+            margin-bottom: 1px;
           }
           .transaction-info-label {
             font-weight: bold;
           }
           .divider {
             border-top: 1px dashed #000;
-            margin: 3px 0;
+            margin: 2px 0;
           }
           table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 4px;
-            font-size: 8px;
+            margin-bottom: 3px;
+            font-size: 7px;
           }
           th {
             text-align: left;
-            padding: 2px 0;
+            padding: 1px 0;
             font-weight: bold;
             border-bottom: 1px solid #000;
-            font-size: 8px;
+            font-size: 7px;
           }
           th:last-child {
             text-align: right;
@@ -103,7 +109,7 @@ export const printTransaction = (transaction: Transaction) => {
           td {
             padding: 1px 0;
             border-bottom: 1px dotted #000;
-            font-size: 8px;
+            font-size: 7px;
           }
           tbody tr:last-child td {
             border-bottom: none;
@@ -112,44 +118,42 @@ export const printTransaction = (transaction: Transaction) => {
             text-align: right;
           }
           .item-name {
-            max-width: 42%;
+            max-width: 45%;
             word-wrap: break-word;
           }
           .item-qty {
             text-align: center;
-            width: 14%;
+            width: 15%;
           }
           .item-price {
             text-align: right;
-            width: 44%;
+            width: 40%;
           }
           .total-section {
-            margin-top: 4px;
-            padding-top: 4px;
-            border-top: 2px solid #000;
+            margin-top: 3px;
+            padding-top: 3px;
+            border-top: 1px solid #000;
           }
           .total-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: bold;
-            margin-top: 2px;
+            margin-top: 1px;
           }
           .footer {
-            margin-top: 6px;
+            margin-top: 4px;
             text-align: center;
-            font-size: 8px;
+            font-size: 7px;
             border-top: 1px dashed #000;
-            padding-top: 4px;
+            padding-top: 3px;
           }
           @media print {
             html, body {
-              width: 80mm !important;
-              max-width: 80mm !important;
-              min-width: 80mm !important;
-              margin: 0 !important;
-              padding: 2mm !important;
+              width: 48mm !important;
+              margin: 0 auto !important;
+              padding: 1mm !important;
             }
             .no-print {
               display: none;
@@ -193,7 +197,7 @@ export const printTransaction = (transaction: Transaction) => {
                     )}</td>
                   </tr>
                   <tr>
-                    <td colspan="3" style="font-size: 7px; padding-left: 0;">
+                    <td colspan="3" style="font-size: 6px; padding-left: 0;">
                       ${item.quantity}x Rp${item.price.toLocaleString("id-ID")}
                     </td>
                   </tr>
@@ -222,10 +226,19 @@ export const printTransaction = (transaction: Transaction) => {
   printWindow.document.write(printContent);
   printWindow.document.close();
 
-  // Wait for content to load, then print
-  setTimeout(() => {
+  // Robust print trigger
+  const triggerPrint = () => {
+    if ((printWindow as any).isPrinting) return;
+    (printWindow as any).isPrinting = true;
     printWindow.focus();
     printWindow.print();
-    printWindow.close();
-  }, 250);
+  };
+
+  if (printWindow.document.readyState === "complete") {
+    setTimeout(triggerPrint, 500);
+  } else {
+    printWindow.onload = () => setTimeout(triggerPrint, 500);
+    // Ultimate fallback
+    setTimeout(triggerPrint, 2000);
+  }
 };
