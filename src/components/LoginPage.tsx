@@ -5,7 +5,6 @@ import {
   Button,
   TextField,
   Input,
-  Label,
   FieldError,
   Description,
   Alert,
@@ -34,6 +33,7 @@ const LoginPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mobileStep, setMobileStep] = useState<"intro" | "login">("intro");
 
   useEffect(() => {
     // Check for OAuth callback - if we're coming back from OAuth, complete the flow
@@ -58,7 +58,7 @@ const LoginPage = () => {
         try {
           // Wait a bit for any cookies to be set by the SDK
           await new Promise((resolve) =>
-            setTimeout(resolve, 500 + attempt * 300),
+            setTimeout(resolve, 500 + attempt * 300)
           );
 
           // Try to get the session - the SDK should have completed the OAuth flow
@@ -88,7 +88,7 @@ const LoginPage = () => {
             setError(
               err instanceof Error
                 ? err.message
-                : "Autentikasi gagal. Silakan coba lagi.",
+                : "Autentikasi gagal. Silakan coba lagi."
             );
             setLoading(false);
             // Clean up URL
@@ -138,7 +138,7 @@ const LoginPage = () => {
 
       if (result.error) {
         setError(
-          result.error.message || "Terjadi kesalahan yang tidak terduga",
+          result.error.message || "Terjadi kesalahan yang tidak terduga"
         );
         setSubmitting(false);
         return;
@@ -172,7 +172,7 @@ const LoginPage = () => {
       setError(
         err instanceof Error
           ? err.message
-          : "Terjadi kesalahan yang tidak terduga",
+          : "Terjadi kesalahan yang tidak terduga"
       );
     } finally {
       setSubmitting(false);
@@ -196,7 +196,7 @@ const LoginPage = () => {
       const callbackUrlPrimary = new URL("/auth/callback", origin).toString();
       const callbackUrlLegacy = new URL(
         "/api/auth/callback",
-        origin,
+        origin
       ).toString();
 
       try {
@@ -228,7 +228,7 @@ const LoginPage = () => {
       // The redirect will happen automatically, so we don't need to do anything else
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Gagal masuk dengan Google",
+        err instanceof Error ? err.message : "Gagal masuk dengan Google"
       );
       setOauthLoading(false);
     }
@@ -299,18 +299,19 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-7xl px-4 py-8 md:px-8 lg:px-12">
-        <div className="grid min-h-[calc(100vh-4rem)] grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-16">
-          {/* Left Section - Info */}
-          <div className="flex flex-col justify-center space-y-8 lg:pr-8">
-            <div className="space-y-6">
-              {/* Logo */}
+    <div className="flex min-h-dvh flex-col overflow-hidden bg-background md:min-h-screen">
+      <div className="mx-auto flex min-h-0 flex-1 flex-col px-4 py-4 sm:py-6 md:max-w-7xl md:px-8 md:py-8 lg:px-12 w-full">
+        <div className="grid min-h-0 flex-1 grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-16">
+          {/* Left Section - Screen 1 on mobile (intro); always visible on desktop */}
+          <div
+            className={`flex flex-col justify-center space-y-8 text-center lg:pr-8 lg:text-left login-left-spawn ${
+              mobileStep !== "intro" ? "hidden lg:flex" : ""
+            } items-center lg:items-start`}
+          >
+            <div className="w-full max-w-md space-y-6 lg:max-w-none">
               <div>
-                <h1 className="text-3xl font-bold text-accent mb-2">kadara</h1>
+                <h1 className="mb-2 text-3xl font-bold text-accent">kadara</h1>
               </div>
-
-              {/* Tagline */}
               <div>
                 <h1 className="text-4xl font-light leading-tight text-foreground md:text-5xl lg:text-6xl">
                   {isSignUp ? (
@@ -321,32 +322,30 @@ const LoginPage = () => {
                   ) : (
                     <>
                       Sistem kasir yang{" "}
-                      <span className="text-accent">efisien</span>
+                      <span className="text-accent">mudah</span>
                     </>
                   )}
                 </h1>
               </div>
-
-              {/* Description */}
               <div className="space-y-3">
-                <p className="text-base text-muted leading-relaxed">
+                <p className="text-base leading-relaxed text-muted">
                   Solusi lengkap untuk mengelola toko Anda. Mulai dari manajemen
                   produk, transaksi penjualan, hingga laporan keuangan -
                   semuanya dalam satu platform.
                 </p>
-                <div className="flex flex-wrap gap-4 pt-2">
+                <div className="flex flex-wrap justify-center gap-4 pt-2 lg:justify-start">
                   <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                    <div className="h-1.5 w-1.5 rounded-full bg-accent" />
                     <span className="text-sm text-muted">Manajemen Produk</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                    <div className="h-1.5 w-1.5 rounded-full bg-accent" />
                     <span className="text-sm text-muted">
                       Transaksi Real-time
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-accent"></div>
+                    <div className="h-1.5 w-1.5 rounded-full bg-accent" />
                     <span className="text-sm text-muted">Laporan Keuangan</span>
                   </div>
                 </div>
@@ -355,23 +354,45 @@ const LoginPage = () => {
             <div className="pt-4">
               <p className="text-sm text-muted">
                 Made with <span className="text-accent">♥</span> by{" "}
-                <span className="text-foreground font-medium">haki studio</span>
+                <span className="font-medium text-foreground">haki studio</span>
               </p>
             </div>
+            <Button
+              onPress={() => setMobileStep("login")}
+              className="mt-6 w-full max-w-md rounded-full bg-accent px-6 py-3 font-normal text-accent-foreground hover:bg-accent/90 lg:hidden"
+            >
+              Lanjutkan
+            </Button>
           </div>
 
-          {/* Right Section - Login Form */}
-          <div className="flex flex-col justify-center">
-            <div className="w-full max-w-md">
-              {/* Logo for mobile/tablet */}
-              <div className="mb-6 lg:hidden">
-                <h1 className="text-2xl font-bold text-accent">kadara</h1>
+          {/* Right Section - Screen 2 on mobile (login form); always visible on desktop */}
+          <div
+            className={`flex min-h-0 flex-1 flex-col items-center justify-center lg:items-start login-form-spawn ${
+              mobileStep !== "login" ? "hidden lg:flex" : ""
+            }`}
+          >
+            <div className="w-full max-w-[min(100%,22rem)] px-1 sm:max-w-md sm:px-0 lg:max-w-md">
+              {/* Branding: centered on mobile, left on desktop */}
+              <div className="mb-6 text-center lg:mb-8 lg:text-left">
+                <div className="lg:hidden">
+                  <h1 className="text-3xl font-bold text-accent sm:text-4xl">
+                    kadara
+                  </h1>
+                </div>
+                <h2 className="mt-2 text-2xl font-semibold text-foreground sm:mt-4 sm:text-3xl lg:mt-0 lg:text-2xl lg:font-light">
+                  {isSignUp ? "Buat akun" : "Selamat datang kembali"}
+                </h2>
+                <p className="mt-1.5 text-sm text-muted sm:mt-2">
+                  {isSignUp
+                    ? "Mari daftar untuk memulai"
+                    : "Masuk ke kadara untuk melanjutkan"}
+                </p>
               </div>
-              <h2 className="mb-8 text-2xl font-light text-foreground">
-                {isSignUp ? "Buat akun" : "Masuk"}
-              </h2>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form
+                onSubmit={handleSubmit}
+                className="flex w-full flex-col space-y-4 sm:space-y-5"
+              >
                 {error && (
                   <Alert status="danger" className="w-full">
                     <Alert.Indicator />
@@ -382,7 +403,7 @@ const LoginPage = () => {
                   </Alert>
                 )}
 
-                <div className="flex flex-col gap-6">
+                <div className="flex w-full flex-col gap-4">
                   <TextField
                     isRequired
                     name="email"
@@ -390,9 +411,10 @@ const LoginPage = () => {
                     value={email}
                     onChange={setEmail}
                     isDisabled={submitting}
+                    className="w-full"
+                    aria-label="Email"
                   >
-                    <Label>Email</Label>
-                    <Input placeholder="Alamat email" />
+                    <Input placeholder="Alamat email" className="w-full" />
                     <FieldError />
                   </TextField>
 
@@ -409,9 +431,10 @@ const LoginPage = () => {
                       }
                       return null;
                     }}
+                    className="w-full"
+                    aria-label="Kata Sandi"
                   >
-                    <Label>Kata Sandi</Label>
-                    <Input placeholder="Kata sandi" />
+                    <Input placeholder="Kata sandi" className="w-full" />
                     {isSignUp && (
                       <Description className="mt-1 text-xs text-muted">
                         Kata sandi minimal 8 karakter
@@ -421,25 +444,20 @@ const LoginPage = () => {
                   </TextField>
                 </div>
 
-                <div className="pt-4">
-                  <Button
-                    type="submit"
-                    fullWidth
-                    isPending={submitting}
-                    isDisabled={submitting || oauthLoading}
-                    className="group justify-between bg-accent text-accent-foreground hover:bg-accent/90 font-normal rounded-lg px-6 py-3"
-                  >
-                    <span>{isSignUp ? "Daftar" : "Masuk"}</span>
-                    <span className="transition-transform group-hover:translate-x-1">
-                      →
-                    </span>
-                  </Button>
-                </div>
+                <Button
+                  type="submit"
+                  fullWidth
+                  isPending={submitting}
+                  isDisabled={submitting || oauthLoading}
+                  className="w-full rounded-full bg-accent px-6 py-3 font-normal text-accent-foreground hover:bg-accent/90"
+                >
+                  {isSignUp ? "Daftar" : "Masuk"}
+                </Button>
 
-                <div className="flex items-center gap-4 py-4">
-                  <div className="h-px flex-1 bg-border"></div>
+                <div className="flex w-full items-center gap-4 py-2">
+                  <div className="h-px flex-1 bg-border" />
                   <span className="text-xs text-muted">atau</span>
-                  <div className="h-px flex-1 bg-border"></div>
+                  <div className="h-px flex-1 bg-border" />
                 </div>
 
                 <Button
@@ -448,15 +466,15 @@ const LoginPage = () => {
                   onPress={handleGoogleSignIn}
                   isPending={oauthLoading}
                   isDisabled={submitting || oauthLoading}
-                  className="font-normal rounded-lg bg-surface hover:scale-102 transition-all duration-300"
+                  className="w-full rounded-full bg-surface font-normal transition-all duration-300 hover:scale-102"
                 >
                   <FcGoogle className="mr-2 text-xl" />
                   Lanjutkan dengan Google
                 </Button>
 
-                <div className="pt-4 text-center text-sm">
+                <p className="pt-2 text-center text-sm text-muted sm:pt-4 lg:text-left">
                   {isSignUp ? (
-                    <p className="text-muted">
+                    <>
                       Sudah punya akun?{" "}
                       <button
                         type="button"
@@ -464,13 +482,13 @@ const LoginPage = () => {
                           setIsSignUp(false);
                           setError(null);
                         }}
-                        className="text-accent hover:text-accent/80 hover:underline font-normal transition-colors"
+                        className="font-normal text-accent transition-colors hover:text-accent/80 hover:underline"
                       >
                         Masuk
                       </button>
-                    </p>
+                    </>
                   ) : (
-                    <p className="text-muted">
+                    <>
                       Belum punya akun?{" "}
                       <button
                         type="button"
@@ -478,13 +496,13 @@ const LoginPage = () => {
                           setIsSignUp(true);
                           setError(null);
                         }}
-                        className="text-accent hover:text-accent/80 hover:underline font-normal transition-colors"
+                        className="font-normal text-accent transition-colors hover:text-accent/80 hover:underline"
                       >
                         Daftar
                       </button>
-                    </p>
+                    </>
                   )}
-                </div>
+                </p>
               </form>
             </div>
           </div>

@@ -15,6 +15,7 @@ import {
   InputGroup,
   Accordion,
   NumberField,
+  Modal,
 } from "@heroui/react";
 import {
   LuReceipt,
@@ -78,7 +79,43 @@ const KasirPage = () => {
   const [isResizing, setIsResizing] = useState(false);
   const [mobileCartOpen, setMobileCartOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [addQuantity, setAddQuantity] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const openProductModal = (product: Product) => {
+    if (product.stock <= 0) return;
+    setSelectedProduct(product);
+    setAddQuantity(1);
+  };
+
+  const closeProductModal = () => {
+    setSelectedProduct(null);
+    setAddQuantity(1);
+  };
+
+  const handleProductClick = (product: Product) => {
+    if (product.stock <= 0) return;
+    if (isDesktop) {
+      const existing = cart.find((item) => item.product_id === product.id);
+      const targetQty = (existing?.quantity ?? 0) + 1;
+      addToCart(product);
+      setQuantity(product.id, targetQty);
+    } else {
+      openProductModal(product);
+    }
+  };
+
+  const handleAddToCartFromModal = () => {
+    if (!selectedProduct) return;
+    const existing = cart.find(
+      (item) => item.product_id === selectedProduct.id
+    );
+    const targetQty = (existing?.quantity ?? 0) + addQuantity;
+    addToCart(selectedProduct);
+    setQuantity(selectedProduct.id, targetQty);
+    closeProductModal();
+  };
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)");
@@ -288,9 +325,9 @@ const KasirPage = () => {
 
   return (
     <div className="flex flex-col w-full gap-5 h-full">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-xl font-bold text-foreground">Kasir</h1>
-        <p className="text-muted text-sm">
+      <div className="flex flex-col gap-0.5 md:gap-1">
+        <h1 className="text-lg md:text-xl font-bold text-foreground">Kasir</h1>
+        <p className="text-muted text-xs md:text-sm">
           Sistem point of sale untuk transaksi penjualan
         </p>
       </div>
@@ -351,16 +388,16 @@ const KasirPage = () => {
                                 ? "opacity-50 cursor-not-allowed"
                                 : "cursor-pointer"
                             }`}
-                            onClick={() => addToCart(product)}
+                            onClick={() => handleProductClick(product)}
                           >
                             <p className="font-semibold text-foreground text-sm">
                               {product.name}
                             </p>
-                            <div className="flex flex-row gap-2 w-full items-center justify-between">
+                            <div className="flex flex-col gap-2 w-full">
                               <p className="text-accent font-medium text-sm">
                                 Rp {product.price.toLocaleString("id-ID")}
                               </p>
-                              <p className="text-xs text-muted mt-1">
+                              <p className="text-xs text-muted">
                                 Stok:{" "}
                                 <span className="text-foreground font-medium text-xs">
                                   {product.stock}
@@ -796,6 +833,84 @@ const KasirPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Product detail modal - quantity & Tambah ke Keranjang */}
+      <Modal>
+        <Modal.Backdrop
+          isOpen={!!selectedProduct}
+          onOpenChange={(open) => !open && closeProductModal()}
+          className="z-200"
+        >
+          <Modal.Container>
+            <Modal.Dialog className="sm:max-w-[360px]">
+              <Modal.CloseTrigger />
+              {selectedProduct && (
+                <>
+                  <Modal.Header>
+                    <Modal.Heading>{selectedProduct.name}</Modal.Heading>
+                  </Modal.Header>
+                  <Modal.Body>
+                    <div className="flex flex-col gap-3">
+                      {selectedProduct.description && (
+                        <p className="text-sm text-muted">
+                          {selectedProduct.description}
+                        </p>
+                      )}
+                      <div className="flex flex-row justify-between items-center">
+                        <span className="text-sm text-muted">Harga</span>
+                        <span className="text-accent font-semibold">
+                          Rp {selectedProduct.price.toLocaleString("id-ID")}
+                        </span>
+                      </div>
+                      <div className="flex flex-row justify-between items-center">
+                        <span className="text-sm text-muted">Stok</span>
+                        <span className="text-sm font-medium text-foreground">
+                          {selectedProduct.stock}
+                        </span>
+                      </div>
+                      {selectedProduct.bundle_quantity > 0 &&
+                        selectedProduct.bundle_price > 0 && (
+                          <div className="text-xs text-success rounded-lg bg-success/10 p-2">
+                            Bundle: {selectedProduct.bundle_quantity} pcs @ Rp{" "}
+                            {selectedProduct.bundle_price.toLocaleString(
+                              "id-ID"
+                            )}{" "}
+                            per pcs
+                          </div>
+                        )}
+                      <NumberField
+                        value={addQuantity}
+                        onChange={(value) =>
+                          value !== undefined && setAddQuantity(value)
+                        }
+                        minValue={1}
+                        maxValue={selectedProduct.stock}
+                        className="w-full"
+                      >
+                        <Label className="text-sm">Jumlah</Label>
+                        <NumberField.Group className="shadow-none border mt-1">
+                          <NumberField.DecrementButton className="w-10" />
+                          <NumberField.Input className="w-14 text-center" />
+                          <NumberField.IncrementButton className="w-10" />
+                        </NumberField.Group>
+                      </NumberField>
+                    </div>
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <Button
+                      variant="primary"
+                      className="w-full bg-accent text-accent-foreground"
+                      onPress={handleAddToCartFromModal}
+                    >
+                      Tambah ke Keranjang
+                    </Button>
+                  </Modal.Footer>
+                </>
+              )}
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
 
       {/* Mobile cart overlay - shown when "Lanjut Pembayaran" is tapped */}
       {mobileCartOpen && (

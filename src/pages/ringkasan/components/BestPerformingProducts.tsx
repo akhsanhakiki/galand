@@ -11,12 +11,16 @@ const BestPerformingProducts: React.FC<BestPerformingProductsProps> = ({
   topPerformers,
 }) => {
   return (
-    <div className="flex flex-col gap-4 h-full">
-      <div className="flex items-center gap-2">
-        <Surface className="p-2 rounded-lg bg-success/10">
-          <LuTrendingUp className="w-4 h-4 text-success" />
-        </Surface>
-        <div className="text-base font-bold">Produk Berkinerja Terbaik</div>
+    <div className="flex flex-col gap-2 md:gap-4 h-full p-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 md:gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 md:gap-2 mb-2">
+          <Surface className="p-1.5 md:p-2 rounded-lg bg-success/10 shrink-0">
+            <LuTrendingUp className="w-3.5 h-3.5 md:w-4 md:h-4 text-success" />
+          </Surface>
+          <h2 className="text-sm md:text-lg font-bold text-foreground">
+            Produk Berkinerja Terbaik
+          </h2>
+        </div>
       </div>
       <div>
         <div className="flex flex-col gap-3">

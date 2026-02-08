@@ -9,6 +9,7 @@ import {
   LuPercent,
   LuCoins,
   LuReceipt,
+  LuShoppingCart,
 } from "react-icons/lu";
 
 // Components
@@ -36,7 +37,8 @@ import type { SummaryResponse, SummaryProduct } from "../../utils/api";
 import { useOrganization } from "../../contexts/OrganizationContext";
 
 const RingkasanPage = () => {
-  const { organizationChangeKey } = useOrganization();
+  const { organizationChangeKey, loading: organizationLoading } =
+    useOrganization();
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("semua");
   const [productViewMode, setProductViewMode] =
     useState<ProductViewMode>("revenue");
@@ -53,8 +55,18 @@ const RingkasanPage = () => {
 
   // Fetch summary data from API
   useEffect(() => {
-    const fetchSummary = async () => {
-      // Only show loading spinner on initial load, not on period changes
+    // Wait for organization (and auth) to be ready before first fetch.
+    // On mobile, the page can mount before session/active org is set, causing
+    // the first request to fail; deferring until !organizationLoading avoids that.
+    if (organizationLoading) {
+      setLoading(true);
+      setError(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    const fetchSummary = async (retryCount = 0) => {
       if (isInitialLoad) {
         setLoading(true);
       }
@@ -68,32 +80,49 @@ const RingkasanPage = () => {
         );
 
         if (!dateRange) {
-          setSummaryData(null);
-          setLoading(false);
+          if (!cancelled) {
+            setSummaryData(null);
+            setLoading(false);
+          }
           return;
         }
 
         const data = await getSummary(dateRange.startDate, dateRange.endDate);
-        setSummaryData(data);
-        setIsInitialLoad(false);
+        if (!cancelled) {
+          setSummaryData(data);
+          setIsInitialLoad(false);
+        }
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to fetch summary"
-        );
-        setSummaryData(null);
-        setIsInitialLoad(false);
+        if (cancelled) return;
+        const isFirstLoadFailure = isInitialLoad && retryCount === 0;
+        if (isFirstLoadFailure) {
+          // Retry once after a short delay (handles auth/session race on first load, e.g. mobile)
+          await new Promise((r) => setTimeout(r, 1000));
+          if (!cancelled) return fetchSummary(1);
+        }
+        if (!cancelled) {
+          setError(
+            err instanceof Error ? err.message : "Failed to fetch summary"
+          );
+          setSummaryData(null);
+          setIsInitialLoad(false);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     fetchSummary();
+    return () => {
+      cancelled = true;
+    };
   }, [
     selectedPeriod,
     customStartDate,
     customEndDate,
     isInitialLoad,
     organizationChangeKey,
+    organizationLoading,
   ]);
 
   // Handle scroll snapping when tabs are clicked
@@ -223,6 +252,10 @@ const RingkasanPage = () => {
       };
     }
 
+    const avgTx = summaryData.average_transaction;
+    const transactionCount =
+      avgTx > 0 ? Math.round(summaryData.total_revenue / avgTx) : 0;
+
     const profitMargin =
       summaryData.total_revenue > 0
         ? (summaryData.total_profit / summaryData.total_revenue) * 100
@@ -233,11 +266,11 @@ const RingkasanPage = () => {
       totalProfit: summaryData.total_profit,
       totalExpenses: summaryData.total_expenses,
       profitMargin: profitMargin,
-      averageTransactionValue: summaryData.average_transaction,
+      averageTransactionValue: avgTx,
+      transactionCount,
       revenueGrowth: 0, // Not in API
       profitGrowth: 0, // Not in API
       expenseGrowth: 0, // Not in API
-      transactionCount: 0, // Not in API
       transactionGrowth: 0, // Not in API
     };
   }, [summaryData]);
@@ -477,23 +510,23 @@ const RingkasanPage = () => {
       </div>
 
       {/* Financial Metrics Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-3">
-        <div className="p-3 md:p-4 bg-surface rounded-2xl md:rounded-3xl">
-          <div className="flex items-center justify-between mb-1.5 md:mb-2">
-            <p className="text-[10px] md:text-xs text-muted leading-tight">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+        <div className="p-4 md:p-5 bg-surface rounded-2xl md:rounded-3xl">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-2.5 mb-2 md:mb-3">
+            <p className="order-2 text-xs text-muted leading-tight md:order-1">
               Total Pendapatan
             </p>
-            <Surface className="p-1.5 md:p-2 rounded-lg bg-accent/10">
-              <LuDollarSign className="w-3 h-3 md:w-4 md:h-4 text-accent" />
+            <Surface className="order-1 w-fit p-2 md:order-2 md:p-1.5 rounded-lg bg-accent/10">
+              <LuDollarSign className="w-4 h-4 md:w-3.5 md:h-3.5 text-accent" />
             </Surface>
           </div>
-          <div className="flex flex-col gap-0.5 md:gap-1">
-            <p className="text-base md:text-xl font-bold text-foreground leading-tight">
+          <div className="flex flex-col gap-1 md:gap-1.5">
+            <p className="text-lg md:text-xl font-bold text-foreground leading-tight">
               {formatCurrency(financialData.totalRevenue)}
             </p>
             {financialData.revenueGrowth > 0 && (
               <div className="flex items-center gap-1 text-success">
-                <span className="text-[10px] md:text-xs">
+                <span className="text-xs">
                   ↑ {financialData.revenueGrowth}%
                 </span>
               </div>
@@ -501,61 +534,59 @@ const RingkasanPage = () => {
           </div>
         </div>
 
-        <div className="p-3 md:p-4 bg-surface rounded-2xl md:rounded-3xl">
-          <div className="flex items-center justify-between mb-1.5 md:mb-2">
-            <p className="text-[10px] md:text-xs text-muted leading-tight">
+        <div className="p-4 md:p-5 bg-surface rounded-2xl md:rounded-3xl">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-2.5 mb-2 md:mb-3">
+            <p className="order-2 text-xs text-muted leading-tight md:order-1">
               Total Profit
             </p>
-            <Surface className="p-1.5 md:p-2 rounded-lg bg-success/10">
-              <LuCoins className="w-3 h-3 md:w-4 md:h-4 text-success" />
+            <Surface className="order-1 w-fit p-2 md:order-2 md:p-1.5 rounded-lg bg-success/10">
+              <LuCoins className="w-4 h-4 md:w-3.5 md:h-3.5 text-success" />
             </Surface>
           </div>
-          <div className="flex flex-col gap-0.5 md:gap-1">
-            <p className="text-base md:text-xl font-bold text-foreground leading-tight">
+          <div className="flex flex-col gap-1 md:gap-1.5">
+            <p className="text-lg md:text-xl font-bold text-foreground leading-tight">
               {formatCurrency(financialData.totalProfit)}
             </p>
             {financialData.profitGrowth > 0 && (
               <div className="flex items-center gap-1 text-success">
-                <span className="text-[10px] md:text-xs">
-                  ↑ {financialData.profitGrowth}%
-                </span>
+                <span className="text-xs">↑ {financialData.profitGrowth}%</span>
               </div>
             )}
           </div>
         </div>
 
-        <div className="p-3 md:p-4 bg-surface rounded-2xl md:rounded-3xl">
-          <div className="flex items-center justify-between mb-1.5 md:mb-2">
-            <p className="text-[10px] md:text-xs text-muted leading-tight">
+        <div className="p-4 md:p-5 bg-surface rounded-2xl md:rounded-3xl">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-2.5 mb-2 md:mb-3">
+            <p className="order-2 text-xs text-muted leading-tight md:order-1">
               Profit Margin
             </p>
-            <Surface className="p-1.5 md:p-2 rounded-lg bg-warning/10">
-              <LuPercent className="w-3 h-3 md:w-4 md:h-4 text-warning" />
+            <Surface className="order-1 w-fit p-2 md:order-2 md:p-1.5 rounded-lg bg-warning/10">
+              <LuPercent className="w-4 h-4 md:w-3.5 md:h-3.5 text-warning" />
             </Surface>
           </div>
-          <div className="flex flex-col gap-0.5 md:gap-1">
-            <p className="text-base md:text-xl font-bold text-foreground leading-tight">
+          <div className="flex flex-col gap-1 md:gap-1.5">
+            <p className="text-lg md:text-xl font-bold text-foreground leading-tight">
               {financialData.profitMargin.toFixed(2)}%
             </p>
           </div>
         </div>
 
-        <div className="p-3 md:p-4 bg-surface rounded-2xl md:rounded-3xl">
-          <div className="flex items-center justify-between mb-1.5 md:mb-2">
-            <p className="text-[10px] md:text-xs text-muted leading-tight">
+        <div className="p-4 md:p-5 bg-surface rounded-2xl md:rounded-3xl">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-2.5 mb-2 md:mb-3">
+            <p className="order-2 text-xs text-muted leading-tight md:order-1">
               Rata-rata Transaksi
             </p>
-            <Surface className="p-1.5 md:p-2 rounded-lg bg-primary/10">
-              <LuTrendingUp className="w-3 h-3 md:w-4 md:h-4 text-primary" />
+            <Surface className="order-1 w-fit p-2 md:order-2 md:p-1.5 rounded-lg bg-primary/10">
+              <LuTrendingUp className="w-4 h-4 md:w-3.5 md:h-3.5 text-primary" />
             </Surface>
           </div>
-          <div className="flex flex-col gap-0.5 md:gap-1">
-            <p className="text-base md:text-xl font-bold text-foreground leading-tight">
+          <div className="flex flex-col gap-1 md:gap-1.5">
+            <p className="text-lg md:text-xl font-bold text-foreground leading-tight">
               {formatCurrency(financialData.averageTransactionValue)}
             </p>
             {financialData.transactionGrowth > 0 && (
               <div className="flex items-center gap-1 text-success">
-                <span className="text-[10px] md:text-xs">
+                <span className="text-xs">
                   ↑ {financialData.transactionGrowth}%
                 </span>
               </div>
@@ -563,22 +594,38 @@ const RingkasanPage = () => {
           </div>
         </div>
 
-        <div className="p-3 md:p-4 bg-surface rounded-2xl md:rounded-3xl">
-          <div className="flex items-center justify-between mb-1.5 md:mb-2">
-            <p className="text-[10px] md:text-xs text-muted leading-tight">
-              Total Pengeluaran
+        <div className="p-4 md:p-5 bg-surface rounded-2xl md:rounded-3xl">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-2.5 mb-2 md:mb-3">
+            <p className="order-2 text-xs text-muted leading-tight md:order-1">
+              Jumlah Transaksi
             </p>
-            <Surface className="p-1.5 md:p-2 rounded-lg bg-danger/10">
-              <LuReceipt className="w-3 h-3 md:w-4 md:h-4 text-danger" />
+            <Surface className="order-1 w-fit p-2 md:order-2 md:p-1.5 rounded-lg bg-primary/10">
+              <LuShoppingCart className="w-4 h-4 md:w-3.5 md:h-3.5 text-primary" />
             </Surface>
           </div>
-          <div className="flex flex-col gap-0.5 md:gap-1">
-            <p className="text-base md:text-xl font-bold text-foreground leading-tight">
+          <div className="flex flex-col gap-1 md:gap-1.5">
+            <p className="text-lg md:text-xl font-bold text-foreground leading-tight">
+              {financialData.transactionCount.toLocaleString("id-ID")}
+            </p>
+          </div>
+        </div>
+
+        <div className="p-4 md:p-5 bg-surface rounded-2xl md:rounded-3xl">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-2.5 mb-2 md:mb-3">
+            <p className="order-2 text-xs text-muted leading-tight md:order-1">
+              Total Pengeluaran
+            </p>
+            <Surface className="order-1 w-fit p-2 md:order-2 md:p-1.5 rounded-lg bg-danger/10">
+              <LuReceipt className="w-4 h-4 md:w-3.5 md:h-3.5 text-danger" />
+            </Surface>
+          </div>
+          <div className="flex flex-col gap-1 md:gap-1.5">
+            <p className="text-lg md:text-xl font-bold text-foreground leading-tight">
               {formatCurrency(financialData.totalExpenses)}
             </p>
             {financialData.expenseGrowth > 0 && (
               <div className="flex items-center gap-1 text-danger">
-                <span className="text-[10px] md:text-xs">
+                <span className="text-xs">
                   ↑ {financialData.expenseGrowth}%
                 </span>
               </div>
