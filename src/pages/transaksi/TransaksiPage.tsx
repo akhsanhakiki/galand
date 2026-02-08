@@ -600,11 +600,11 @@ const TransaksiPage = () => {
         </div>
 
         <div className="p-6 bg-surface rounded-3xl flex flex-col h-full min-h-[500px]">
-          <div className="flex flex-row items-center w-full gap-2 md:gap-4 pb-4">
+          <div className="flex flex-row items-center justify-between w-full gap-2 md:gap-4 pb-4">
             <SearchField
               value={searchQuery}
               onChange={setSearchQuery}
-              className="flex-1 min-w-0 md:w-1/4"
+              className="flex-1 min-w-0 md:w-1/4 md:max-w-sm"
             >
               <SearchField.Group className="shadow-none border ">
                 <SearchField.SearchIcon />

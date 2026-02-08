@@ -164,6 +164,12 @@ const ProdukPage = () => {
     }
   };
 
+  const getStockStatusLabel = (stock: number) => {
+    if (stock === 0) return "Habis";
+    if (stock < 10) return "Stok Menipis";
+    return "Tersedia";
+  };
+
   const getStockStatus = (stock: number) => {
     if (stock === 0) {
       return (
@@ -277,70 +283,78 @@ const ProdukPage = () => {
           <p className="text-muted text-sm">Kelola inventori dan stok produk</p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="p-4 bg-surface rounded-3xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted mb-1">Total Produk</p>
-                <p className="text-xl font-bold text-foreground">
-                  {stats.total}
-                </p>
-              </div>
-              <Surface className="p-2 rounded-lg bg-accent/10">
-                <LuPackage className="w-4 h-4 text-accent" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          <div className="p-4 md:p-5 bg-surface rounded-2xl md:rounded-3xl">
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-2.5 mb-2 md:mb-3">
+              <p className="order-2 text-xs text-muted leading-tight md:order-1">
+                Total Produk
+              </p>
+              <Surface className="order-1 w-fit p-2 md:order-2 md:p-1.5 rounded-lg bg-accent/10">
+                <LuPackage className="w-4 h-4 md:w-3.5 md:h-3.5 text-accent" />
               </Surface>
+            </div>
+            <div className="flex flex-col gap-1 md:gap-1.5">
+              <p className="text-lg md:text-xl font-bold text-foreground leading-tight">
+                {stats.total}
+              </p>
             </div>
           </div>
 
-          <div className="p-4 bg-surface rounded-3xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted mb-1">Stok Tersedia</p>
-                <p className="text-xl font-bold text-foreground">
-                  {stats.inStock}
-                </p>
-              </div>
-              <Surface className="p-2 rounded-lg bg-success/10">
-                <LuCheck className="w-4 h-4 text-success" />
+          <div className="p-4 md:p-5 bg-surface rounded-2xl md:rounded-3xl">
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-2.5 mb-2 md:mb-3">
+              <p className="order-2 text-xs text-muted leading-tight md:order-1">
+                Stok Tersedia
+              </p>
+              <Surface className="order-1 w-fit p-2 md:order-2 md:p-1.5 rounded-lg bg-success/10">
+                <LuCheck className="w-4 h-4 md:w-3.5 md:h-3.5 text-success" />
               </Surface>
+            </div>
+            <div className="flex flex-col gap-1 md:gap-1.5">
+              <p className="text-lg md:text-xl font-bold text-foreground leading-tight">
+                {stats.inStock}
+              </p>
             </div>
           </div>
 
-          <div className="p-4 bg-surface rounded-3xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted mb-1">Stok Menipis</p>
-                <p className="text-xl font-bold text-foreground">
-                  {stats.lowStock}
-                </p>
-              </div>
-              <Surface className="p-2 rounded-lg bg-warning/10">
-                <LuTriangleAlert className="w-4 h-4 text-warning" />
+          <div className="p-4 md:p-5 bg-surface rounded-2xl md:rounded-3xl">
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-2.5 mb-2 md:mb-3">
+              <p className="order-2 text-xs text-muted leading-tight md:order-1">
+                Stok Menipis
+              </p>
+              <Surface className="order-1 w-fit p-2 md:order-2 md:p-1.5 rounded-lg bg-warning/10">
+                <LuTriangleAlert className="w-4 h-4 md:w-3.5 md:h-3.5 text-warning" />
               </Surface>
+            </div>
+            <div className="flex flex-col gap-1 md:gap-1.5">
+              <p className="text-lg md:text-xl font-bold text-foreground leading-tight">
+                {stats.lowStock}
+              </p>
             </div>
           </div>
 
-          <div className="p-4 bg-surface rounded-3xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted mb-1">Habis</p>
-                <p className="text-xl font-bold text-foreground">
-                  {stats.outOfStock}
-                </p>
-              </div>
-              <Surface className="p-2 rounded-lg bg-danger/10">
-                <LuCircleX className="w-4 h-4 text-danger" />
+          <div className="p-4 md:p-5 bg-surface rounded-2xl md:rounded-3xl">
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-2.5 mb-2 md:mb-3">
+              <p className="order-2 text-xs text-muted leading-tight md:order-1">
+                Habis
+              </p>
+              <Surface className="order-1 w-fit p-2 md:order-2 md:p-1.5 rounded-lg bg-danger/10">
+                <LuCircleX className="w-4 h-4 md:w-3.5 md:h-3.5 text-danger" />
               </Surface>
+            </div>
+            <div className="flex flex-col gap-1 md:gap-1.5">
+              <p className="text-lg md:text-xl font-bold text-foreground leading-tight">
+                {stats.outOfStock}
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="p-4 bg-surface rounded-3xl flex flex-col h-full min-h-[500px]">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4">
+        <div className="p-6 bg-surface rounded-3xl flex flex-col h-full min-h-[500px]">
+          <div className="flex flex-row items-center justify-between w-full gap-2 md:gap-4 pb-4">
             <SearchField
               value={searchQuery}
               onChange={setSearchQuery}
-              className="w-1/4"
+              className="flex-1 min-w-0 md:w-1/4 md:max-w-sm"
             >
               <SearchField.Group className="shadow-none border">
                 <SearchField.SearchIcon />
@@ -348,15 +362,17 @@ const ProdukPage = () => {
                 <SearchField.ClearButton />
               </SearchField.Group>
             </SearchField>
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2">
               <Dropdown>
                 <Button
                   variant="ghost"
                   isDisabled={filteredProducts.length === 0}
                   size="sm"
+                  className="md:min-w-0"
+                  aria-label="Export"
                 >
-                  <LuDownload className="w-3.5 h-3.5" />
-                  <span className="text-xs">Export</span>
+                  <LuDownload className="w-3.5 h-3.5 shrink-0" />
+                  <span className="hidden md:inline">Export</span>
                 </Button>
                 <Dropdown.Popover>
                   <Dropdown.Menu
@@ -383,7 +399,7 @@ const ProdukPage = () => {
                 size="sm"
               >
                 <LuPlus className="w-3.5 h-3.5" />
-                <span className="text-xs">Tambah Produk</span>
+                <span className="text-xs hidden md:inline">Tambah Produk</span>
               </Button>
             </div>
           </div>
@@ -400,7 +416,44 @@ const ProdukPage = () => {
               </div>
             ) : (
               <>
-                <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+                {/* Mobile: list of items */}
+                <div className="md:hidden flex-1 overflow-y-auto flex flex-col gap-2 min-h-0">
+                  {paginatedProducts.map((product) => (
+                    <div
+                      key={product.id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => handleEdit(product)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleEdit(product);
+                        }
+                      }}
+                      className="p-3 rounded-xl border border-separator flex flex-col gap-1 cursor-pointer touch-manipulation active:opacity-90"
+                      aria-label={`Edit ${product.name}`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-semibold text-foreground truncate min-w-0">
+                          {product.name}
+                        </span>
+                        <span className="text-[11px] text-muted shrink-0">
+                          {getStockStatusLabel(product.stock)}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-foreground/90 leading-tight">
+                        {product.stock} stok · Rp{" "}
+                        {product.price.toLocaleString("id-ID")}
+                        {product.cogs != null && (
+                          <> · Rp {(product.cogs ?? 0).toLocaleString("id-ID")} HPP</>
+                        )}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop: table */}
+                <div className="hidden md:flex flex-1 overflow-hidden flex-col min-h-0">
                   {/* Scrollable Container - wraps both tables */}
                   <div
                     ref={scrollContainerRef}
