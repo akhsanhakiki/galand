@@ -27,6 +27,9 @@ import {
   LuDownload,
   LuCalendar,
   LuDollarSign,
+  LuShoppingCart,
+  LuCoins,
+  LuTrendingUp,
 } from "react-icons/lu";
 
 type TimePeriod =
@@ -489,37 +492,38 @@ const TransaksiPage = () => {
               >
                 <Tabs.List
                   aria-label="Periode Waktu"
-                  className="bg-background-secondary flex *:h-6 *:w-fit *:px-2 *:text-[11px] *:font-normal *:rounded-none *:bg-transparent *:data-[selected=true]:bg-transparent *:data-[selected=true]:text-foreground *:data-[hover=true]:bg-transparent"
+                  className="bg-background-secondary flex *:h-6 *:md:h-6 *:flex-1 *:min-w-0 *:md:min-w-[60px] *:px-2 *:md:px-2 *:text-[11px] *:md:text-[11px] *:font-normal *:whitespace-nowrap *:rounded-none *:bg-transparent *:data-[selected=true]:bg-transparent *:data-[selected=true]:text-foreground *:data-[hover=true]:bg-transparent"
+                  style={{ minWidth: "100%", width: "max-content" }}
                 >
-                  <Tabs.Tab id="semua">
+                  <Tabs.Tab id="semua" style={{ scrollSnapAlign: "start" }}>
                     Semua
                     <Tabs.Indicator />
                   </Tabs.Tab>
-                  <Tabs.Tab id="hari-ini">
+                  <Tabs.Tab id="hari-ini" style={{ scrollSnapAlign: "start" }}>
                     Hari ini
                     <Tabs.Indicator />
                   </Tabs.Tab>
-                  <Tabs.Tab id="kemarin">
+                  <Tabs.Tab id="kemarin" style={{ scrollSnapAlign: "start" }}>
                     Kemarin
                     <Tabs.Indicator />
                   </Tabs.Tab>
-                  <Tabs.Tab id="mingguan">
+                  <Tabs.Tab id="mingguan" style={{ scrollSnapAlign: "start" }}>
                     Minggu ini
                     <Tabs.Indicator />
                   </Tabs.Tab>
-                  <Tabs.Tab id="bulanan">
+                  <Tabs.Tab id="bulanan" style={{ scrollSnapAlign: "start" }}>
                     Bulan ini
                     <Tabs.Indicator />
                   </Tabs.Tab>
-                  <Tabs.Tab id="tahunan">
+                  <Tabs.Tab id="tahunan" style={{ scrollSnapAlign: "start" }}>
                     Tahun ini
                     <Tabs.Indicator />
                   </Tabs.Tab>
-                  <Tabs.Tab id="3tahun">
+                  <Tabs.Tab id="3tahun" style={{ scrollSnapAlign: "start" }}>
                     3 Tahun ini
                     <Tabs.Indicator />
                   </Tabs.Tab>
-                  <Tabs.Tab id="kustom">
+                  <Tabs.Tab id="kustom" style={{ scrollSnapAlign: "end" }}>
                     Kustom
                     <Tabs.Indicator />
                   </Tabs.Tab>
@@ -529,70 +533,78 @@ const TransaksiPage = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="p-4 bg-surface rounded-3xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted mb-1">Total Transaksi</p>
-                <p className="text-xl font-bold text-foreground">
-                  {stats.total}
-                </p>
-              </div>
-              <Surface className="p-2 rounded-lg bg-accent/10">
-                <LuDollarSign className="w-4 h-4 text-accent" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          <div className="p-4 md:p-5 bg-surface rounded-2xl md:rounded-3xl">
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-2.5 mb-2 md:mb-3">
+              <p className="order-2 text-xs text-muted leading-tight md:order-1">
+                Total Transaksi
+              </p>
+              <Surface className="order-1 w-fit p-2 md:order-2 md:p-1.5 rounded-lg bg-accent/10">
+                <LuShoppingCart className="w-4 h-4 md:w-3.5 md:h-3.5 text-accent" />
               </Surface>
+            </div>
+            <div className="flex flex-col gap-1 md:gap-1.5">
+              <p className="text-lg md:text-xl font-bold text-foreground leading-tight">
+                {stats.total}
+              </p>
             </div>
           </div>
 
-          <div className="p-4 bg-surface rounded-3xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted mb-1">Total Jumlah</p>
-                <p className="text-xl font-bold text-foreground">
-                  Rp {stats.totalAmount.toLocaleString("id-ID")}
-                </p>
-              </div>
-              <Surface className="p-2 rounded-lg bg-success/10">
-                <LuDollarSign className="w-4 h-4 text-success" />
+          <div className="p-4 md:p-5 bg-surface rounded-2xl md:rounded-3xl">
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-2.5 mb-2 md:mb-3">
+              <p className="order-2 text-xs text-muted leading-tight md:order-1">
+                Total Jumlah
+              </p>
+              <Surface className="order-1 w-fit p-2 md:order-2 md:p-1.5 rounded-lg bg-success/10">
+                <LuDollarSign className="w-4 h-4 md:w-3.5 md:h-3.5 text-success" />
               </Surface>
+            </div>
+            <div className="flex flex-col gap-1 md:gap-1.5">
+              <p className="text-lg md:text-xl font-bold text-foreground leading-tight">
+                Rp {stats.totalAmount.toLocaleString("id-ID")}
+              </p>
             </div>
           </div>
 
-          <div className="p-4 bg-surface rounded-3xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted mb-1">Total Profit</p>
-                <p className="text-xl font-bold text-foreground">
-                  Rp {stats.totalProfit.toLocaleString("id-ID")}
-                </p>
-              </div>
-              <Surface className="p-2 rounded-lg bg-warning/10">
-                <LuDollarSign className="w-4 h-4 text-warning" />
+          <div className="p-4 md:p-5 bg-surface rounded-2xl md:rounded-3xl">
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-2.5 mb-2 md:mb-3">
+              <p className="order-2 text-xs text-muted leading-tight md:order-1">
+                Total Profit
+              </p>
+              <Surface className="order-1 w-fit p-2 md:order-2 md:p-1.5 rounded-lg bg-warning/10">
+                <LuCoins className="w-4 h-4 md:w-3.5 md:h-3.5 text-warning" />
               </Surface>
+            </div>
+            <div className="flex flex-col gap-1 md:gap-1.5">
+              <p className="text-lg md:text-xl font-bold text-foreground leading-tight">
+                Rp {stats.totalProfit.toLocaleString("id-ID")}
+              </p>
             </div>
           </div>
 
-          <div className="p-4 bg-surface rounded-3xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted mb-1">Rata-rata</p>
-                <p className="text-xl font-bold text-foreground">
-                  Rp {stats.average.toLocaleString("id-ID")}
-                </p>
-              </div>
-              <Surface className="p-2 rounded-lg bg-info/10">
-                <LuDollarSign className="w-4 h-4 text-info" />
+          <div className="p-4 md:p-5 bg-surface rounded-2xl md:rounded-3xl">
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-2.5 mb-2 md:mb-3">
+              <p className="order-2 text-xs text-muted leading-tight md:order-1">
+                Rata-rata
+              </p>
+              <Surface className="order-1 w-fit p-2 md:order-2 md:p-1.5 rounded-lg bg-warning/10">
+                <LuTrendingUp className="w-4 h-4 md:w-3.5 md:h-3.5 text-warning" />
               </Surface>
+            </div>
+            <div className="flex flex-col gap-1 md:gap-1.5">
+              <p className="text-lg md:text-xl font-bold text-foreground leading-tight">
+                Rp {stats.average.toLocaleString("id-ID")}
+              </p>
             </div>
           </div>
         </div>
 
         <div className="p-6 bg-surface rounded-3xl flex flex-col h-full min-h-[500px]">
-          <div className="flex flex-col md:flex-row md:items-center w-full justify-between gap-4 pb-4">
+          <div className="flex flex-row items-center w-full gap-2 md:gap-4 pb-4">
             <SearchField
               value={searchQuery}
               onChange={setSearchQuery}
-              className="w-full md:w-1/4"
+              className="flex-1 min-w-0 md:w-1/4"
             >
               <SearchField.Group className="shadow-none border ">
                 <SearchField.SearchIcon />
@@ -601,15 +613,17 @@ const TransaksiPage = () => {
               </SearchField.Group>
             </SearchField>
 
-            <div className="flex flex-row items-center gap-2">
+            <div className="flex shrink-0 items-center">
               <Dropdown>
                 <Button
                   variant="ghost"
                   isDisabled={filteredTransactions.length === 0}
                   size="sm"
+                  className="md:min-w-0"
+                  aria-label="Export"
                 >
-                  <LuDownload className="w-3.5 h-3.5" />
-                  Export
+                  <LuDownload className="w-3.5 h-3.5 shrink-0" />
+                  <span className="hidden md:inline">Export</span>
                 </Button>
                 <Dropdown.Popover>
                   <Dropdown.Menu
@@ -644,7 +658,70 @@ const TransaksiPage = () => {
               </div>
             ) : (
               <>
-                <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+                {/* Mobile: list of items */}
+                <div className="md:hidden flex-1 overflow-y-auto flex flex-col gap-2 min-h-0">
+                  {paginatedTransactions.map((transaction) => {
+                    const totalBarang =
+                      transaction.items?.reduce(
+                        (sum, item) => sum + item.quantity,
+                        0
+                      ) || 0;
+                    const profitClass =
+                      transaction.profit !== null
+                        ? transaction.profit > 0
+                          ? "text-success"
+                          : transaction.profit < 0
+                            ? "text-danger"
+                            : ""
+                        : "";
+                    return (
+                      <div
+                        key={transaction.id}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => handleViewTransaction(transaction)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            handleViewTransaction(transaction);
+                          }
+                        }}
+                        className="p-3 rounded-xl border border-separator flex flex-col gap-1 cursor-pointer touch-manipulation active:opacity-90"
+                        aria-label={`View transaction ${transaction.id}`}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-semibold text-foreground shrink-0">
+                            #{transaction.id}
+                          </span>
+                          <span className="text-[11px] text-muted truncate">
+                            {formatDate(transaction.created_at)}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-foreground/90 leading-tight">
+                          {totalBarang} brg · Rp{" "}
+                          {transaction.total_amount.toLocaleString("id-ID")}
+                          {transaction.profit !== null && (
+                            <>
+                              {" · "}
+                              <span className={profitClass}>
+                                Rp{" "}
+                                {transaction.profit.toLocaleString("id-ID")}
+                              </span>
+                            </>
+                          )}
+                          {" · "}
+                          {formatPaymentMethod(transaction.payment_method)}
+                          {transaction.discount
+                            ? ` · ${transaction.discount}`
+                            : ""}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Desktop: table */}
+                <div className="hidden md:flex flex-1 overflow-hidden flex-col min-h-0">
                   <div
                     ref={scrollContainerRef}
                     className="overflow-y-auto overflow-x-auto flex-1"

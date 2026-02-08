@@ -408,7 +408,7 @@ const RingkasanPage = () => {
             >
               <Tabs.List
                 aria-label="Periode Waktu"
-                className="bg-background-secondary flex *:h-6 *:md:h-6 *:flex-1 *:min-w-[56px] *:md:min-w-[60px] *:px-2 *:md:px-2 *:text-[11px] *:md:text-[11px] *:font-normal *:rounded-none *:bg-transparent *:data-[selected=true]:bg-transparent *:data-[selected=true]:text-foreground *:data-[hover=true]:bg-transparent"
+                className="bg-background-secondary flex *:h-6 *:md:h-6 *:flex-1 *:min-w-0 *:md:min-w-[60px] *:px-2 *:md:px-2 *:text-[11px] *:md:text-[11px] *:font-normal *:whitespace-nowrap *:rounded-none *:bg-transparent *:data-[selected=true]:bg-transparent *:data-[selected=true]:text-foreground *:data-[hover=true]:bg-transparent"
                 style={{ minWidth: "100%", width: "max-content" }}
               >
                 <Tabs.Tab id="semua" style={{ scrollSnapAlign: "start" }}>
