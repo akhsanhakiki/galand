@@ -258,9 +258,68 @@
   border: 1px solid var(--border) !important;
 }
 
+/* Switch track (control) – darker background when off; selected state keeps accent */
+.switch:not([data-selected="true"]) .switch__control {
+  background-color: #d0d0d0 !important;
+}
+.dark .switch:not([data-selected="true"]) .switch__control,
+[data-theme="dark"] .switch:not([data-selected="true"]) .switch__control {
+  background-color: #2a2a2a !important;
+}
+
+/* Chart axis tick text: Recharts sets fill via inline attr (#666), override in dark mode so text is white */
+.dark [data-chart] .recharts-cartesian-axis-tick-value,
+.dark [data-chart] .recharts-cartesian-axis-tick-label text,
+.dark [data-chart] .recharts-text.recharts-cartesian-axis-tick-value,
+[data-theme="dark"] [data-chart] .recharts-cartesian-axis-tick-value,
+[data-theme="dark"] [data-chart] .recharts-cartesian-axis-tick-label text,
+[data-theme="dark"] [data-chart] .recharts-text.recharts-cartesian-axis-tick-value {
+  fill: var(--foreground) !important;
+}
+.dark [data-chart] .recharts-cartesian-axis-tick-value tspan,
+[data-theme="dark"] [data-chart] .recharts-cartesian-axis-tick-value tspan {
+  fill: inherit !important;
+}
+
 /* Ensure app island fills viewport so mobile bottom nav can stick */
 astro-island {
   display: block;
   height: 100%;
   min-height: 100dvh;
+}
+
+/* Login page: mobile spawn animations (left section first, then form) */
+@keyframes login-left-spawn {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes login-form-spawn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.login-left-spawn {
+  animation: login-left-spawn 0.45s ease-out forwards;
+}
+.login-form-spawn {
+  opacity: 0;
+  animation: login-form-spawn 0.4s ease-out 0.35s forwards;
+}
+@media (min-width: 1024px) {
+  .login-left-spawn,
+  .login-form-spawn {
+    animation: none;
+    opacity: 1;
+  }
 }

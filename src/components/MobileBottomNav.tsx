@@ -10,7 +10,7 @@ import {
   LuPackage,
   LuEllipsis,
 } from "react-icons/lu";
-import { Button } from "@heroui/react";
+import { Button, Surface } from "@heroui/react";
 import { useAuth } from "../contexts/AuthContext";
 import Header from "./Header";
 
@@ -88,7 +88,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             <Button
               key={key}
               variant="ghost"
-              className={`flex flex-col items-center justify-center gap-1 h-auto py-2 px-2 min-w-[60px] shrink-0 ${
+              className={`flex flex-col items-center justify-center gap-1 h-auto py-2 px-2 min-w-[60px] shrink-0 data-[hovered=true]:bg-foreground/6 ${
                 isActive ? "text-primary" : "text-default-500"
               }`}
               onPress={() => onNavigate(key)}
@@ -103,7 +103,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         {moreMenuItems.length > 0 && (
           <Button
             variant="ghost"
-            className="flex flex-col items-center justify-center gap-1 h-auto py-2 px-2 min-w-[60px] shrink-0 text-default-500"
+            className="flex flex-col items-center justify-center gap-1 h-auto py-2 px-2 min-w-[60px] shrink-0 text-default-500 data-[hovered=true]:bg-foreground/6"
             onPress={() => setIsMoreMenuOpen(true)}
           >
             <LuEllipsis className="w-5 h-5 shrink-0" />
@@ -130,68 +130,71 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         />
       )}
 
-      {isMoreMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-50 bg-background flex flex-col h-full">
-          <Header isMobile={true} />
-          <div className="flex flex-col gap-4 md:gap-6 items-center justify-start p-4 flex-1 overflow-y-auto">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 w-full">
-              {moreMenuItems.map(({ title, icon: Icon, key }) => (
-                <div
-                  key={key}
-                  onClick={() => handleMoreMenuClick(key)}
-                  className="cursor-pointer bg-surface hover:shadow-lg transition-all min-h-32 md:min-h-56 border-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1),0_-2px_4px_-1px_rgba(0,0,0,0.06)] rounded-lg flex flex-col p-4"
-                >
-                  <div className="mb-2">
-                    <h3 className="text-base md:text-xl font-bold text-foreground">
-                      {title}
-                    </h3>
-                  </div>
-                  <div className="flex items-end justify-end flex-1 w-full">
-                    <Icon className="w-8 h-8 md:w-20 md:h-20 text-accent" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <nav className="bg-surface safe-area-inset-bottom">
-            <div className="flex items-center justify-around px-1 py-2 overflow-x-auto">
-              {bottomNavItems.map(({ title, icon: Icon, key }) => {
-                const isActive = currentPage === key;
-                return (
-                  <Button
+      {isMoreMenuOpen &&
+        mounted &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div className="md:hidden fixed inset-0 z-[110] bg-background flex flex-col h-full">
+            <Header isMobile={true} />
+            <div className="flex flex-col gap-4 md:gap-6 items-center justify-start p-4 flex-1 overflow-y-auto">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 w-full">
+                {moreMenuItems.map(({ title, icon: Icon, key }) => (
+                  <button
                     key={key}
-                    variant="ghost"
-                    className={`flex flex-col items-center justify-center gap-1 h-auto py-2 px-2 min-w-[60px] shrink-0 ${
-                      isActive ? "text-primary" : "text-default-500"
-                    }`}
-                    onPress={() => {
-                      onNavigate(key);
-                      setIsMoreMenuOpen(false);
-                    }}
+                    type="button"
+                    onClick={() => handleMoreMenuClick(key)}
+                    className="cursor-pointer bg-surface transition-all min-h-24 md:min-h-28 border-0 rounded-2xl md:rounded-3xl p-3 md:p-4 flex flex-col items-start gap-2 w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   >
-                    <Icon className="w-5 h-5 shrink-0" />
-                    <span className="text-[10px] font-medium leading-tight text-center">
+                    <Surface className="w-fit p-2 rounded-lg bg-accent/10 shrink-0 pointer-events-none">
+                      <Icon className="w-5 h-5 md:w-6 md:h-6 text-accent" />
+                    </Surface>
+                    <span className="text-sm md:text-base font-bold text-foreground">
                       {title}
                     </span>
-                  </Button>
-                );
-              })}
-              {moreMenuItems.length > 0 && (
-                <Button
-                  variant="ghost"
-                  className="flex flex-col items-center justify-center gap-1 h-auto py-2 px-2 min-w-[60px] shrink-0 text-primary"
-                  onPress={() => setIsMoreMenuOpen(false)}
-                >
-                  <LuEllipsis className="w-5 h-5 shrink-0" />
-                  <span className="text-[10px] font-medium leading-tight text-center">
-                    Lainnya
-                  </span>
-                </Button>
-              )}
+                  </button>
+                ))}
+              </div>
             </div>
-          </nav>
-        </div>
-      )}
+            <nav className="bg-surface safe-area-inset-bottom">
+              <div className="flex items-center justify-around px-1 py-2 overflow-x-auto">
+                {bottomNavItems.map(({ title, icon: Icon, key }) => {
+                  const isActive = currentPage === key;
+                  return (
+                    <Button
+                      key={key}
+                      variant="ghost"
+                      className={`flex flex-col items-center justify-center gap-1 h-auto py-2 px-2 min-w-[60px] shrink-0 data-[hovered=true]:bg-foreground/6 ${
+                        isActive ? "text-primary" : "text-default-500"
+                      }`}
+                      onPress={() => {
+                        onNavigate(key);
+                        setIsMoreMenuOpen(false);
+                      }}
+                    >
+                      <Icon className="w-5 h-5 shrink-0" />
+                      <span className="text-[10px] font-medium leading-tight text-center">
+                        {title}
+                      </span>
+                    </Button>
+                  );
+                })}
+                {moreMenuItems.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    className="flex flex-col items-center justify-center gap-1 h-auto py-2 px-2 min-w-[60px] shrink-0 text-primary data-[hovered=true]:bg-foreground/6"
+                    onPress={() => setIsMoreMenuOpen(false)}
+                  >
+                    <LuEllipsis className="w-5 h-5 shrink-0" />
+                    <span className="text-[10px] font-medium leading-tight text-center">
+                      Lainnya
+                    </span>
+                  </Button>
+                )}
+              </div>
+            </nav>
+          </div>,
+          document.body
+        )}
     </>
   );
 };
