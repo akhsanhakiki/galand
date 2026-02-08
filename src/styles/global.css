@@ -257,3 +257,10 @@
 .radio__control {
   border: 1px solid var(--border) !important;
 }
+
+/* Ensure app island fills viewport so mobile bottom nav can stick */
+astro-island {
+  display: block;
+  height: 100%;
+  min-height: 100dvh;
+}

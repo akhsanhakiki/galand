@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   LuChartPie,
   LuBanknote,
@@ -28,12 +29,19 @@ interface MobileBottomNavProps {
   onNavigate: (menuKey: string) => void;
 }
 
+const NAVBAR_HEIGHT = "5rem";
+
 const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   currentPage,
   onNavigate,
 }) => {
   const { user } = useAuth();
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Filter menu items based on user role
   const getFilteredMenuItems = () => {
@@ -66,42 +74,61 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
     setIsMoreMenuOpen(false);
   };
 
-  return (
-    <>
-      <nav className="md:hidden bg-surface z-10 shrink-0 safe-area-inset-bottom border-t border-separator">
-        <div className="flex items-center justify-around px-1 py-2 overflow-x-auto">
-          {bottomNavItems.map(({ title, icon: Icon, key }) => {
-            const isActive = currentPage === key;
-            return (
-              <Button
-                key={key}
-                variant="ghost"
-                className={`flex flex-col items-center justify-center gap-1 h-auto py-2 px-2 min-w-[60px] shrink-0 ${
-                  isActive ? "text-primary" : "text-default-500"
-                }`}
-                onPress={() => onNavigate(key)}
-              >
-                <Icon className="w-5 h-5 shrink-0" />
-                <span className="text-[10px] font-medium leading-tight text-center">
-                  {title}
-                </span>
-              </Button>
-            );
-          })}
-          {moreMenuItems.length > 0 && (
+  const navEl = (
+    <nav
+      className="md:hidden fixed bottom-0 left-0 right-0 bg-surface z-100 shrink-0 border-t border-separator"
+      style={{
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+      }}
+    >
+      <div className="flex items-center justify-around px-1 py-2 overflow-x-auto">
+        {bottomNavItems.map(({ title, icon: Icon, key }) => {
+          const isActive = currentPage === key;
+          return (
             <Button
+              key={key}
               variant="ghost"
-              className="flex flex-col items-center justify-center gap-1 h-auto py-2 px-2 min-w-[60px] shrink-0 text-default-500"
-              onPress={() => setIsMoreMenuOpen(true)}
+              className={`flex flex-col items-center justify-center gap-1 h-auto py-2 px-2 min-w-[60px] shrink-0 ${
+                isActive ? "text-primary" : "text-default-500"
+              }`}
+              onPress={() => onNavigate(key)}
             >
-              <LuEllipsis className="w-5 h-5 shrink-0" />
+              <Icon className="w-5 h-5 shrink-0" />
               <span className="text-[10px] font-medium leading-tight text-center">
-                Lainnya
+                {title}
               </span>
             </Button>
-          )}
-        </div>
-      </nav>
+          );
+        })}
+        {moreMenuItems.length > 0 && (
+          <Button
+            variant="ghost"
+            className="flex flex-col items-center justify-center gap-1 h-auto py-2 px-2 min-w-[60px] shrink-0 text-default-500"
+            onPress={() => setIsMoreMenuOpen(true)}
+          >
+            <LuEllipsis className="w-5 h-5 shrink-0" />
+            <span className="text-[10px] font-medium leading-tight text-center">
+              Lainnya
+            </span>
+          </Button>
+        )}
+      </div>
+    </nav>
+  );
+
+  return (
+    <>
+      {mounted && typeof document !== "undefined"
+        ? createPortal(navEl, document.body)
+        : null}
+      {/* Spacer so content padding is reserved before nav is portaled */}
+      {mounted ? null : (
+        <div
+          className="md:hidden shrink-0"
+          style={{ height: NAVBAR_HEIGHT }}
+          aria-hidden
+        />
+      )}
 
       {isMoreMenuOpen && (
         <div className="md:hidden fixed inset-0 z-50 bg-background flex flex-col h-full">

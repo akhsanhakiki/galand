@@ -10,7 +10,7 @@ const MainContainer = () => {
   return (
     <Providers>
       <ProtectedRoute>
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col min-h-dvh h-full w-full min-w-0">
           <>
             <MobileView />
             <DesktopView />
