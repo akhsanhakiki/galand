@@ -9,6 +9,16 @@ import react from "@astrojs/react";
 export default defineConfig({
   output: "server",
   adapter: netlify(),
+  server: {
+    host: true,
+    port: 4321,
+    // Allow requests from other devices on the network (e.g. http://192.168.1.4:4321)
+    cors: true,
+    // So HMR WebSocket connects to the dev machine from other devices
+    hmr: process.env.VITE_HMR_HOST
+      ? { host: process.env.VITE_HMR_HOST, port: 4321, protocol: "ws" }
+      : true,
+  },
   integrations: [react()],
   vite: {
     plugins: [tailwindcss()],
