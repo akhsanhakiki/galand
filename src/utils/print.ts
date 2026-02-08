@@ -43,40 +43,40 @@ export const printTransaction = (transaction: Transaction) => {
           }
           @page {
             size: 58mm auto;
-            margin: 0;
+            margin: 8mm 0 0 0; /* Top margin so first line is in printable area */
           }
           body {
             font-family: 'Courier New', Courier, monospace;
             width: 48mm; /* Standard printable width for 58mm paper */
             max-width: 100%;
             margin: 0 auto;
-            padding: 2mm 1mm;
+            padding: 10mm 2mm 4mm 2mm; /* Extra top padding so text is fully printed */
             color: #000;
             background: #fff;
-            font-size: 10px;
-            line-height: 1.25;
+            font-size: 12px;
+            line-height: 1.3;
             overflow: visible;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
           .header {
             text-align: center;
-            margin-bottom: 4px;
-            padding-bottom: 4px;
+            margin-bottom: 6px;
+            padding-bottom: 6px;
             border-bottom: 1px solid #000;
           }
           .header h1 {
-            font-size: 12px;
+            font-size: 14px;
             font-weight: bold;
-            margin-bottom: 2px;
+            margin-bottom: 3px;
             text-transform: uppercase;
           }
           .header p {
-            font-size: 10px;
+            font-size: 12px;
           }
           .transaction-info {
-            margin-bottom: 4px;
-            font-size: 9px;
+            margin-bottom: 6px;
+            font-size: 11px;
           }
           .transaction-info-row {
             display: flex;
@@ -88,28 +88,28 @@ export const printTransaction = (transaction: Transaction) => {
           }
           .divider {
             border-top: 1px dashed #000;
-            margin: 2px 0;
+            margin: 4px 0;
           }
           table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 4px;
-            font-size: 9px;
+            margin-bottom: 6px;
+            font-size: 11px;
           }
           th {
             text-align: left;
-            padding: 2px 0;
+            padding: 3px 0;
             font-weight: bold;
             border-bottom: 1px solid #000;
-            font-size: 9px;
+            font-size: 11px;
           }
           th:last-child {
             text-align: right;
           }
           td {
-            padding: 2px 0;
+            padding: 3px 0;
             border-bottom: 1px dotted #000;
-            font-size: 9px;
+            font-size: 11px;
           }
           tbody tr:last-child td {
             border-bottom: none;
@@ -130,30 +130,30 @@ export const printTransaction = (transaction: Transaction) => {
             width: 40%;
           }
           .total-section {
-            margin-top: 3px;
-            padding-top: 3px;
-            border-top: 1px solid #000;
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 2px solid #000;
           }
           .total-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 11px;
+            font-size: 13px;
             font-weight: bold;
-            margin-top: 2px;
+            margin-top: 3px;
           }
           .footer {
-            margin-top: 6px;
+            margin-top: 8px;
             text-align: center;
-            font-size: 9px;
+            font-size: 11px;
             border-top: 1px dashed #000;
-            padding-top: 4px;
+            padding-top: 6px;
           }
           @media print {
             html, body {
               width: 48mm !important;
               margin: 0 auto !important;
-              padding: 1mm !important;
+              padding: 10mm 2mm 4mm 2mm !important;
             }
             .no-print {
               display: none;
@@ -197,7 +197,7 @@ export const printTransaction = (transaction: Transaction) => {
                     )}</td>
                   </tr>
                   <tr>
-                    <td colspan="3" style="font-size: 8px; padding-left: 0;">
+                    <td colspan="3" style="font-size: 10px; padding-left: 0;">
                       ${item.quantity}x Rp${item.price.toLocaleString("id-ID")}
                     </td>
                   </tr>

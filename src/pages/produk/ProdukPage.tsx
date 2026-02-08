@@ -82,7 +82,7 @@ const ProdukPage = () => {
         initial[col.id] = col.defaultWidth;
       });
       return initial;
-    },
+    }
   );
 
   const handleResize = useCallback(
@@ -91,7 +91,7 @@ const ProdukPage = () => {
       if (column) {
         const clampedWidth = Math.max(
           column.minWidth,
-          Math.min(column.maxWidth, width),
+          Math.min(column.maxWidth, width)
         );
         setColumnWidths((prev) => ({
           ...prev,
@@ -99,7 +99,7 @@ const ProdukPage = () => {
         }));
       }
     },
-    [columnConfigs],
+    [columnConfigs]
   );
 
   useEffect(() => {
@@ -189,7 +189,7 @@ const ProdukPage = () => {
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) =>
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      product.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [products, searchQuery]);
 
@@ -682,7 +682,7 @@ const ProdukPage = () => {
                                   <div className="flex items-center h-full overflow-hidden">
                                     Rp{" "}
                                     {(product.cogs ?? 0).toLocaleString(
-                                      "id-ID",
+                                      "id-ID"
                                     )}
                                   </div>
                                 </td>
@@ -721,7 +721,7 @@ const ProdukPage = () => {
                                   <div className="flex items-center h-full overflow-hidden">
                                     Rp{" "}
                                     {(product.bundle_price ?? 0).toLocaleString(
-                                      "id-ID",
+                                      "id-ID"
                                     )}
                                   </div>
                                 </td>
@@ -841,7 +841,7 @@ const ProdukPage = () => {
                       <div className="flex items-center gap-1">
                         {Array.from(
                           { length: totalPages },
-                          (_, i) => i + 1,
+                          (_, i) => i + 1
                         ).map((page) => (
                           <Button
                             key={page}
@@ -861,7 +861,7 @@ const ProdukPage = () => {
                         variant="ghost"
                         onPress={() =>
                           setCurrentPage((prev) =>
-                            Math.min(totalPages, prev + 1),
+                            Math.min(totalPages, prev + 1)
                           )
                         }
                         isDisabled={currentPage === totalPages}
@@ -876,7 +876,7 @@ const ProdukPage = () => {
                       {(currentPage - 1) * itemsPerPage + 1} -{" "}
                       {Math.min(
                         currentPage * itemsPerPage,
-                        filteredProducts.length,
+                        filteredProducts.length
                       )}{" "}
                       data dari {filteredProducts.length} produk
                     </div>
