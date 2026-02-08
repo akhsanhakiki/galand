@@ -112,12 +112,8 @@ export default function TransactionView({
   }
 
   return (
-    <Modal.Backdrop
-      isOpen={isOpen}
-      onOpenChange={onClose}
-      variant="transparent"
-    >
-      <Modal.Container>
+    <Modal.Backdrop isOpen={isOpen} onOpenChange={onClose} className="z-200">
+      <Modal.Container className="z-200">
         <Modal.Dialog className="sm:max-w-2xl">
           <Modal.CloseTrigger />
           <Modal.Header>

@@ -77,7 +77,7 @@ export default function Header({
       <>
         <div className="w-full px-4 py-2">
           <div className="flex items-center justify-between w-full">
-            <h1 className="text-lg font-bold text-primary">kadara</h1>
+            <h1 className="text-xl font-bold text-primary">kadara</h1>
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"

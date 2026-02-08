@@ -141,9 +141,9 @@ export default function DiscountForm({
   };
 
   return (
-    <Modal.Backdrop isOpen={isOpen} onOpenChange={handleClose}>
-      <Modal.Container>
-        <Modal.Dialog className="sm:max-w-md">
+    <Modal.Backdrop isOpen={isOpen} onOpenChange={handleClose} className="z-200">
+      <Modal.Container className="z-200">
+        <Modal.Dialog className="sm:max-w-2xl">
           <Modal.CloseTrigger />
           <form onSubmit={handleSubmit}>
             <Modal.Header>

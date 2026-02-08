@@ -444,37 +444,38 @@ const PengeluaranPage = () => {
               >
                 <Tabs.List
                   aria-label="Periode Waktu"
-                  className="bg-background-secondary flex *:h-6 *:w-fit *:px-2 *:text-[11px] *:font-normal *:rounded-none *:bg-transparent *:data-[selected=true]:bg-transparent *:data-[selected=true]:text-foreground *:data-[hover=true]:bg-transparent"
+                  className="bg-background-secondary flex *:h-6 *:md:h-6 *:flex-1 *:min-w-0 *:md:min-w-[60px] *:px-2 *:md:px-2 *:text-[11px] *:md:text-[11px] *:font-normal *:whitespace-nowrap *:rounded-none *:bg-transparent *:data-[selected=true]:bg-transparent *:data-[selected=true]:text-foreground *:data-[hover=true]:bg-transparent"
+                  style={{ minWidth: "100%", width: "max-content" }}
                 >
-                  <Tabs.Tab id="semua">
+                  <Tabs.Tab id="semua" style={{ scrollSnapAlign: "start" }}>
                     Semua
                     <Tabs.Indicator />
                   </Tabs.Tab>
-                  <Tabs.Tab id="hari-ini">
+                  <Tabs.Tab id="hari-ini" style={{ scrollSnapAlign: "start" }}>
                     Hari ini
                     <Tabs.Indicator />
                   </Tabs.Tab>
-                  <Tabs.Tab id="kemarin">
+                  <Tabs.Tab id="kemarin" style={{ scrollSnapAlign: "start" }}>
                     Kemarin
                     <Tabs.Indicator />
                   </Tabs.Tab>
-                  <Tabs.Tab id="mingguan">
+                  <Tabs.Tab id="mingguan" style={{ scrollSnapAlign: "start" }}>
                     Minggu ini
                     <Tabs.Indicator />
                   </Tabs.Tab>
-                  <Tabs.Tab id="bulanan">
+                  <Tabs.Tab id="bulanan" style={{ scrollSnapAlign: "start" }}>
                     Bulan ini
                     <Tabs.Indicator />
                   </Tabs.Tab>
-                  <Tabs.Tab id="tahunan">
+                  <Tabs.Tab id="tahunan" style={{ scrollSnapAlign: "start" }}>
                     Tahun ini
                     <Tabs.Indicator />
                   </Tabs.Tab>
-                  <Tabs.Tab id="3tahun">
+                  <Tabs.Tab id="3tahun" style={{ scrollSnapAlign: "start" }}>
                     3 Tahun ini
                     <Tabs.Indicator />
                   </Tabs.Tab>
-                  <Tabs.Tab id="kustom">
+                  <Tabs.Tab id="kustom" style={{ scrollSnapAlign: "end" }}>
                     Kustom
                     <Tabs.Indicator />
                   </Tabs.Tab>
