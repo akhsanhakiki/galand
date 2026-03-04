@@ -1,7 +1,17 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, useRef } from "react";
-import { Surface, Tabs, Button, Popover, Spinner } from "@heroui/react";
+import {
+  Surface,
+  Tabs,
+  Spinner,
+  DateField,
+  DateRangePicker,
+  Label,
+  RangeCalendar,
+} from "@heroui/react";
+import { parseDate } from "@internationalized/date";
+import type { DateValue } from "@internationalized/date";
 
 import {
   LuTrendingUp,
@@ -46,7 +56,15 @@ const RingkasanPage = () => {
     useState<ProductSortMode>("revenue");
   const [customStartDate, setCustomStartDate] = useState<string>("");
   const [customEndDate, setCustomEndDate] = useState<string>("");
-  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState<boolean>(false);
+
+  const customRangeValue: { start: DateValue; end: DateValue } | null =
+    customStartDate && customEndDate
+      ? {
+          start: parseDate(customStartDate.slice(0, 10)),
+          end: parseDate(customEndDate.slice(0, 10)),
+        }
+      : null;
   const [loading, setLoading] = useState<boolean>(true);
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -379,20 +397,81 @@ const RingkasanPage = () => {
           </p>
         </div>
         <div className="flex flex-col md:flex-row md:items-center gap-2">
+          {selectedPeriod === "custom" && (
+            <DateRangePicker
+              className="w-[260px] min-w-0"
+              value={customRangeValue}
+              onChange={(value: { start: DateValue; end: DateValue } | null) => {
+                if (value) {
+                  setCustomStartDate(value.start.toString());
+                  setCustomEndDate(value.end.toString());
+                } else {
+                  setCustomStartDate("");
+                  setCustomEndDate("");
+                }
+              }}
+              isOpen={isDatePickerOpen}
+              onOpenChange={setIsDatePickerOpen}
+            >
+              <Label className="sr-only">Periode kustom</Label>
+              <DateField.Group fullWidth className="rounded-xl border border-separator bg-surface shadow-none h-8">
+                <DateField.Input slot="start">
+                  {(segment) => (
+                    <DateField.Segment segment={segment} />
+                  )}
+                </DateField.Input>
+                <DateRangePicker.RangeSeparator />
+                <DateField.Input slot="end">
+                  {(segment) => (
+                    <DateField.Segment segment={segment} />
+                  )}
+                </DateField.Input>
+                <DateField.Suffix>
+                  <DateRangePicker.Trigger>
+                    <DateRangePicker.TriggerIndicator />
+                  </DateRangePicker.Trigger>
+                </DateField.Suffix>
+              </DateField.Group>
+              <DateRangePicker.Popover className="rounded-xl p-2">
+                <RangeCalendar aria-label="Pilih periode kustom">
+                  <RangeCalendar.Header>
+                    <RangeCalendar.YearPickerTrigger>
+                      <RangeCalendar.YearPickerTriggerHeading />
+                      <RangeCalendar.YearPickerTriggerIndicator />
+                    </RangeCalendar.YearPickerTrigger>
+                    <RangeCalendar.NavButton slot="previous" />
+                    <RangeCalendar.NavButton slot="next" />
+                  </RangeCalendar.Header>
+                  <RangeCalendar.Grid>
+                    <RangeCalendar.GridHeader>
+                      {(day: string) => (
+                        <RangeCalendar.HeaderCell>{day}</RangeCalendar.HeaderCell>
+                      )}
+                    </RangeCalendar.GridHeader>
+                    <RangeCalendar.GridBody>
+                      {(date: DateValue) => (
+                        <RangeCalendar.Cell date={date} />
+                      )}
+                    </RangeCalendar.GridBody>
+                  </RangeCalendar.Grid>
+                </RangeCalendar>
+              </DateRangePicker.Popover>
+            </DateRangePicker>
+          )}
           <Tabs
             selectedKey={selectedPeriod}
             onSelectionChange={(key) => {
               setSelectedPeriod(key as TimePeriod);
               if (key === "custom") {
-                setIsPopoverOpen(true);
+                setIsDatePickerOpen(true);
               } else if (key !== "semua") {
                 setCustomStartDate("");
                 setCustomEndDate("");
-                setIsPopoverOpen(false);
+                setIsDatePickerOpen(false);
               } else {
                 setCustomStartDate("");
                 setCustomEndDate("");
-                setIsPopoverOpen(false);
+                setIsDatePickerOpen(false);
               }
             }}
           >
@@ -446,66 +525,6 @@ const RingkasanPage = () => {
               </Tabs.List>
             </Tabs.ListContainer>
           </Tabs>
-          {selectedPeriod === "custom" && (
-            <Popover isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-              <Popover.Trigger>
-                <Button size="sm" variant="ghost" className="h-8 px-3 text-xs">
-                  {customStartDate && customEndDate
-                    ? (() => {
-                        const formatDate = (dateString: string) => {
-                          const date = new Date(dateString);
-                          return date.toLocaleDateString("id-ID", {
-                            day: "numeric",
-                            month: "short",
-                          });
-                        };
-                        return `${formatDate(customStartDate)} - ${formatDate(
-                          customEndDate
-                        )}`;
-                      })()
-                    : "Pilih Tanggal"}
-                </Button>
-              </Popover.Trigger>
-              <Popover.Content className="w-auto">
-                <Popover.Dialog>
-                  <Popover.Heading className="text-sm font-semibold mb-3">
-                    Pilih Periode Kustom
-                  </Popover.Heading>
-                  <div className="flex items-center gap-3">
-                    <div className="flex flex-col gap-1">
-                      <label
-                        htmlFor="start-date"
-                        className="text-xs text-muted"
-                      >
-                        Dari Tanggal
-                      </label>
-                      <input
-                        id="start-date"
-                        type="date"
-                        value={customStartDate}
-                        onChange={(e) => setCustomStartDate(e.target.value)}
-                        max={customEndDate || undefined}
-                        className="h-8 px-3 text-xs rounded-lg border border-separator bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label htmlFor="end-date" className="text-xs text-muted">
-                        Sampai Tanggal
-                      </label>
-                      <input
-                        id="end-date"
-                        type="date"
-                        value={customEndDate}
-                        onChange={(e) => setCustomEndDate(e.target.value)}
-                        min={customStartDate || undefined}
-                        className="h-8 px-3 text-xs rounded-lg border border-separator bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-                </Popover.Dialog>
-              </Popover.Content>
-            </Popover>
-          )}
         </div>
       </div>
 
