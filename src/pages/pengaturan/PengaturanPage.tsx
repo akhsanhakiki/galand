@@ -254,8 +254,8 @@ const PengaturanPage = () => {
   return (
     <div className="flex flex-col w-full h-full gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-lg font-bold text-foreground">Pengaturan</h1>
-        <p className="text-muted text-xs">
+        <h1 className="hidden md:block text-lg font-bold text-foreground">Pengaturan</h1>
+        <p className="hidden md:block text-muted text-xs">
           Kelola pengaturan aplikasi dan preferensi Anda
         </p>
       </div>

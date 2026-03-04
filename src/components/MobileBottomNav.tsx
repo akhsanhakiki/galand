@@ -135,7 +135,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         typeof document !== "undefined" &&
         createPortal(
           <div className="md:hidden fixed inset-0 z-[110] bg-background flex flex-col h-full">
-            <Header isMobile={true} />
+            <Header isMobile={true} pageTitle="Lainnya" />
             <div className="flex flex-col gap-4 md:gap-6 items-center justify-start p-4 flex-1 overflow-y-auto">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 w-full">
                 {moreMenuItems.map(({ title, icon: Icon, key }) => (

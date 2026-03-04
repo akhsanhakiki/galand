@@ -20,6 +20,16 @@ const pageComponents: Record<string, React.ComponentType> = {
   pengaturan: PengaturanPage,
 };
 
+const PAGE_TITLES: Record<string, string> = {
+  ringkasan: "Ringkasan",
+  transaksi: "Transaksi",
+  diskon: "Diskon",
+  produk: "Produk",
+  kasir: "Kasir",
+  pengeluaran: "Pengeluaran",
+  pengaturan: "Pengaturan",
+};
+
 // Helper function to get current page from URL
 const getCurrentPageFromUrl = (): string | null => {
   if (typeof window === "undefined") return null;
@@ -87,7 +97,12 @@ const MobileView = () => {
 
   return (
     <div className="md:hidden flex flex-col min-h-dvh h-full w-full min-w-0">
-      <Header isMobile={true} />
+      <Header
+        isMobile={true}
+        pageTitle={
+          currentPage ? PAGE_TITLES[currentPage] ?? currentPage : undefined
+        }
+      />
       <div className="flex-1 min-h-0 flex flex-col w-full px-4 overflow-y-auto pb-[calc(5rem+env(safe-area-inset-bottom,0px))]">
         {CurrentPageComponent && <CurrentPageComponent key={currentPage} />}
       </div>

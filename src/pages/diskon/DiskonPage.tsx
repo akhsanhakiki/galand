@@ -95,7 +95,7 @@ const DiskonPage = () => {
     <>
       <div className="flex flex-col w-full gap-3 md:gap-5 h-full">
         <div className="flex flex-col gap-0.5 md:gap-1">
-          <h1 className="text-lg md:text-xl font-bold text-foreground">Diskon</h1>
+          <h1 className="hidden md:block text-lg md:text-xl font-bold text-foreground">Diskon</h1>
           <p className="text-muted text-xs md:text-sm hidden md:block">
             Kelola kode diskon dan promo penjualan
           </p>

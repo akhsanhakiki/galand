@@ -389,10 +389,10 @@ const RingkasanPage = () => {
     <div className="flex flex-col w-full gap-3 md:gap-5 flex-1 min-h-min md:h-full md:min-h-0">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4">
         <div className="flex flex-col gap-0.5 md:gap-1">
-          <h1 className="text-lg md:text-xl font-bold text-foreground">
+          <h1 className="hidden md:block text-lg md:text-xl font-bold text-foreground">
             Ringkasan
           </h1>
-          <p className="text-muted text-xs md:text-sm">
+          <p className="hidden md:block text-muted text-xs md:text-sm">
             Pantau ringkasan penjualan dan inventori Anda
           </p>
         </div>

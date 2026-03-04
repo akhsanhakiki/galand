@@ -325,13 +325,6 @@ const KasirPage = () => {
 
   return (
     <div className="flex flex-col w-full gap-5 h-full">
-      {/* Mobile: show Daftar Produk header at top; Desktop: show Kasir page title */}
-      <div className="flex flex-col gap-0.5 md:gap-1 md:hidden">
-        <h1 className="text-lg font-bold text-foreground">Kasir</h1>
-        <p className="text-muted text-xs">
-          Click untuk menambahkan produk ke keranjang
-        </p>
-      </div>
       <div className="hidden md:flex flex-col gap-0.5 md:gap-1">
         <h1 className="text-lg md:text-xl font-bold text-foreground">Kasir</h1>
         <p className="text-muted text-xs md:text-sm">

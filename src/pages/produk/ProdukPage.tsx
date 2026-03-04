@@ -279,8 +279,8 @@ const ProdukPage = () => {
       `}</style>
       <div className="flex flex-col w-full gap-5 h-full">
         <div className="flex flex-col gap-1">
-          <h1 className="text-xl font-bold text-foreground">Produk</h1>
-          <p className="text-muted text-sm">Kelola inventori dan stok produk</p>
+          <h1 className="hidden md:block text-xl font-bold text-foreground">Produk</h1>
+          <p className="hidden md:block text-muted text-sm">Kelola inventori dan stok produk</p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">

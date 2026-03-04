@@ -369,7 +369,7 @@ const PengeluaranPage = () => {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xl font-bold text-foreground">Pengeluaran</h1>
+              <h1 className="hidden md:block text-xl font-bold text-foreground">Pengeluaran</h1>
               {selectedPeriod !== "kustom" &&
                 (selectedPeriod === "semua" ? (
                   <span className="text-sm text-muted">(Semua data)</span>
@@ -379,7 +379,7 @@ const PengeluaranPage = () => {
                   </span>
                 ))}
             </div>
-            <p className="text-muted text-sm">
+            <p className="hidden md:block text-muted text-sm">
               Kelola catatan pengeluaran bisnis
             </p>
           </div>
