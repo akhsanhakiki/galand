@@ -111,7 +111,7 @@ const TransaksiPage = () => {
         initial[col.id] = col.defaultWidth;
       });
       return initial;
-    }
+    },
   );
 
   const handleResize = useCallback(
@@ -120,7 +120,7 @@ const TransaksiPage = () => {
       if (column) {
         const clampedWidth = Math.max(
           column.minWidth,
-          Math.min(column.maxWidth, width)
+          Math.min(column.maxWidth, width),
         );
         setColumnWidths((prev) => ({
           ...prev,
@@ -128,7 +128,7 @@ const TransaksiPage = () => {
         }));
       }
     },
-    [columnConfigs]
+    [columnConfigs],
   );
 
   const getDateRange = useCallback((): {
@@ -222,7 +222,7 @@ const TransaksiPage = () => {
     if (!searchQuery) return transactions;
     const query = searchQuery.toLowerCase();
     return transactions.filter((t) =>
-      t.id.toString().toLowerCase().includes(query)
+      t.id.toString().toLowerCase().includes(query),
     );
   }, [transactions, searchQuery]);
 
@@ -388,11 +388,11 @@ const TransaksiPage = () => {
     const periodTransactions = transactions; // Already filtered by date range in fetchTransactions
     const periodTotalAmount = periodTransactions.reduce(
       (sum, transaction) => sum + transaction.total_amount,
-      0
+      0,
     );
     const periodTotalProfit = periodTransactions.reduce(
       (sum, transaction) => sum + (transaction.profit || 0),
-      0
+      0,
     );
 
     return {
@@ -417,7 +417,9 @@ const TransaksiPage = () => {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="hidden md:block text-xl font-bold text-foreground">Transaksi</h1>
+              <h1 className="hidden md:block text-xl font-bold text-foreground">
+                Transaksi
+              </h1>
               {selectedPeriod !== "kustom" &&
                 (selectedPeriod === "semua" ? (
                   <span className="text-sm text-muted">(Semua data)</span>
@@ -435,7 +437,7 @@ const TransaksiPage = () => {
             {selectedPeriod === "kustom" && (
               <DateRangePicker
                 className="w-[280px] min-w-0"
-                value={customRangeValue}
+                value={customRangeValue as any}
                 onChange={(value) => {
                   if (value) {
                     setCustomStartDate(value.start.toString());
@@ -449,17 +451,16 @@ const TransaksiPage = () => {
                 onOpenChange={setIsDatePickerOpen}
               >
                 <Label className="sr-only">Periode kustom</Label>
-                <DateField.Group fullWidth className="rounded-xl border border-separator bg-surface shadow-none">
+                <DateField.Group
+                  fullWidth
+                  className="rounded-xl border border-separator bg-surface shadow-none"
+                >
                   <DateField.Input slot="start">
-                    {(segment) => (
-                      <DateField.Segment segment={segment} />
-                    )}
+                    {(segment) => <DateField.Segment segment={segment} />}
                   </DateField.Input>
                   <DateRangePicker.RangeSeparator />
                   <DateField.Input slot="end">
-                    {(segment) => (
-                      <DateField.Segment segment={segment} />
-                    )}
+                    {(segment) => <DateField.Segment segment={segment} />}
                   </DateField.Input>
                   <DateField.Suffix>
                     <DateRangePicker.Trigger>
@@ -486,14 +487,12 @@ const TransaksiPage = () => {
                         )}
                       </RangeCalendar.GridHeader>
                       <RangeCalendar.GridBody>
-                        {(date) => (
-                          <RangeCalendar.Cell date={date} />
-                        )}
+                        {(date) => <RangeCalendar.Cell date={date} />}
                       </RangeCalendar.GridBody>
                     </RangeCalendar.Grid>
                   </RangeCalendar>
-                  </DateRangePicker.Popover>
-                </DateRangePicker>
+                </DateRangePicker.Popover>
+              </DateRangePicker>
             )}
             <Tabs
               selectedKey={selectedPeriod}
@@ -628,7 +627,7 @@ const TransaksiPage = () => {
           </div>
         </div>
 
-        <div className="p-6 bg-surface rounded-3xl flex flex-col h-full min-h-[500px]">
+        <div className="p-6 bg-surface rounded-3xl flex flex-col h-full min-h-[350px]">
           <div className="flex flex-row items-center justify-between w-full gap-2 md:gap-4 pb-4">
             <SearchField
               value={searchQuery}
@@ -693,7 +692,7 @@ const TransaksiPage = () => {
                     const totalBarang =
                       transaction.items?.reduce(
                         (sum, item) => sum + item.quantity,
-                        0
+                        0,
                       ) || 0;
                     const profitClass =
                       transaction.profit !== null
@@ -733,8 +732,7 @@ const TransaksiPage = () => {
                             <>
                               {" · "}
                               <span className={profitClass}>
-                                Rp{" "}
-                                {transaction.profit.toLocaleString("id-ID")}
+                                Rp {transaction.profit.toLocaleString("id-ID")}
                               </span>
                             </>
                           )}
@@ -886,7 +884,7 @@ const TransaksiPage = () => {
                             >
                               {transaction.items?.reduce(
                                 (sum, item) => sum + item.quantity,
-                                0
+                                0,
                               ) || 0}
                             </td>
                             <td
@@ -906,8 +904,8 @@ const TransaksiPage = () => {
                                   ? transaction.profit > 0
                                     ? "text-success"
                                     : transaction.profit < 0
-                                    ? "text-danger"
-                                    : "text-foreground"
+                                      ? "text-danger"
+                                      : "text-foreground"
                                   : "text-foreground"
                               }`}
                               style={{
@@ -997,9 +995,9 @@ const TransaksiPage = () => {
                 </div>
                 <div className="flex flex-row gap-2 justify-between items-center">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm text-muted">Data per halaman:</p>
+                    <p className="text-xs text-muted">Data per halaman:</p>
                     <Select
-                      className="w-16"
+                      className="w-16 min-w-0"
                       value={itemsPerPage.toString()}
                       onChange={(value) => {
                         if (value) {
@@ -1007,12 +1005,12 @@ const TransaksiPage = () => {
                         }
                       }}
                     >
-                      <Select.Trigger className="bg-foreground/5 shadow-none">
-                        <Select.Value />
+                      <Select.Trigger className="bg-foreground/5 shadow-none text-xs h-7 min-h-7 py-1 px-2">
+                        <Select.Value className="md:text-xs text-[12px]" />
                         <Select.Indicator />
                       </Select.Trigger>
                       <Select.Popover>
-                        <ListBox>
+                        <ListBox className="text-xs">
                           <ListBox.Item id="10" textValue="10">
                             10
                             <ListBox.ItemIndicator />
@@ -1050,7 +1048,7 @@ const TransaksiPage = () => {
                       <div className="flex items-center gap-1">
                         {Array.from(
                           { length: totalPages },
-                          (_, i) => i + 1
+                          (_, i) => i + 1,
                         ).map((page) => (
                           <Button
                             key={page}
@@ -1070,7 +1068,7 @@ const TransaksiPage = () => {
                         variant="ghost"
                         onPress={() =>
                           setCurrentPage((prev) =>
-                            Math.min(totalPages, prev + 1)
+                            Math.min(totalPages, prev + 1),
                           )
                         }
                         isDisabled={currentPage === totalPages}
@@ -1081,11 +1079,11 @@ const TransaksiPage = () => {
                     </div>
                   )}
                   {totalPages > 0 && (
-                    <div className="text-center text-sm text-muted pt-2">
+                    <div className="text-center text-xs text-muted pt-2">
                       {(currentPage - 1) * itemsPerPage + 1} -{" "}
                       {Math.min(
                         currentPage * itemsPerPage,
-                        filteredTransactions.length
+                        filteredTransactions.length,
                       )}{" "}
                       data dari {filteredTransactions.length} transaksi
                     </div>
