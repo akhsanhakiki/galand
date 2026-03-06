@@ -69,7 +69,7 @@ const KasirPage = () => {
   const [itemsPerPage, setItemsPerPage] = useState<number>(12);
   const [discountCode, setDiscountCode] = useState("");
   const [validatedDiscount, setValidatedDiscount] = useState<Discount | null>(
-    null
+    null,
   );
   const [discountError, setDiscountError] = useState<string>("");
   const [isValidatingDiscount, setIsValidatingDiscount] = useState(false);
@@ -109,7 +109,7 @@ const KasirPage = () => {
   const handleAddToCartFromModal = () => {
     if (!selectedProduct) return;
     const existing = cart.find(
-      (item) => item.product_id === selectedProduct.id
+      (item) => item.product_id === selectedProduct.id,
     );
     const targetQty = (existing?.quantity ?? 0) + addQuantity;
     addToCart(selectedProduct);
@@ -144,7 +144,7 @@ const KasirPage = () => {
   const subtotal = useMemo(() => {
     return cart.reduce(
       (sum, item) => sum + calculateItemTotal(item.product, item.quantity),
-      0
+      0,
     );
   }, [cart]);
 
@@ -155,11 +155,11 @@ const KasirPage = () => {
       return (subtotal * validatedDiscount.percentage) / 100;
     } else if (validatedDiscount.type === "individual_item") {
       const applicableItems = cart.filter(
-        (item) => item.product_id === validatedDiscount.product_id
+        (item) => item.product_id === validatedDiscount.product_id,
       );
       const applicableSubtotal = applicableItems.reduce(
         (sum, item) => sum + calculateItemTotal(item.product, item.quantity),
-        0
+        0,
       );
       return (applicableSubtotal * validatedDiscount.percentage) / 100;
     }
@@ -175,7 +175,7 @@ const KasirPage = () => {
     return products.filter(
       (p) =>
         p.name.toLowerCase().includes(query) ||
-        p.id.toString().toLowerCase().includes(query)
+        p.id.toString().toLowerCase().includes(query),
     );
   }, [products, searchQuery]);
 
@@ -345,7 +345,7 @@ const KasirPage = () => {
               <Spinner size="lg" />
             </div>
           ) : (
-            <div className="flex flex-col gap-4 bg-surface rounded-3xl p-4 h-full w-full min-w-0">
+            <div className="flex flex-col gap-4 bg-surface rounded-2xl p-4 h-full w-full min-w-0">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 w-full min-w-0">
                 <div className="hidden md:flex flex-col gap-1 min-w-0">
                   <h2 className="text-md font-bold text-foreground">
@@ -465,7 +465,7 @@ const KasirPage = () => {
                       <div className="flex items-center gap-1">
                         {Array.from(
                           { length: totalPages },
-                          (_, i) => i + 1
+                          (_, i) => i + 1,
                         ).map((page) => (
                           <Button
                             key={page}
@@ -485,7 +485,7 @@ const KasirPage = () => {
                         variant="ghost"
                         onPress={() =>
                           setCurrentPage((prev) =>
-                            Math.min(totalPages, prev + 1)
+                            Math.min(totalPages, prev + 1),
                           )
                         }
                         isDisabled={currentPage === totalPages}
@@ -499,29 +499,29 @@ const KasirPage = () => {
                         {(currentPage - 1) * itemsPerPage + 1} -{" "}
                         {Math.min(
                           currentPage * itemsPerPage,
-                          filteredProducts.length
+                          filteredProducts.length,
                         )}{" "}
                         dari {filteredProducts.length} produk
                       </div>
                     )}
                   </div>
                 )}
-                <div className="md:hidden pt-4">
-                  <Button
-                    variant="primary"
-                    className="w-full bg-accent text-accent-foreground"
-                    size="md"
-                    onPress={() => setMobileCartOpen(true)}
-                  >
-                    <LuShoppingCart className="w-4 h-4" />
-                    Lanjut Pembayaran
-                    {cart.length > 0 && (
+                {cart.length > 0 && (
+                  <div className="md:hidden pt-4">
+                    <Button
+                      variant="primary"
+                      className="w-full bg-accent text-accent-foreground"
+                      size="md"
+                      onPress={() => setMobileCartOpen(true)}
+                    >
+                      <LuShoppingCart className="w-4 h-4" />
+                      Lanjut Pembayaran
                       <span className="ml-1.5 font-semibold">
                         ({cart.length})
                       </span>
-                    )}
-                  </Button>
-                </div>
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -581,7 +581,7 @@ const KasirPage = () => {
                           {cart.map((item) => {
                             const itemTotal = calculateItemTotal(
                               item.product,
-                              item.quantity
+                              item.quantity,
                             );
                             const hasBundle =
                               item.product.bundle_quantity > 0 &&
@@ -589,7 +589,7 @@ const KasirPage = () => {
                               item.quantity >= item.product.bundle_quantity;
                             const bundles = hasBundle
                               ? Math.floor(
-                                  item.quantity / item.product.bundle_quantity
+                                  item.quantity / item.product.bundle_quantity,
                                 )
                               : 0;
                             const remaining = hasBundle
@@ -873,7 +873,7 @@ const KasirPage = () => {
                           <div className="text-xs text-success rounded-lg bg-success/10 p-2">
                             Bundle: {selectedProduct.bundle_quantity} pcs @ Rp{" "}
                             {selectedProduct.bundle_price.toLocaleString(
-                              "id-ID"
+                              "id-ID",
                             )}{" "}
                             per pcs
                           </div>
@@ -967,7 +967,7 @@ const KasirPage = () => {
                         {cart.map((item) => {
                           const itemTotal = calculateItemTotal(
                             item.product,
-                            item.quantity
+                            item.quantity,
                           );
                           const hasBundle =
                             item.product.bundle_quantity > 0 &&
@@ -975,7 +975,7 @@ const KasirPage = () => {
                             item.quantity >= item.product.bundle_quantity;
                           const bundles = hasBundle
                             ? Math.floor(
-                                item.quantity / item.product.bundle_quantity
+                                item.quantity / item.product.bundle_quantity,
                               )
                             : 0;
                           const remaining = hasBundle

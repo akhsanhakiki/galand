@@ -3,12 +3,16 @@
 import React, { useEffect, useState } from "react";
 import { Button, Chip, Surface, Spinner, SearchField } from "@heroui/react";
 import {
-  LuTag,
+  LuPercent,
+  LuCalendarCheck,
+  LuPiggyBank,
+  LuZap,
   LuPlus,
   LuPencil,
   LuTrash2,
   LuCopy,
   LuCheck,
+  LuTag,
 } from "react-icons/lu";
 import type { Discount } from "../../utils/api";
 import { getDiscounts, deleteDiscount } from "../../utils/api";
@@ -93,69 +97,79 @@ const DiskonPage = () => {
 
   return (
     <>
-      <div className="flex flex-col w-full gap-3 md:gap-5 h-full">
+      <div className="flex flex-col w-full gap-5 h-full">
         <div className="flex flex-col gap-0.5 md:gap-1">
-          <h1 className="hidden md:block text-lg md:text-xl font-bold text-foreground">Diskon</h1>
+          <h1 className="hidden md:block text-lg md:text-xl font-bold text-foreground">
+            Diskon
+          </h1>
           <p className="text-muted text-xs md:text-sm hidden md:block">
             Kelola kode diskon dan promo penjualan
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
-          <div className="p-2.5 md:p-5 bg-surface rounded-xl md:rounded-3xl">
-            <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between md:gap-2.5 mb-1 md:mb-3">
-              <p className="order-2 text-[10px] md:text-xs text-muted leading-tight md:order-1">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          <div className="p-4 md:p-5 bg-surface rounded-2xl md:rounded-3xl">
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-2.5 mb-2 md:mb-3">
+              <p className="order-2 text-xs text-muted leading-tight md:order-1">
                 Total Diskon
               </p>
-              <Surface className="order-1 w-fit p-1.5 md:order-2 md:p-1.5 rounded-lg bg-accent/10">
-                <LuTag className="w-3 h-3 md:w-3.5 md:h-3.5 text-accent" />
+              <Surface className="order-1 w-fit p-2 md:order-2 md:p-1.5 rounded-lg bg-accent/10">
+                <LuPercent className="w-4 h-4 md:w-3.5 md:h-3.5 text-accent" />
               </Surface>
             </div>
-            <p className="text-base md:text-xl font-bold text-foreground leading-tight">
-              {stats.total}
-            </p>
+            <div className="flex flex-col gap-1 md:gap-1.5">
+              <p className="text-lg md:text-xl font-bold text-foreground leading-tight">
+                {stats.total}
+              </p>
+            </div>
           </div>
 
-          <div className="p-2.5 md:p-5 bg-surface rounded-xl md:rounded-3xl">
-            <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between md:gap-2.5 mb-1 md:mb-3">
-              <p className="order-2 text-[10px] md:text-xs text-muted leading-tight md:order-1">
+          <div className="p-4 md:p-5 bg-surface rounded-2xl md:rounded-3xl">
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-2.5 mb-2 md:mb-3">
+              <p className="order-2 text-xs text-muted leading-tight md:order-1">
                 Digunakan Hari Ini
               </p>
-              <Surface className="order-1 w-fit p-1.5 md:order-2 md:p-1.5 rounded-lg bg-success/10">
-                <LuTag className="w-3 h-3 md:w-3.5 md:h-3.5 text-success" />
+              <Surface className="order-1 w-fit p-2 md:order-2 md:p-1.5 rounded-lg bg-success/10">
+                <LuCalendarCheck className="w-4 h-4 md:w-3.5 md:h-3.5 text-success" />
               </Surface>
             </div>
-            <p className="text-base md:text-xl font-bold text-foreground leading-tight">
-              -
-            </p>
+            <div className="flex flex-col gap-1 md:gap-1.5">
+              <p className="text-lg md:text-xl font-bold text-foreground leading-tight">
+                -
+              </p>
+            </div>
           </div>
 
-          <div className="p-2.5 md:p-5 bg-surface rounded-xl md:rounded-3xl">
-            <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between md:gap-2.5 mb-1 md:mb-3">
-              <p className="order-2 text-[10px] md:text-xs text-muted leading-tight md:order-1">
+          <div className="p-4 md:p-5 bg-surface rounded-2xl md:rounded-3xl">
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-2.5 mb-2 md:mb-3">
+              <p className="order-2 text-xs text-muted leading-tight md:order-1">
                 Total Penghematan
               </p>
-              <Surface className="order-1 w-fit p-1.5 md:order-2 md:p-1.5 rounded-lg bg-warning/10">
-                <LuTag className="w-3 h-3 md:w-3.5 md:h-3.5 text-warning" />
+              <Surface className="order-1 w-fit p-2 md:order-2 md:p-1.5 rounded-lg bg-warning/10">
+                <LuPiggyBank className="w-4 h-4 md:w-3.5 md:h-3.5 text-warning" />
               </Surface>
             </div>
-            <p className="text-base md:text-xl font-bold text-foreground leading-tight">
-              -
-            </p>
+            <div className="flex flex-col gap-1 md:gap-1.5">
+              <p className="text-lg md:text-xl font-bold text-foreground leading-tight">
+                -
+              </p>
+            </div>
           </div>
 
-          <div className="p-2.5 md:p-5 bg-surface rounded-xl md:rounded-3xl">
-            <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between md:gap-2.5 mb-1 md:mb-3">
-              <p className="order-2 text-[10px] md:text-xs text-muted leading-tight md:order-1">
+          <div className="p-4 md:p-5 bg-surface rounded-2xl md:rounded-3xl">
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-2.5 mb-2 md:mb-3">
+              <p className="order-2 text-xs text-muted leading-tight md:order-1">
                 Aktif
               </p>
-              <Surface className="order-1 w-fit p-1.5 md:order-2 md:p-1.5 rounded-lg bg-success/10">
-                <LuTag className="w-3 h-3 md:w-3.5 md:h-3.5 text-success" />
+              <Surface className="order-1 w-fit p-2 md:order-2 md:p-1.5 rounded-lg bg-success/10">
+                <LuZap className="w-4 h-4 md:w-3.5 md:h-3.5 text-success" />
               </Surface>
             </div>
-            <p className="text-base md:text-xl font-bold text-foreground leading-tight">
-              {stats.total}
-            </p>
+            <div className="flex flex-col gap-1 md:gap-1.5">
+              <p className="text-lg md:text-xl font-bold text-foreground leading-tight">
+                {stats.total}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -181,7 +195,9 @@ const DiskonPage = () => {
                   size="sm"
                 >
                   <LuPlus className="w-3.5 h-3.5" />
-                  <span className="text-xs hidden md:inline">Tambah Diskon</span>
+                  <span className="text-xs hidden md:inline">
+                    Tambah Diskon
+                  </span>
                 </Button>
               </div>
               <div className="flex flex-col h-full overflow-hidden gap-1">
@@ -217,7 +233,9 @@ const DiskonPage = () => {
                               </p>
                             </div>
                             <div className="flex flex-row gap-1.5 w-full items-center min-w-0">
-                              <p className="text-[10px] md:text-xs text-muted shrink-0">Kode:</p>
+                              <p className="text-[10px] md:text-xs text-muted shrink-0">
+                                Kode:
+                              </p>
                               <p className="text-xs md:text-base font-medium text-muted truncate flex-1 min-w-0">
                                 {discount.code}
                               </p>

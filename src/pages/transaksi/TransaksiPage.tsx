@@ -627,7 +627,7 @@ const TransaksiPage = () => {
           </div>
         </div>
 
-        <div className="p-6 bg-surface rounded-3xl flex flex-col h-full min-h-[350px]">
+        <div className="p-4 bg-surface rounded-2xl flex flex-col h-full min-h-[350px]">
           <div className="flex flex-row items-center justify-between w-full gap-2 md:gap-4 pb-4">
             <SearchField
               value={searchQuery}
