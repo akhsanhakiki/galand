@@ -65,9 +65,13 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
 
   const filteredMenuItems = getFilteredMenuItems();
 
-  // Show only first 4 items in bottom nav, rest in "Lainnya" modal
-  const bottomNavItems = filteredMenuItems.slice(0, 4);
+  // Show only first 4 items in bottom nav, rest in "Lainnya" modal (or show single item directly)
   const moreMenuItems = filteredMenuItems.slice(4);
+  const bottomNavItems =
+    moreMenuItems.length === 1
+      ? [...filteredMenuItems.slice(0, 4), ...moreMenuItems]
+      : filteredMenuItems.slice(0, 4);
+  const showLainnyaButton = moreMenuItems.length > 1;
 
   const handleMoreMenuClick = (menuKey: string) => {
     onNavigate(menuKey);
@@ -100,7 +104,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             </Button>
           );
         })}
-        {moreMenuItems.length > 0 && (
+        {showLainnyaButton && (
           <Button
             variant="ghost"
             className="flex flex-col items-center justify-center gap-1 h-auto py-2 px-2 min-w-[60px] shrink-0 text-default-500 data-[hovered=true]:bg-foreground/6"
@@ -130,12 +134,13 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         />
       )}
 
-      {isMoreMenuOpen &&
+      {showLainnyaButton &&
+        isMoreMenuOpen &&
         mounted &&
         typeof document !== "undefined" &&
         createPortal(
           <div className="md:hidden fixed inset-0 z-[110] bg-background flex flex-col h-full">
-            <Header isMobile={true} />
+            <Header isMobile={true} pageTitle="Lainnya" />
             <div className="flex flex-col gap-4 md:gap-6 items-center justify-start p-4 flex-1 overflow-y-auto">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 w-full">
                 {moreMenuItems.map(({ title, icon: Icon, key }) => (
@@ -178,7 +183,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                     </Button>
                   );
                 })}
-                {moreMenuItems.length > 0 && (
+                {showLainnyaButton && (
                   <Button
                     variant="ghost"
                     className="flex flex-col items-center justify-center gap-1 h-auto py-2 px-2 min-w-[60px] shrink-0 text-primary data-[hovered=true]:bg-foreground/6"
@@ -193,7 +198,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
               </div>
             </nav>
           </div>,
-          document.body
+          document.body,
         )}
     </>
   );

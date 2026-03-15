@@ -22,15 +22,18 @@ import {
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import OrganizationSwitcher from "./OrganizationSwitcher";
 
 interface HeaderProps {
   collapsed?: boolean;
   isMobile?: boolean;
+  pageTitle?: string;
 }
 
 export default function Header({
   collapsed = false,
   isMobile = false,
+  pageTitle,
 }: HeaderProps) {
   const { theme, setTheme } = useTheme();
   const { user, loading: authLoading, signOut } = useAuth();
@@ -77,20 +80,11 @@ export default function Header({
       <>
         <div className="w-full px-4 py-2">
           <div className="flex items-center justify-between w-full">
-            <h1 className="text-xl font-bold text-primary">kadara</h1>
+            <h1 className="text-xl font-bold text-foreground truncate min-w-0">
+              {pageTitle ?? "kadara"}
+            </h1>
             <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                isIconOnly
-                size="sm"
-                onPress={() => setTheme(theme === "dark" ? "light" : "dark")}
-              >
-                {mounted && theme === "dark" ? (
-                  <LuSun className="w-4 h-4 text-default-500" />
-                ) : (
-                  <LuMoon className="w-4 h-4 text-default-500" />
-                )}
-              </Button>
+              <OrganizationSwitcher compact />
               <button
                 onClick={() => setIsProfileModalOpen(true)}
                 className="cursor-pointer"

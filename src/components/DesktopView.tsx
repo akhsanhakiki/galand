@@ -80,15 +80,19 @@ const DesktopView = () => {
   }
 
   // Show onboarding page if needed (overrides current page)
-  const CurrentPageComponent = shouldShowOnboarding 
-    ? OnboardingPage 
+  const CurrentPageComponent = shouldShowOnboarding
+    ? OnboardingPage
     : pageComponents[currentPage];
 
   return (
     <div className="hidden md:flex flex-row gap-4 md:gap-4 p-4 md:p-4 h-full">
       <MenuControl isMobile={false} currentPage={currentPage} />
       <div className="flex-1 min-w-0">
-        {CurrentPageComponent && <CurrentPageComponent key={shouldShowOnboarding ? "onboarding" : currentPage} />}
+        {CurrentPageComponent && (
+          <CurrentPageComponent
+            key={shouldShowOnboarding ? "onboarding" : currentPage}
+          />
+        )}
       </div>
     </div>
   );
