@@ -576,17 +576,17 @@ const PengeluaranPage = () => {
           </div>
         </div>
 
-        <div className="p-4 bg-surface rounded-3xl flex flex-col h-full min-h-[500px]">
+        <div className="p-6 bg-surface rounded-3xl flex flex-col h-full min-h-[500px]">
           <style>{`
             .table-header-separator {
               box-shadow: 0 1px 0 0 var(--separator) !important;
             }
           `}</style>
-          <div className="flex flex-col md:flex-row md:items-center w-full justify-between gap-4 pb-4">
+          <div className="flex flex-row items-center justify-between w-full gap-2 md:gap-4 pb-4">
             <SearchField
               value={searchQuery}
               onChange={setSearchQuery}
-              className="w-full md:w-1/4"
+              className="flex-1 min-w-0 md:w-1/4 md:max-w-sm"
             >
               <SearchField.Group className="shadow-none border">
                 <SearchField.SearchIcon />
@@ -595,15 +595,17 @@ const PengeluaranPage = () => {
               </SearchField.Group>
             </SearchField>
 
-            <div className="flex flex-row items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2">
               <Dropdown>
                 <Button
                   variant="ghost"
                   isDisabled={filteredExpenses.length === 0}
                   size="sm"
+                  className="md:min-w-0"
+                  aria-label="Export"
                 >
-                  <LuDownload className="w-3.5 h-3.5" />
-                  Export
+                  <LuDownload className="w-3.5 h-3.5 shrink-0" />
+                  <span className="hidden md:inline">Export</span>
                 </Button>
                 <Dropdown.Popover>
                   <Dropdown.Menu
@@ -630,7 +632,7 @@ const PengeluaranPage = () => {
                 size="sm"
               >
                 <LuPlus className="w-3.5 h-3.5" />
-                <span className="text-xs">Tambah Pengeluaran</span>
+                <span className="text-xs hidden md:inline">Tambah Pengeluaran</span>
               </Button>
             </div>
           </div>

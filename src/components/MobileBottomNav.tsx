@@ -65,9 +65,13 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
 
   const filteredMenuItems = getFilteredMenuItems();
 
-  // Show only first 4 items in bottom nav, rest in "Lainnya" modal
-  const bottomNavItems = filteredMenuItems.slice(0, 4);
+  // Show only first 4 items in bottom nav, rest in "Lainnya" modal (or show single item directly)
   const moreMenuItems = filteredMenuItems.slice(4);
+  const bottomNavItems =
+    moreMenuItems.length === 1
+      ? [...filteredMenuItems.slice(0, 4), ...moreMenuItems]
+      : filteredMenuItems.slice(0, 4);
+  const showLainnyaButton = moreMenuItems.length > 1;
 
   const handleMoreMenuClick = (menuKey: string) => {
     onNavigate(menuKey);
@@ -100,7 +104,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             </Button>
           );
         })}
-        {moreMenuItems.length > 0 && (
+        {showLainnyaButton && (
           <Button
             variant="ghost"
             className="flex flex-col items-center justify-center gap-1 h-auto py-2 px-2 min-w-[60px] shrink-0 text-default-500 data-[hovered=true]:bg-foreground/6"
@@ -130,7 +134,8 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         />
       )}
 
-      {isMoreMenuOpen &&
+      {showLainnyaButton &&
+        isMoreMenuOpen &&
         mounted &&
         typeof document !== "undefined" &&
         createPortal(
@@ -178,7 +183,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                     </Button>
                   );
                 })}
-                {moreMenuItems.length > 0 && (
+                {showLainnyaButton && (
                   <Button
                     variant="ghost"
                     className="flex flex-col items-center justify-center gap-1 h-auto py-2 px-2 min-w-[60px] shrink-0 text-primary data-[hovered=true]:bg-foreground/6"
@@ -193,7 +198,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
               </div>
             </nav>
           </div>,
-          document.body
+          document.body,
         )}
     </>
   );
