@@ -11,6 +11,7 @@ import {
   TextField,
 } from "@heroui/react";
 import { useEffect, useRef, useState } from "react";
+import { LuCamera, LuImage } from "react-icons/lu";
 import type { Product, ProductCreate, ProductUpdate } from "../utils/api";
 import { createProduct, updateProduct, uploadProductPhoto } from "../utils/api";
 
@@ -39,6 +40,7 @@ export default function ProductForm({
   const [pendingPhotoFile, setPendingPhotoFile] = useState<File | null>(null);
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const blobUrlRef = useRef<string | null>(null);
 
   const revokeBlobPreview = () => {
@@ -203,8 +205,8 @@ export default function ProductForm({
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-2">
                   <Label>Foto Produk</Label>
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-                    <div className="h-44 w-44 shrink-0 rounded-2xl border border-separator bg-foreground/5 overflow-hidden mx-auto sm:mx-0">
+                  <div className="flex flex-col gap-3">
+                    <div className="mx-auto w-full max-w-[min(100%,18rem)] sm:max-w-[min(100%,22rem)] aspect-square rounded-2xl border border-separator bg-foreground/5 overflow-hidden">
                       {imageSrc ? (
                         <img
                           src={imageSrc}
@@ -217,14 +219,22 @@ export default function ProductForm({
                         </div>
                       )}
                     </div>
-                    <div className="flex flex-col gap-2 min-w-0">
-                      <input
-                        ref={photoInputRef}
-                        type="file"
-                        accept="image/*"
-                        className="sr-only"
-                        onChange={handlePhotoSelected}
-                      />
+                    <input
+                      ref={photoInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      onChange={handlePhotoSelected}
+                    />
+                    <input
+                      ref={cameraInputRef}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      className="sr-only"
+                      onChange={handlePhotoSelected}
+                    />
+                    <div className="flex flex-row justify-end gap-2">
                       <Button
                         type="button"
                         size="sm"
@@ -232,12 +242,19 @@ export default function ProductForm({
                         isDisabled={isSubmitting}
                         onPress={() => photoInputRef.current?.click()}
                       >
+                        <LuImage className="w-3.5 h-3.5 shrink-0" />
                         Pilih foto
                       </Button>
-                      <p className="text-[11px] text-muted leading-snug">
-                        PNG, JPG, atau WebP. Unggah ke penyimpanan terjadi saat
-                        Anda menekan Simpan.
-                      </p>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        isDisabled={isSubmitting}
+                        onPress={() => cameraInputRef.current?.click()}
+                      >
+                        <LuCamera className="w-3.5 h-3.5 shrink-0" />
+                        Ambil foto
+                      </Button>
                     </div>
                   </div>
                 </div>
