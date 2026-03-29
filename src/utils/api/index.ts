@@ -76,6 +76,7 @@ export {
   createOrganization,
   updateOrganization,
   deleteOrganization,
+  uploadOrganizationLogo,
   getOrganizationMembers,
   addOrganizationMember,
   updateOrganizationMember,
