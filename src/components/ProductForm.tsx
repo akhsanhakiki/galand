@@ -188,9 +188,13 @@ export default function ProductForm({
   const imageSrc = photoPreviewUrl ?? product?.photo_url ?? null;
 
   return (
-    <Modal.Backdrop isOpen={isOpen} onOpenChange={handleClose}>
-      <Modal.Container>
-        <Modal.Dialog className="flex max-h-[min(90dvh,720px)] w-full flex-col overflow-hidden sm:max-w-md">
+    <Modal.Backdrop
+      isOpen={isOpen}
+      onOpenChange={handleClose}
+      className="z-200 flex min-h-dvh items-center justify-center overflow-hidden px-3 pt-[max(0.5rem,env(safe-area-inset-top,0px))] pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:min-h-screen md:p-4"
+    >
+      <Modal.Container className="flex w-full max-w-full min-h-0 justify-center">
+        <Modal.Dialog className="flex w-full max-h-[calc(100svh-5rem-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px)-1.5rem)] max-w-md flex-col overflow-hidden md:max-h-[min(90dvh,720px)]">
           <Modal.CloseTrigger />
           <form
             className="flex min-h-0 flex-1 flex-col overflow-hidden"
