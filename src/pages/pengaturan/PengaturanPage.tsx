@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Button,
   Separator,
@@ -23,6 +23,11 @@ import {
   LuUserPlus,
   LuTrash2,
   LuPencil,
+  LuChevronRight,
+  LuChevronLeft,
+  LuCamera,
+  LuImage,
+  LuStore,
 } from "react-icons/lu";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTheme } from "next-themes";
@@ -42,6 +47,7 @@ import {
   createOrganization,
   updateOrganization,
   deleteOrganization,
+  uploadOrganizationLogo,
   getOrganizationMembers,
   addOrganizationMember,
   updateOrganizationMember,
@@ -69,9 +75,23 @@ const PengaturanPage = () => {
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
   const [orgForm, setOrgForm] = useState<OrganizationCreate>({
     name: "",
-    logo: "",
     metadata: "",
   });
+  const [pendingCreateLogo, setPendingCreateLogo] = useState<File | null>(null);
+  const [createLogoPreview, setCreateLogoPreview] = useState<string | null>(
+    null,
+  );
+  const createLogoBlobRef = useRef<string | null>(null);
+  const createPhotoInputRef = useRef<HTMLInputElement>(null);
+  const createCameraInputRef = useRef<HTMLInputElement>(null);
+  const [pendingEditLogo, setPendingEditLogo] = useState<File | null>(null);
+  const [editLogoPreview, setEditLogoPreview] = useState<string | null>(null);
+  const [editingOrgDisplayLogoUrl, setEditingOrgDisplayLogoUrl] = useState<
+    string | null
+  >(null);
+  const editLogoBlobRef = useRef<string | null>(null);
+  const editPhotoInputRef = useRef<HTMLInputElement>(null);
+  const editCameraInputRef = useRef<HTMLInputElement>(null);
   const [memberForm, setMemberForm] = useState<OrganizationMemberCreate>({
     userId: "",
     role: "admin",
@@ -80,10 +100,26 @@ const PengaturanPage = () => {
   const [editingOrgForm, setEditingOrgForm] = useState<OrganizationUpdate>({});
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [editingMemberRole, setEditingMemberRole] = useState<string>("admin");
+  const [isMdUp, setIsMdUp] = useState<boolean | null>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const update = () => setIsMdUp(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (isMdUp !== true || selectedOrgId || organizations.length === 0) {
+      return;
+    }
+    setSelectedOrgId(organizations[0].id);
+  }, [isMdUp, selectedOrgId, organizations]);
 
   const fetchUsers = async () => {
     try {
@@ -111,11 +147,6 @@ const PengaturanPage = () => {
     try {
       const data = await getOrganizations(0, 100);
       setOrganizations(data);
-      if (data.length > 0 && !selectedOrgId) {
-        const firstOrgId = data[0].id;
-        setSelectedOrgId(firstOrgId);
-        fetchOrganizationMembers(firstOrgId);
-      }
     } catch (error) {
       // Error handling
     } finally {
@@ -139,21 +170,65 @@ const PengaturanPage = () => {
     setEditingOrgId(org.id);
     setEditingOrgForm({
       name: org.name,
-      logo: org.logo || "",
       metadata: org.metadata || "",
     });
+    setEditingOrgDisplayLogoUrl(org.logo);
+    if (editLogoBlobRef.current) {
+      URL.revokeObjectURL(editLogoBlobRef.current);
+      editLogoBlobRef.current = null;
+    }
+    setPendingEditLogo(null);
+    setEditLogoPreview(null);
     setIsEditOrgModalOpen(true);
 
     try {
       const latest = await getOrganization(org.id);
       setEditingOrgForm({
         name: latest.name,
-        logo: latest.logo || "",
         metadata: latest.metadata || "",
       });
+      setEditingOrgDisplayLogoUrl(latest.logo);
     } catch (error) {
       // Error handling
     }
+  };
+
+  const handleCreateLogoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    const contentType = file.type || "";
+    if (!contentType.startsWith("image/")) {
+      alert("Pilih file gambar (PNG, JPG, WebP).");
+      return;
+    }
+    if (createLogoBlobRef.current) {
+      URL.revokeObjectURL(createLogoBlobRef.current);
+      createLogoBlobRef.current = null;
+    }
+    const url = URL.createObjectURL(file);
+    createLogoBlobRef.current = url;
+    setCreateLogoPreview(url);
+    setPendingCreateLogo(file);
+  };
+
+  const handleEditLogoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    const contentType = file.type || "";
+    if (!contentType.startsWith("image/")) {
+      alert("Pilih file gambar (PNG, JPG, WebP).");
+      return;
+    }
+    if (editLogoBlobRef.current) {
+      URL.revokeObjectURL(editLogoBlobRef.current);
+      editLogoBlobRef.current = null;
+    }
+    const url = URL.createObjectURL(file);
+    editLogoBlobRef.current = url;
+    setEditLogoPreview(url);
+    setPendingEditLogo(file);
   };
 
   const handleCreateOrganization = async () => {
@@ -161,24 +236,48 @@ const PengaturanPage = () => {
       return;
     }
     try {
-      await createOrganization(orgForm);
+      const created = await createOrganization({
+        name: orgForm.name.trim(),
+        ...(orgForm.metadata?.trim() ? { metadata: orgForm.metadata } : {}),
+      });
+      if (pendingCreateLogo) {
+        await uploadOrganizationLogo(created.id, pendingCreateLogo);
+      }
+      if (createLogoBlobRef.current) {
+        URL.revokeObjectURL(createLogoBlobRef.current);
+        createLogoBlobRef.current = null;
+      }
+      setPendingCreateLogo(null);
+      setCreateLogoPreview(null);
       setIsOrgModalOpen(false);
-      setOrgForm({ name: "", logo: "", metadata: "" });
+      setOrgForm({ name: "", metadata: "" });
       fetchOrganizations();
     } catch (error) {
-      // Error handling
+      alert(error instanceof Error ? error.message : "Gagal menambah toko");
     }
   };
 
   const handleUpdateOrganization = async (orgId: string) => {
     try {
-      await updateOrganization(orgId, editingOrgForm);
+      await updateOrganization(orgId, {
+        name: (editingOrgForm.name || "").trim(),
+        metadata: editingOrgForm.metadata ?? "",
+      });
+      if (pendingEditLogo) {
+        await uploadOrganizationLogo(orgId, pendingEditLogo);
+      }
+      if (editLogoBlobRef.current) {
+        URL.revokeObjectURL(editLogoBlobRef.current);
+        editLogoBlobRef.current = null;
+      }
+      setPendingEditLogo(null);
+      setEditLogoPreview(null);
       setEditingOrgId(null);
       setEditingOrgForm({});
       setIsEditOrgModalOpen(false);
       fetchOrganizations();
     } catch (error) {
-      // Error handling
+      alert(error instanceof Error ? error.message : "Gagal memperbarui toko");
     }
   };
 
@@ -251,10 +350,17 @@ const PengaturanPage = () => {
     : "light";
   const displayTheme = mounted ? theme : "system";
 
+  const selectedOrganization =
+    selectedOrgId === null
+      ? undefined
+      : organizations.find((o) => o.id === selectedOrgId);
+
   return (
     <div className="flex flex-col w-full h-full gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="hidden md:block text-lg font-bold text-foreground">Pengaturan</h1>
+        <h1 className="hidden md:block text-lg font-bold text-foreground">
+          Pengaturan
+        </h1>
         <p className="hidden md:block text-muted text-xs">
           Kelola pengaturan aplikasi dan preferensi Anda
         </p>
@@ -332,10 +438,14 @@ const PengaturanPage = () => {
           {/* Toko Tab */}
           {user?.role === "admin" && (
             <Tabs.Panel id="toko">
-              <div className="flex flex-col gap-4 text-left h-full">
-                <div className="flex flex-row gap-4 flex-1 min-h-0 overflow-hidden">
+              <div className="flex flex-col gap-4 text-left h-full flex-1 min-h-0">
+                <div className="flex flex-col md:flex-row gap-4 flex-1 min-h-0 overflow-hidden">
                   {/* First Column: Organizations List */}
-                  <div className="flex flex-col w-1/3 min-w-0 border-r border-gray-200/50 pr-4">
+                  <div
+                    className={`flex flex-col w-full md:w-1/3 min-w-0 md:border-r md:border-gray-200/50 md:pr-4 min-h-0 ${
+                      selectedOrgId ? "hidden md:flex" : "flex"
+                    }`}
+                  >
                     <div className="flex items-center justify-between mb-2">
                       <p className="text-xs font-medium text-foreground">
                         Toko
@@ -372,12 +482,16 @@ const PengaturanPage = () => {
                           >
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex items-center gap-2 flex-1 min-w-0">
-                                {org.logo && (
+                                {org.logo ? (
                                   <img
                                     src={org.logo}
                                     alt={org.name}
-                                    className="w-8 h-8 rounded"
+                                    className="w-12 h-12 rounded-xl object-cover shrink-0"
                                   />
+                                ) : (
+                                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                                    <LuStore className="w-6 h-6 text-primary" />
+                                  </div>
                                 )}
                                 <div className="flex flex-col min-w-0 flex-1">
                                   <p className="text-sm font-medium text-foreground truncate">
@@ -425,9 +539,67 @@ const PengaturanPage = () => {
                   </div>
 
                   {/* Second Column: Members List */}
-                  <div className="flex flex-col flex-1 min-w-0">
+                  <div
+                    className={`flex flex-col flex-1 min-w-0 min-h-0 ${
+                      selectedOrgId ? "flex" : "hidden md:flex"
+                    }`}
+                  >
                     {selectedOrgId ? (
                       <>
+                        <nav
+                          className="md:hidden flex items-center gap-1 text-xs shrink-0 mb-3 -mt-1"
+                          aria-label="Navigasi toko"
+                        >
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2 -ml-2 gap-1 min-w-0"
+                            onPress={() => setSelectedOrgId(null)}
+                          >
+                            <LuChevronLeft className="w-4 h-4 shrink-0" />
+                            <span className="text-muted">Toko</span>
+                          </Button>
+                          <LuChevronRight
+                            className="w-3 h-3 shrink-0 text-muted opacity-80"
+                            aria-hidden
+                          />
+                          <span className="text-foreground font-medium truncate min-w-0">
+                            {organizations.find((o) => o.id === selectedOrgId)
+                              ?.name ?? "Toko"}
+                          </span>
+                        </nav>
+                        {selectedOrganization ? (
+                          <div className="shrink-0 mb-4">
+                            <div className="flex gap-4 md:gap-5">
+                              <div className="h-36 w-36 sm:h-40 sm:w-40 md:h-44 md:w-44 shrink-0 overflow-hidden rounded-2xl border border-separator bg-surface">
+                                {selectedOrganization.logo ? (
+                                  <img
+                                    src={selectedOrganization.logo}
+                                    alt=""
+                                    className="h-full w-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="flex h-full w-full items-center justify-center bg-primary/10">
+                                    <LuStore className="h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20 text-primary" />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="min-w-0 flex-1 flex flex-col gap-1 justify-center">
+                                <p className="text-base md:text-lg font-semibold text-foreground leading-tight">
+                                  {selectedOrganization.name}
+                                </p>
+                                <p className="text-[11px] text-muted font-mono truncate">
+                                  {selectedOrganization.slug}
+                                </p>
+                                {selectedOrganization.metadata?.trim() ? (
+                                  <p className="text-xs md:text-sm text-muted mt-1 whitespace-pre-wrap wrap-break-word line-clamp-6 md:line-clamp-none">
+                                    {selectedOrganization.metadata}
+                                  </p>
+                                ) : null}
+                              </div>
+                            </div>
+                          </div>
+                        ) : null}
                         <div className="flex items-center justify-between mb-2">
                           <p className="text-xs font-medium text-foreground">
                             Anggota
@@ -675,7 +847,20 @@ const PengaturanPage = () => {
       </div>
 
       {/* Create Organization Modal */}
-      <Modal.Backdrop isOpen={isOrgModalOpen} onOpenChange={setIsOrgModalOpen}>
+      <Modal.Backdrop
+        isOpen={isOrgModalOpen}
+        onOpenChange={(open) => {
+          setIsOrgModalOpen(open);
+          if (!open) {
+            if (createLogoBlobRef.current) {
+              URL.revokeObjectURL(createLogoBlobRef.current);
+              createLogoBlobRef.current = null;
+            }
+            setPendingCreateLogo(null);
+            setCreateLogoPreview(null);
+          }
+        }}
+      >
         <Modal.Container>
           <Modal.Dialog className="sm:max-w-md">
             <Modal.CloseTrigger />
@@ -693,15 +878,59 @@ const PengaturanPage = () => {
                     <InputGroup.Input />
                   </InputGroup>
                 </TextField>
-                <TextField
-                  value={orgForm.logo || ""}
-                  onChange={(value) => setOrgForm({ ...orgForm, logo: value })}
-                >
-                  <Label className="text-xs font-medium">Logo URL</Label>
-                  <InputGroup className="shadow-none border">
-                    <InputGroup.Input />
-                  </InputGroup>
-                </TextField>
+                <div className="flex flex-col gap-2">
+                  <Label className="text-xs font-medium">Logo Toko</Label>
+                  <div className="flex flex-col gap-3 w-full">
+                    <div className="mx-auto flex w-full max-w-[min(100%,18rem)] sm:max-w-[min(100%,22rem)] aspect-square rounded-2xl border border-separator bg-foreground/5 overflow-hidden">
+                      {createLogoPreview ? (
+                        <img
+                          src={createLogoPreview}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center text-xs text-muted text-center px-2">
+                          Belum ada logo
+                        </div>
+                      )}
+                    </div>
+                    <input
+                      ref={createPhotoInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      onChange={handleCreateLogoSelected}
+                    />
+                    <input
+                      ref={createCameraInputRef}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      className="sr-only"
+                      onChange={handleCreateLogoSelected}
+                    />
+                    <div className="flex flex-row justify-end gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        onPress={() => createPhotoInputRef.current?.click()}
+                      >
+                        <LuImage className="w-3.5 h-3.5 shrink-0" />
+                        Unggah foto
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        onPress={() => createCameraInputRef.current?.click()}
+                      >
+                        <LuCamera className="w-3.5 h-3.5 shrink-0" />
+                        Ambil foto
+                      </Button>
+                    </div>
+                  </div>
+                </div>
                 <TextField
                   value={orgForm.metadata || ""}
                   onChange={(value) =>
@@ -732,15 +961,23 @@ const PengaturanPage = () => {
       {/* Edit Organization Modal */}
       <Modal.Backdrop
         isOpen={isEditOrgModalOpen}
+        className="z-200"
         onOpenChange={(open) => {
           setIsEditOrgModalOpen(open);
           if (!open) {
+            if (editLogoBlobRef.current) {
+              URL.revokeObjectURL(editLogoBlobRef.current);
+              editLogoBlobRef.current = null;
+            }
+            setPendingEditLogo(null);
+            setEditLogoPreview(null);
+            setEditingOrgDisplayLogoUrl(null);
             setEditingOrgId(null);
             setEditingOrgForm({});
           }
         }}
       >
-        <Modal.Container>
+        <Modal.Container className="z-200">
           <Modal.Dialog className="sm:max-w-md">
             <Modal.CloseTrigger />
             <Modal.Header>
@@ -759,17 +996,61 @@ const PengaturanPage = () => {
                     <InputGroup.Input />
                   </InputGroup>
                 </TextField>
-                <TextField
-                  value={(editingOrgForm.logo as string) || ""}
-                  onChange={(value) =>
-                    setEditingOrgForm({ ...editingOrgForm, logo: value })
-                  }
-                >
-                  <Label className="text-xs font-medium">Logo URL</Label>
-                  <InputGroup className="shadow-none border">
-                    <InputGroup.Input />
-                  </InputGroup>
-                </TextField>
+                <div className="flex flex-col gap-2">
+                  <Label className="text-xs font-medium">Logo Toko</Label>
+                  <div className="flex flex-col gap-3">
+                    <div className="mx-auto w-full max-w-[min(100%,18rem)] sm:max-w-[min(100%,22rem)] aspect-square rounded-2xl border border-separator bg-foreground/5 overflow-hidden">
+                      {editLogoPreview || editingOrgDisplayLogoUrl ? (
+                        <img
+                          src={
+                            editLogoPreview ?? editingOrgDisplayLogoUrl ?? ""
+                          }
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center text-xs text-muted text-center px-2">
+                          Belum ada logo
+                        </div>
+                      )}
+                    </div>
+                    <input
+                      ref={editPhotoInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      onChange={handleEditLogoSelected}
+                    />
+                    <input
+                      ref={editCameraInputRef}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      className="sr-only"
+                      onChange={handleEditLogoSelected}
+                    />
+                    <div className="flex flex-row justify-start gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        onPress={() => editPhotoInputRef.current?.click()}
+                      >
+                        <LuImage className="w-3.5 h-3.5 shrink-0" />
+                        Unggah foto
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        onPress={() => editCameraInputRef.current?.click()}
+                      >
+                        <LuCamera className="w-3.5 h-3.5 shrink-0" />
+                        Ambil foto
+                      </Button>
+                    </div>
+                  </div>
+                </div>
                 <TextField
                   value={(editingOrgForm.metadata as string) || ""}
                   onChange={(value) =>

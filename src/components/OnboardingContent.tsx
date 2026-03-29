@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Button,
   TextField,
@@ -12,13 +12,21 @@ import {
   ListBox,
   Surface,
 } from "@heroui/react";
-import { LuStore, LuUsers, LuSparkles, LuCheck } from "react-icons/lu";
+import {
+  LuStore,
+  LuUsers,
+  LuSparkles,
+  LuCheck,
+  LuCamera,
+  LuImage,
+} from "react-icons/lu";
 import { useOrganization } from "../contexts/OrganizationContext";
 import { useAuth } from "../contexts/AuthContext";
 import {
   createOrganization,
   addOrganizationMember,
   getOrganizations,
+  uploadOrganizationLogo,
 } from "../utils/api/organizations";
 import { updateUser } from "../utils/api/users";
 import { getUsers } from "../utils/api/users";
@@ -42,9 +50,13 @@ export default function OnboardingContent() {
   // Create toko form state
   const [orgForm, setOrgForm] = useState({
     name: "",
-    logo: "",
     metadata: "",
   });
+  const [pendingLogo, setPendingLogo] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const logoBlobRef = useRef<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   // Invite user form state
   const [users, setUsers] = useState<User[]>([]);
@@ -103,6 +115,34 @@ export default function OnboardingContent() {
     }
   };
 
+  const handleLogoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    const contentType = file.type || "";
+    if (!contentType.startsWith("image/")) {
+      setError("Pilih file gambar (PNG, JPG, WebP).");
+      return;
+    }
+    if (logoBlobRef.current) {
+      URL.revokeObjectURL(logoBlobRef.current);
+      logoBlobRef.current = null;
+    }
+    const url = URL.createObjectURL(file);
+    logoBlobRef.current = url;
+    setLogoPreview(url);
+    setPendingLogo(file);
+    setError(null);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (logoBlobRef.current) {
+        URL.revokeObjectURL(logoBlobRef.current);
+      }
+    };
+  }, []);
+
   const handleCreateToko = async () => {
     if (!orgForm.name.trim()) {
       setError("Nama toko wajib diisi");
@@ -121,9 +161,11 @@ export default function OnboardingContent() {
       // Create organization via API
       const newOrg = await createOrganization({
         name: orgForm.name,
-        logo: orgForm.logo || undefined,
-        metadata: orgForm.metadata || undefined,
+        ...(orgForm.metadata?.trim() ? { metadata: orgForm.metadata } : {}),
       });
+      if (pendingLogo) {
+        await uploadOrganizationLogo(newOrg.id, pendingLogo);
+      }
 
       // Update user role to admin
       await updateUser(user.id, { role: "admin" });
@@ -320,17 +362,63 @@ export default function OnboardingContent() {
                 </InputGroup>
               </TextField>
 
-              <TextField
-                value={orgForm.logo || ""}
-                onChange={(value) => setOrgForm({ ...orgForm, logo: value })}
-              >
+              <div className="flex flex-col gap-2">
                 <Label className="text-xs font-medium">
-                  Logo URL (Opsional)
+                  Logo Toko (Opsional)
                 </Label>
-                <InputGroup className="shadow-none border">
-                  <InputGroup.Input placeholder="https://example.com/logo.png" />
-                </InputGroup>
-              </TextField>
+                <div className="flex flex-col gap-3 w-full">
+                  <div className="mx-auto flex w-full max-w-[min(100%,18rem)] sm:max-w-[min(100%,22rem)] aspect-square rounded-2xl border border-separator bg-foreground/5 overflow-hidden">
+                    {logoPreview ? (
+                      <img
+                        src={logoPreview}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center text-xs text-muted text-center px-2">
+                        Belum ada logo
+                      </div>
+                    )}
+                  </div>
+                  <input
+                    ref={photoInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={handleLogoSelected}
+                  />
+                  <input
+                    ref={cameraInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="sr-only"
+                    onChange={handleLogoSelected}
+                  />
+                  <div className="flex flex-row justify-end gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      isDisabled={isSubmitting}
+                      onPress={() => photoInputRef.current?.click()}
+                    >
+                      <LuImage className="w-3.5 h-3.5 shrink-0" />
+                      Unggah foto
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      isDisabled={isSubmitting}
+                      onPress={() => cameraInputRef.current?.click()}
+                    >
+                      <LuCamera className="w-3.5 h-3.5 shrink-0" />
+                      Ambil foto
+                    </Button>
+                  </div>
+                </div>
+              </div>
 
               <TextField
                 value={orgForm.metadata || ""}
