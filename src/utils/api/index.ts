@@ -25,6 +25,7 @@ export type {
   OrganizationMember,
   OrganizationMemberCreate,
   OrganizationMemberUpdate,
+  ProductPhotoUploadResponse,
 } from "./types";
 
 // Re-export product functions
@@ -32,7 +33,10 @@ export {
   createProduct,
   deleteProduct,
   getProduct,
+  getProductPhotoUploadUrl,
   getProducts,
+  putProductPhotoFile,
+  putProductPhotoToStorage,
   updateProduct,
 } from "./products";
 

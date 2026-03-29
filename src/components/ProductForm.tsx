@@ -2,7 +2,6 @@
 
 import {
   Button,
-  Card,
   Input,
   Label,
   Modal,
@@ -11,15 +10,20 @@ import {
   TextArea,
   TextField,
 } from "@heroui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Product, ProductCreate, ProductUpdate } from "../utils/api";
-import { createProduct, updateProduct } from "../utils/api";
+import {
+  createProduct,
+  putProductPhotoFile,
+  updateProduct,
+} from "../utils/api";
 
 interface ProductFormProps {
   product?: Product | null;
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  /** Called after the modal closes; may return a Promise (e.g. reload list). */
+  onSuccess: () => void | Promise<void>;
 }
 
 export default function ProductForm({
@@ -36,8 +40,22 @@ export default function ProductForm({
   const [bundleQuantity, setBundleQuantity] = useState<number | undefined>();
   const [bundlePrice, setBundlePrice] = useState<number | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingPhotoFile, setPendingPhotoFile] = useState<File | null>(null);
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const blobUrlRef = useRef<string | null>(null);
+
+  const revokeBlobPreview = () => {
+    if (blobUrlRef.current) {
+      URL.revokeObjectURL(blobUrlRef.current);
+      blobUrlRef.current = null;
+    }
+  };
 
   useEffect(() => {
+    revokeBlobPreview();
+    setPendingPhotoFile(null);
+    setPhotoPreviewUrl(null);
     if (product) {
       setName(product.name || "");
       setPrice(product.price);
@@ -56,6 +74,28 @@ export default function ProductForm({
       setBundlePrice(undefined);
     }
   }, [product, isOpen]);
+
+  useEffect(() => {
+    return () => {
+      revokeBlobPreview();
+    };
+  }, []);
+
+  const handlePhotoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    const contentType = file.type || "";
+    if (!contentType.startsWith("image/")) {
+      alert("Pilih file gambar (PNG, JPG, WebP).");
+      return;
+    }
+    revokeBlobPreview();
+    const url = URL.createObjectURL(file);
+    blobUrlRef.current = url;
+    setPhotoPreviewUrl(url);
+    setPendingPhotoFile(file);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,6 +126,21 @@ export default function ProductForm({
           updateData.bundle_quantity = bundleQuantity;
         if (bundlePrice !== product.bundle_price)
           updateData.bundle_price = bundlePrice;
+
+        if (pendingPhotoFile) {
+          const { photo_url, photo_key } = await putProductPhotoFile(
+            product.id,
+            pendingPhotoFile,
+          );
+          updateData.photo_url = photo_url;
+          updateData.photo_key = photo_key;
+        }
+
+        if (Object.keys(updateData).length === 0) {
+          onClose();
+          return;
+        }
+
         await updateProduct(product.id, updateData);
       } else {
         const createData: ProductCreate = {
@@ -97,19 +152,30 @@ export default function ProductForm({
           bundle_quantity: bundleQuantity,
           bundle_price: bundlePrice,
         };
-        await createProduct(createData);
+        const created = await createProduct(createData);
+        if (pendingPhotoFile) {
+          const { photo_url, photo_key } = await putProductPhotoFile(
+            created.id,
+            pendingPhotoFile,
+          );
+          await updateProduct(created.id, { photo_url, photo_key });
+        }
       }
-      onSuccess();
       onClose();
       resetForm();
-    } catch (error) {
-      alert("Gagal menyimpan produk");
+      await Promise.resolve(onSuccess());
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Gagal menyimpan produk";
+      alert(msg);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const resetForm = () => {
+    revokeBlobPreview();
+    setPendingPhotoFile(null);
+    setPhotoPreviewUrl(null);
     setName("");
     setPrice(undefined);
     setCogs(undefined);
@@ -128,19 +194,64 @@ export default function ProductForm({
     }
   };
 
+  const imageSrc = photoPreviewUrl ?? product?.photo_url ?? null;
+
   return (
     <Modal.Backdrop isOpen={isOpen} onOpenChange={handleClose}>
       <Modal.Container>
-        <Modal.Dialog className="sm:max-w-md">
+        <Modal.Dialog className="flex max-h-[min(90dvh,720px)] w-full flex-col overflow-hidden sm:max-w-md">
           <Modal.CloseTrigger />
-          <form onSubmit={handleSubmit}>
-            <Modal.Header>
+          <form
+            className="flex min-h-0 flex-1 flex-col overflow-hidden"
+            onSubmit={handleSubmit}
+          >
+            <Modal.Header className="shrink-0">
               <Modal.Heading>
                 {product ? "Edit Produk" : "Buat Produk"}
               </Modal.Heading>
             </Modal.Header>
-            <Modal.Body>
+            <Modal.Body className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
               <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <Label>Foto Produk</Label>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                    <div className="h-44 w-44 shrink-0 rounded-2xl border border-separator bg-foreground/5 overflow-hidden mx-auto sm:mx-0">
+                      {imageSrc ? (
+                        <img
+                          src={imageSrc}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center text-xs text-muted text-center px-2">
+                          Tanpa foto
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-2 min-w-0">
+                      <input
+                        ref={photoInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="sr-only"
+                        onChange={handlePhotoSelected}
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        isDisabled={isSubmitting}
+                        onPress={() => photoInputRef.current?.click()}
+                      >
+                        Pilih foto
+                      </Button>
+                      <p className="text-[11px] text-muted leading-snug">
+                        PNG, JPG, atau WebP. Unggah ke penyimpanan terjadi saat
+                        Anda menekan Simpan.
+                      </p>
+                    </div>
+                  </div>
+                </div>
                 <TextField
                   isRequired
                   name="name"
@@ -251,7 +362,7 @@ export default function ProductForm({
                 </NumberField>
               </div>
             </Modal.Body>
-            <Modal.Footer>
+            <Modal.Footer className="shrink-0">
               <Button
                 isDisabled={isSubmitting}
                 slot="close"

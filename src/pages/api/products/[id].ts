@@ -99,15 +99,14 @@ export const PATCH: APIRoute = async ({ params, request }) => {
     });
 
     if (!response.ok) {
-      return new Response(
-        JSON.stringify({ error: "Failed to update product" }),
-        {
-          status: response.status,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const errText = await response.text();
+      return new Response(errText || JSON.stringify({ error: "Failed to update product" }), {
+        status: response.status,
+        headers: {
+          "Content-Type":
+            response.headers.get("Content-Type") ?? "application/json",
+        },
+      });
     }
 
     const data = await response.json();
