@@ -12,11 +12,7 @@ import {
 } from "@heroui/react";
 import { useEffect, useRef, useState } from "react";
 import type { Product, ProductCreate, ProductUpdate } from "../utils/api";
-import {
-  createProduct,
-  putProductPhotoFile,
-  updateProduct,
-} from "../utils/api";
+import { createProduct, updateProduct, uploadProductPhoto } from "../utils/api";
 
 interface ProductFormProps {
   product?: Product | null;
@@ -128,20 +124,17 @@ export default function ProductForm({
           updateData.bundle_price = bundlePrice;
 
         if (pendingPhotoFile) {
-          const { photo_url, photo_key } = await putProductPhotoFile(
-            product.id,
-            pendingPhotoFile,
-          );
-          updateData.photo_url = photo_url;
-          updateData.photo_key = photo_key;
+          if (Object.keys(updateData).length > 0) {
+            await updateProduct(product.id, updateData);
+          }
+          await uploadProductPhoto(product.id, pendingPhotoFile);
+        } else {
+          if (Object.keys(updateData).length === 0) {
+            onClose();
+            return;
+          }
+          await updateProduct(product.id, updateData);
         }
-
-        if (Object.keys(updateData).length === 0) {
-          onClose();
-          return;
-        }
-
-        await updateProduct(product.id, updateData);
       } else {
         const createData: ProductCreate = {
           name,
@@ -154,11 +147,7 @@ export default function ProductForm({
         };
         const created = await createProduct(createData);
         if (pendingPhotoFile) {
-          const { photo_url, photo_key } = await putProductPhotoFile(
-            created.id,
-            pendingPhotoFile,
-          );
-          await updateProduct(created.id, { photo_url, photo_key });
+          await uploadProductPhoto(created.id, pendingPhotoFile);
         }
       }
       onClose();
