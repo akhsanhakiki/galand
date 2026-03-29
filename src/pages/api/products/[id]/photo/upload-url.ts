@@ -18,32 +18,12 @@ export const POST: APIRoute = async ({ params, request }) => {
       });
     }
 
-    const body = await request.json();
-    const authHeader = request.headers.get("Authorization");
-
-    const headers: HeadersInit = {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    };
-
-    if (authHeader) {
-      headers["Authorization"] = authHeader;
-    }
-
-    const response = await fetch(
-      `${API_BASE_URL}/products/${id}/photo/upload-url`,
-      {
-        method: "POST",
-        headers,
-        body: JSON.stringify(body),
-      }
-    );
-
-    if (!response.ok) {
+    const contentType = request.headers.get("Content-Type");
+    if (!contentType?.includes("multipart/form-data")) {
       return new Response(
-        JSON.stringify({ error: "Failed to get upload URL" }),
+        JSON.stringify({ error: "Expected multipart/form-data with file field" }),
         {
-          status: response.status,
+          status: 400,
           headers: {
             "Content-Type": "application/json",
           },
@@ -51,12 +31,29 @@ export const POST: APIRoute = async ({ params, request }) => {
       );
     }
 
-    const data = await response.json();
+    const authHeader = request.headers.get("Authorization");
+    const body = await request.arrayBuffer();
 
-    return new Response(JSON.stringify(data), {
-      status: 200,
+    const response = await fetch(
+      `${API_BASE_URL}/products/${id}/photo/upload-url`,
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": contentType,
+          ...(authHeader ? { Authorization: authHeader } : {}),
+        },
+        body,
+      }
+    );
+
+    const responseText = await response.text();
+
+    return new Response(responseText || null, {
+      status: response.status,
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type":
+          response.headers.get("Content-Type") ?? "application/json",
       },
     });
   } catch {

@@ -1,9 +1,4 @@
-import type {
-  Product,
-  ProductCreate,
-  ProductPhotoUploadResponse,
-  ProductUpdate,
-} from "./types";
+import type { Product, ProductCreate, ProductUpdate } from "./types";
 import { getBearerAuthHeaders } from "./session";
 
 const API_BASE = "/api/products";
@@ -11,7 +6,7 @@ const API_BASE = "/api/products";
 export async function getProducts(
   offset = 0,
   limit = 100,
-  search?: string
+  search?: string,
 ): Promise<Product[]> {
   const queryParams = new URLSearchParams();
   queryParams.set("offset", offset.toString());
@@ -51,9 +46,7 @@ export async function getProduct(id: number): Promise<Product> {
   return response.json();
 }
 
-export async function createProduct(
-  product: ProductCreate
-): Promise<Product> {
+export async function createProduct(product: ProductCreate): Promise<Product> {
   const headers = await getBearerAuthHeaders({
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -74,7 +67,7 @@ export async function createProduct(
 
 export async function updateProduct(
   id: number,
-  product: ProductUpdate
+  product: ProductUpdate,
 ): Promise<Product> {
   const headers = await getBearerAuthHeaders({
     "Content-Type": "application/json",
@@ -88,7 +81,10 @@ export async function updateProduct(
   });
 
   if (!response.ok) {
-    const message = await parseApiErrorMessage(response, "Failed to update product");
+    const message = await parseApiErrorMessage(
+      response,
+      "Failed to update product",
+    );
     throw new Error(message);
   }
 
@@ -97,7 +93,7 @@ export async function updateProduct(
 
 async function parseApiErrorMessage(
   response: Response,
-  fallback: string
+  fallback: string,
 ): Promise<string> {
   try {
     const text = await response.text();
@@ -127,64 +123,39 @@ export async function deleteProduct(id: number): Promise<void> {
   }
 }
 
-export async function getProductPhotoUploadUrl(
-  productId: number,
-  contentType: string
-): Promise<ProductPhotoUploadResponse> {
-  const headers = await getBearerAuthHeaders({
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  });
-
-  const response = await fetch(`${API_BASE}/${productId}/photo/upload-url`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({ content_type: contentType }),
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to get photo upload URL");
-  }
-
-  return response.json();
-}
-
-export async function putProductPhotoToStorage(
-  uploadUrl: string,
-  file: Blob,
-  contentType: string
-): Promise<void> {
-  const response = await fetch(uploadUrl, {
-    method: "PUT",
-    body: file,
-    headers: {
-      "Content-Type": contentType,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to upload photo");
-  }
-}
-
 /**
- * Presign + PUT file to object storage. Does not PATCH the product — merge
- * `{ photo_url, photo_key }` into your save payload so the server receives
- * photo fields together with other updates (avoids empty PATCH errors).
+ * Upload image (multipart `file`). Backend resizes → WebP → R2 → updates
+ * photo and returns the full product.
  */
-export async function putProductPhotoFile(
+export async function uploadProductPhoto(
   productId: number,
-  file: File
-): Promise<{ photo_url: string; photo_key: string }> {
-  const contentType = file.type || "image/jpeg";
+  file: File,
+): Promise<Product> {
+  const contentType = file.type || "";
   if (!contentType.startsWith("image/")) {
     throw new Error("File must be an image");
   }
 
-  const { upload_url, photo_url, photo_key } = await getProductPhotoUploadUrl(
-    productId,
-    contentType
-  );
-  await putProductPhotoToStorage(upload_url, file, contentType);
-  return { photo_url, photo_key };
+  const authHeaders = await getBearerAuthHeaders({
+    Accept: "application/json",
+  });
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${API_BASE}/${productId}/photo/upload-url`, {
+    method: "POST",
+    headers: authHeaders,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const message = await parseApiErrorMessage(
+      response,
+      "Failed to upload photo",
+    );
+    throw new Error(message);
+  }
+
+  return response.json();
 }

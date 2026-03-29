@@ -28,17 +28,8 @@ export interface ProductUpdate {
   stock?: number | null;
   bundle_quantity?: number | null;
   bundle_price?: number | null;
-  /** Public URL — use if your API accepts it on PATCH */
   photo_url?: string | null;
-  /** R2/S3 object key — many APIs expect this after presigned upload */
   photo_key?: string | null;
-}
-
-export interface ProductPhotoUploadResponse {
-  upload_url: string;
-  photo_key: string;
-  photo_url: string;
-  expires_in: number;
 }
 
 export interface TransactionItem {
