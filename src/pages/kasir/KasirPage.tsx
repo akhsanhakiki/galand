@@ -390,6 +390,15 @@ const KasirPage = () => {
                             }`}
                             onClick={() => handleProductClick(product)}
                           >
+                            {product.photo_url ? (
+                              <div className="w-full aspect-square max-h-28 rounded-lg overflow-hidden bg-foreground/5 mb-1">
+                                <img
+                                  src={product.photo_url}
+                                  alt=""
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            ) : null}
                             <p className="font-semibold text-foreground text-sm">
                               {product.name}
                             </p>
@@ -851,6 +860,15 @@ const KasirPage = () => {
                   </Modal.Header>
                   <Modal.Body>
                     <div className="flex flex-col gap-3">
+                      {selectedProduct.photo_url ? (
+                        <div className="w-full aspect-square max-h-48 rounded-xl overflow-hidden bg-foreground/5">
+                          <img
+                            src={selectedProduct.photo_url}
+                            alt=""
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : null}
                       {selectedProduct.description && (
                         <p className="text-sm text-muted">
                           {selectedProduct.description}

@@ -144,8 +144,8 @@ const ProdukPage = () => {
     }
   };
 
-  const handleFormSuccess = () => {
-    loadProducts();
+  const handleFormSuccess = async () => {
+    await loadProducts();
   };
 
   const handleExport = (format: "csv" | "xlsx" | "pdf") => {
@@ -433,21 +433,34 @@ const ProdukPage = () => {
                       className="p-3 rounded-xl border border-separator flex flex-col gap-1 cursor-pointer touch-manipulation active:opacity-90"
                       aria-label={`Edit ${product.name}`}
                     >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs font-semibold text-foreground truncate min-w-0">
-                          {product.name}
-                        </span>
-                        <span className="text-[11px] text-muted shrink-0">
-                          {getStockStatusLabel(product.stock)}
-                        </span>
+                      <div className="flex items-start gap-2 min-w-0">
+                        {product.photo_url ? (
+                          <div className="h-12 w-12 shrink-0 rounded-lg overflow-hidden bg-foreground/5 border border-separator">
+                            <img
+                              src={product.photo_url}
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        ) : null}
+                        <div className="flex flex-col gap-1 min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-xs font-semibold text-foreground truncate min-w-0">
+                              {product.name}
+                            </span>
+                            <span className="text-[11px] text-muted shrink-0">
+                              {getStockStatusLabel(product.stock)}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-foreground/90 leading-tight">
+                            {product.stock} stok · Rp{" "}
+                            {product.price.toLocaleString("id-ID")}
+                            {product.cogs != null && (
+                              <> · Rp {(product.cogs ?? 0).toLocaleString("id-ID")} HPP</>
+                            )}
+                          </p>
+                        </div>
                       </div>
-                      <p className="text-[11px] text-foreground/90 leading-tight">
-                        {product.stock} stok · Rp{" "}
-                        {product.price.toLocaleString("id-ID")}
-                        {product.cogs != null && (
-                          <> · Rp {(product.cogs ?? 0).toLocaleString("id-ID")} HPP</>
-                        )}
-                      </p>
                     </div>
                   ))}
                 </div>
@@ -531,8 +544,17 @@ const ProdukPage = () => {
                                     }px`,
                                   }}
                                 >
-                                  <div className="flex items-center h-full overflow-hidden">
-                                    <span className="truncate">
+                                  <div className="flex items-center gap-2 h-full overflow-hidden min-w-0">
+                                    {product.photo_url ? (
+                                      <div className="h-7 w-7 shrink-0 rounded-md overflow-hidden bg-foreground/5 border border-separator">
+                                        <img
+                                          src={product.photo_url}
+                                          alt=""
+                                          className="h-full w-full object-cover"
+                                        />
+                                      </div>
+                                    ) : null}
+                                    <span className="truncate min-w-0">
                                       {product.name}
                                     </span>
                                   </div>
