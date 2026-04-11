@@ -1,0 +1,16 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Default shell; remote URL must match app.windows[0].url in tauri.conf.json",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default"
+  ],
+  "remote": {
+    "urls": [
+      "https://*/*"
+    ]
+  }
+}
